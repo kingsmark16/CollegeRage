@@ -53,6 +53,8 @@ const deleteUser = inngest.createFunction(
     {id: "delete-user"},
     {event: "clerk/user.deleted"},
     async ({event}) => {
+
+        await connectDB();
         const {id} = event.data
 
         await UserModel.deleteOne({clerkId: id});
