@@ -10,7 +10,7 @@ import { inngest, functions } from './config/inngest';
 
 const app = express();
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(cors({
@@ -29,11 +29,11 @@ const startServer = async () => {
     try {
         await connectDB();
 
-        if(process.env.NODE_ENV !== "production"){
-            app.listen(PORT, () => {
-                console.log(`Server running on http://localhost:${PORT}`);
-            })
-        }
+        
+        app.listen(PORT, () => {
+            console.log(`Server running on http://localhost:${PORT}`);
+        })
+        
     } catch (error) {
         console.error("Failed to start server:", error);
         process.exit(1);
