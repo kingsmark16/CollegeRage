@@ -26,7 +26,7 @@ interface ClerkUserDeletedEvent {
 type Events = ClerkUserCreatedEvent | ClerkUserDeletedEvent;
 
 // Create a client to send and receive events
-export const inngest = new Inngest({ id: "college-rage" });
+export const inngest = new Inngest({ id: "college-rage", signingKey: process.env.INNGEST_SIGNING_KEY as string });
 
 
 const syncUser = inngest.createFunction(
