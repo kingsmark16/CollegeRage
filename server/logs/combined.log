@@ -1,0 +1,226 @@
+{"level":"info","message":"Received request for /","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:07:37:51 +0000] \"GET / HTTP/1.1\" 304 - \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36\"","service":"college-rage"}
+{"level":"info","message":"Received request for /","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:17:56:55 +0000] \"GET / HTTP/1.1\" 200 19 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"Received request for /","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:17:59:12 +0000] \"GET / HTTP/1.1\" 200 19 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"Received request for /","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:17:59:16 +0000] \"GET / HTTP/1.1\" 200 19 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:17:59:32 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:17:59:53 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:17:59:59 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:00:01 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:00:51 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:02:45 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:02:46 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:02:48 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:02:51 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"Received request for /","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:03:15 +0000] \"GET / HTTP/1.1\" 200 19 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"Received request for /","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:03:22 +0000] \"GET / HTTP/1.1\" 200 19 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"Received request for /","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:03:27 +0000] \"GET / HTTP/1.1\" 200 19 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"Received request for /","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:03:28 +0000] \"GET / HTTP/1.1\" 200 19 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"Received request for /","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:03:45 +0000] \"GET / HTTP/1.1\" 200 19 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:03:56 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:05:09 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-PH) WindowsPowerShell/5.1.26100.8655\"","service":"college-rage"}
+{"level":"info","message":"Received request for /","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:05:19 +0000] \"GET / HTTP/1.1\" 200 19 \"-\" \"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-PH) WindowsPowerShell/5.1.26100.8655\"","service":"college-rage"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:06:39.468Z"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:06:39 +0000] \"GET /health HTTP/1.1\" 200 73 \"-\" \"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-PH) WindowsPowerShell/5.1.26100.8655\"","service":"college-rage","timestamp":"2026-06-20T18:06:39.476Z"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:08:35 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:08:40 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:08:41 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:08:42 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:08:43 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:09:17 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:09:18 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"PostmanRuntime/7.39.1\"","service":"college-rage"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:11:52 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"Thunder Client (https://www.thunderclient.com)\"","service":"college-rage"}
+{"level":"info","message":"Received request for /","service":"college-rage"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:11:59 +0000] \"GET / HTTP/1.1\" 200 19 \"-\" \"Thunder Client (https://www.thunderclient.com)\"","service":"college-rage"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:15:17 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-PH) WindowsPowerShell/5.1.26100.8655\"","service":"college-rage"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:15:37 +0000] \"GET /health HTTP/1.1\" 404 145 \"-\" \"vscode-restclient\"","service":"college-rage"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:18:55.912Z"}
+{"level":"info","message":"::1 - - [20/Jun/2026:18:18:55 +0000] \"GET /health HTTP/1.1\" 200 73 \"-\" \"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-PH) WindowsPowerShell/5.1.26100.8655\"","service":"college-rage","timestamp":"2026-06-20T18:18:55.920Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:22:11.300Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:22:11 +0000] \"GET /health HTTP/1.1\" 200 73 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:22:11.307Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:23:02.077Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:23:02 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:23:02.079Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:23:03.122Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:23:03 +0000] \"GET /health HTTP/1.1\" 200 73 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:23:03.123Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:23:03.983Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:23:03 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:23:03.984Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:23:04.460Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:23:04 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:23:04.461Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:23:04.802Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:23:04 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:23:04.804Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:23:05.094Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:23:05 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:23:05.095Z"}
+{"level":"warn","message":"Blocked rate limit request: GET /health ::ffff:127.0.0.1 vscode-restclient - Reason: [object Object]","service":"college-rage","timestamp":"2026-06-20T18:23:05.375Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:23:05.377Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:23:05 +0000] \"GET /health HTTP/1.1\" 200 76 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:23:05.392Z"}
+{"level":"warn","message":"Blocked rate limit request: GET /health ::ffff:127.0.0.1 vscode-restclient - Reason: [object Object]","service":"college-rage","timestamp":"2026-06-20T18:23:05.517Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:23:05.519Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:23:05 +0000] \"GET /health HTTP/1.1\" 200 76 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:23:05.519Z"}
+{"level":"warn","message":"Blocked rate limit request: GET /health ::ffff:127.0.0.1 vscode-restclient - Reason: [object Object]","service":"college-rage","timestamp":"2026-06-20T18:23:05.520Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:23:05.521Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:23:05 +0000] \"GET /health HTTP/1.1\" 200 76 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:23:05.522Z"}
+{"level":"warn","message":"Blocked rate limit request: GET /health ::ffff:127.0.0.1 vscode-restclient - Reason: [object Object]","service":"college-rage","timestamp":"2026-06-20T18:23:05.784Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:23:05.785Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:23:05 +0000] \"GET /health HTTP/1.1\" 200 76 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:23:05.786Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:12.577Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:12 +0000] \"GET /health HTTP/1.1\" 200 73 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:12.588Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:15.742Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:15 +0000] \"GET /health HTTP/1.1\" 200 73 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:15.743Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:17.363Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:17 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:17.365Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:18.483Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:18 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:18.484Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:19.962Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:19 +0000] \"GET /health HTTP/1.1\" 200 73 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:19.964Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:21.336Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:21 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:21.337Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:22.338Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:22 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:22.340Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:23.350Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:23 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:23.351Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:24.378Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:24 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:24.380Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:25.183Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:25 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:25.184Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:25.883Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:25 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:25.884Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:26.750Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:26 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:26.751Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:27.485Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:27 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:27.486Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:28.201Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:28 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:28.202Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:28.993Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:28 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:28.994Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:29.770Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:29 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:29.771Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:30.528Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:30 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:30.530Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:31.360Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:31 +0000] \"GET /health HTTP/1.1\" 200 73 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:31.362Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:32.143Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:32 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:32.144Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:32.880Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:32 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:32.881Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:33.607Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:33 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:33.608Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:34.333Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:34 +0000] \"GET /health HTTP/1.1\" 200 73 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:34.334Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:35.421Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:35 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:35.422Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:36.766Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:36 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:36.768Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:38.204Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:38 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:38.206Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:38.430Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:38 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:38.431Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:38.685Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:38 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:38.686Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:38.724Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:38 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:38.725Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:38.966Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:38 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:38.967Z"}
+{"level":"warn","message":"Blocked rate limit request: GET /health ::ffff:127.0.0.1 vscode-restclient","service":"college-rage","timestamp":"2026-06-20T18:25:39.165Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:39.166Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:39 +0000] \"GET /health HTTP/1.1\" 200 76 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:39.167Z"}
+{"level":"warn","message":"Blocked rate limit request: GET /health ::ffff:127.0.0.1 vscode-restclient","service":"college-rage","timestamp":"2026-06-20T18:25:39.246Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:39.246Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:39 +0000] \"GET /health HTTP/1.1\" 200 76 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:39.247Z"}
+{"level":"warn","message":"Blocked rate limit request: GET /health ::ffff:127.0.0.1 vscode-restclient","service":"college-rage","timestamp":"2026-06-20T18:25:39.465Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:25:39.466Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:25:39 +0000] \"GET /health HTTP/1.1\" 200 76 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:25:39.466Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:27:51.299Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:27:51 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:27:51.309Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:27:52.617Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:27:52 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:27:52.620Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:27:53.178Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:27:53 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:27:53.179Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:27:53.375Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:27:53 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:27:53.376Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:27:53.746Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:27:53 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:27:53.747Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:27:54.339Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:27:54 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:27:54.340Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:27:54.993Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:27:54 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:27:54.994Z"}
+{"level":"warn","message":"Blocked rate limit request: GET /health ::ffff:127.0.0.1 vscode-restclient","service":"college-rage","timestamp":"2026-06-20T18:27:55.536Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:27:55 +0000] \"GET /health HTTP/1.1\" 429 84 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:27:55.537Z"}
+{"level":"warn","message":"Blocked rate limit request: GET /health ::ffff:127.0.0.1 vscode-restclient","service":"college-rage","timestamp":"2026-06-20T18:27:55.929Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:27:55 +0000] \"GET /health HTTP/1.1\" 429 84 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:27:55.930Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:42:45.936Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:42:45 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:42:45.937Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:42:49.784Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:42:49 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:42:49.785Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:42:50.460Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:42:50 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:42:50.462Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:42:51.106Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:42:51 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:42:51.107Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:42:51.635Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:42:51 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:42:51.637Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:42:52.309Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:42:52 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:42:52.310Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:42:52.909Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:42:52 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:42:52.910Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:42:53.518Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:42:53 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:42:53.520Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:42:54.290Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:42:54 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:42:54.291Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:42:54.879Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:42:54 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:42:54.880Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:42:55.476Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:42:55 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:42:55.477Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:42:56.062Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:42:56 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:42:56.062Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:42:56.839Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:42:56 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:42:56.840Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:42:57.444Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:42:57 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:42:57.445Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:42:58.239Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:42:58 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:42:58.240Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:42:58.993Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:42:58 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:42:58.995Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:42:59.735Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:42:59 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:42:59.736Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:43:00.491Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:43:00 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:43:00.492Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:43:06.524Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:43:06 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:43:06.525Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:43:06.858Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:43:06 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:43:06.859Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:43:07.039Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:43:07 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:43:07.040Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:43:07.526Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:43:07 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:43:07.527Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:43:07.841Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:43:07 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:43:07.842Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:43:08.787Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:43:08 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:43:08.794Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:43:10.875Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:43:10 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:43:10.876Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:43:12.134Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:43:12 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:43:12.135Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:43:16.905Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:43:16 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:43:16.906Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:43:17.067Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:43:17 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:43:17.068Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:43:17.413Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:43:17 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:43:17.414Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:43:17.638Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:43:17 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:43:17.638Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-20T18:43:17.976Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:43:17 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:43:17.977Z"}
+{"level":"warn","message":"Blocked rate limit request: GET /health ::ffff:127.0.0.1 vscode-restclient","service":"college-rage","timestamp":"2026-06-20T18:43:18.261Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:43:18 +0000] \"GET /health HTTP/1.1\" 429 84 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:43:18.263Z"}
+{"level":"warn","message":"Blocked rate limit request: GET /health ::ffff:127.0.0.1 vscode-restclient","service":"college-rage","timestamp":"2026-06-20T18:43:18.797Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Jun/2026:18:43:18 +0000] \"GET /health HTTP/1.1\" 429 84 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-20T18:43:18.798Z"}
+{"level":"info","message":"Received request for /health","service":"college-rage","timestamp":"2026-06-21T07:39:30.490Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [21/Jun/2026:07:39:30 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"vscode-restclient\"","service":"college-rage","timestamp":"2026-06-21T07:39:30.502Z"}
