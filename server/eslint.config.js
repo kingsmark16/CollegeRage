@@ -1,6 +1,9 @@
 import js from '@eslint/js';
 
 export default [
+  {
+    ignores: ['node_modules/**', 'coverage/**', 'logs/**', 'dist/**', 'src/generated/**'],
+  },
   js.configs.recommended,
   {
     languageOptions: {
@@ -46,8 +49,5 @@ export default [
         jest: 'readonly',
       },
     },
-  },
-  {
-    ignores: ['node_modules/**', 'coverage/**', 'logs/**'],
   },
 ];

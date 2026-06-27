@@ -14,7 +14,7 @@ datasource db {
 
 model Media {
   id          String   @id @default(cuid())
-  title       String?
+  description String?
   fileUrl     String
   fileType    MediaType
   uploadedAt  DateTime @default(now())

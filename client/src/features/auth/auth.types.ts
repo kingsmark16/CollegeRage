@@ -1,4 +1,4 @@
-export type NeonAuthUser = {
+export type AuthUser = {
   id: string;
   email?: string;
   name?: string;
@@ -8,5 +8,5 @@ export type NeonAuthUser = {
 };
 
 export type AuthenticatedUserResponse = {
-  user: NeonAuthUser;
+  user: AuthUser;
 };

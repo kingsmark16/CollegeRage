@@ -6,6 +6,8 @@ const env = {
   PORT: process.env.PORT || 3000,
   NODE_ENV: process.env.NODE_ENV || 'development',
   DATABASE_URL: process.env.DATABASE_URL,
+  NEON_AUTH_BASE_URL: process.env.NEON_AUTH_BASE_URL,
+  CLIENT_ORIGIN: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
   LOG_LEVEL: process.env.LOG_LEVEL || 'info',
   ARCJET_ENV: process.env.ARCJET_ENV || 'development',
   ARCJET_KEY: process.env.ARCJET_KEY!,

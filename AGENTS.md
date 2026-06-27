@@ -1,6 +1,12 @@
 # College Rage Web App
 
-NestJS 11 project. Express adapter.
+Enterprise-grade PERN Stack application.
+
+- Frontend: React + TypeScript + Vite
+- Backend: Node.js + Express + TypeScript
+- Database: PostgreSQL + Prisma ORM + Neon
+- Authentication: Neon Auth
+
 
 ## Role
 
