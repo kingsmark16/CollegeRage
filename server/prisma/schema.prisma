@@ -13,15 +13,111 @@ datasource db {
 }
 
 model Media {
-  id          String   @id @default(cuid())
-  description String?
-  fileUrl     String
-  fileType    MediaType
-  uploadedAt  DateTime @default(now())
+  id               String    @id @default(uuid())
+  type             MediaType
+  description      String?
+  originalFilename String
+  sanitizedName    String
+  mimeType         String
+  extension        String
+  sizeBytes        Int
+  width            Int?
+  height           Int?
+  uploadedByUserId String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  image            Image?
+  video            Video?
+
+  @@index([type])
+  @@index([uploadedByUserId])
+  @@index([createdAt])
+}
+
+model Image {
+  id          String   @id @default(uuid())
+  mediaId     String   @unique
+  dropboxPath String   @unique
+  url         String   @unique
+  createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  media       Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+}
+
+model Video {
+  id        String         @id @default(uuid())
+  mediaId   String         @unique
+  duration  Float?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  media     Media          @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  variants  VideoVariant[]
+  thumbnail Thumbnail?
+}
+
+model VideoVariant {
+  id          String              @id @default(uuid())
+  videoId     String
+  quality     VideoVariantQuality
+  width       Int
+  height      Int
+  sizeBytes   Int
+  dropboxPath String              @unique
+  url         String              @unique
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  video       Video               @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([videoId, quality])
+  @@index([quality])
+}
+
+model Thumbnail {
+  id          String   @id @default(uuid())
+  videoId     String   @unique
+  width       Int?
+  height      Int?
+  sizeBytes   Int
+  dropboxPath String   @unique
+  url         String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  video       Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+}
+
+model DropboxCredential {
+  id                String    @id @default(uuid())
+  accountId         String?   @unique
+  accessToken       String
+  refreshToken      String?
+  tokenType         String?
+  scope             String?
+  expiresAt         DateTime?
+  connectedByUserId String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([connectedByUserId])
+}
+
+model DropboxOAuthState {
+  state     String    @id
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 enum MediaType {
   IMAGE
   VIDEO
+}
+
+enum VideoVariantQuality {
+  P480
+  P720
+  P1080
 }

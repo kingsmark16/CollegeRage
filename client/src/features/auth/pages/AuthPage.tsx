@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { CheckCircle2, LogIn, LogOut, ShieldCheck, UserPlus } from 'lucide-react';
+import { CheckCircle2, Cloud, LogIn, LogOut, ShieldCheck, UserPlus } from 'lucide-react';
 import backgroundImage from '@/assets/BG.png';
 import { Button } from '@/components/ui/button';
 import { type AuthMode } from '@/services/auth.service';
@@ -13,7 +13,7 @@ const AuthPage = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [validationErrors, setValidationErrors] = useState<AuthFieldErrors>({});
-  const { error, isLoading, isSubmitting, logOut, submitAuth, user, verifiedApiUser, verifyWithApi } =
+  const { connectDropbox, error, isLoading, isSubmitting, logOut, submitAuth, user, verifiedApiUser, verifyWithApi } =
     useAuth();
 
   const isSignIn = mode === 'sign-in';
@@ -125,6 +125,15 @@ const AuthPage = () => {
                   >
                     <ShieldCheck aria-hidden="true" data-icon="inline-start" />
                     Verify API
+                  </Button>
+                  <Button
+                    className="border-[#2e2e2e] bg-[#282a2b] text-[#e2e2e2] hover:border-[#34d59a] hover:bg-[#282a2b] hover:text-[#5af2b4]"
+                    type="button"
+                    onClick={() => void connectDropbox()}
+                    disabled={isSubmitting}
+                  >
+                    <Cloud aria-hidden="true" data-icon="inline-start" />
+                    Connect Dropbox
                   </Button>
                   <Button
                     className="border-[#2e2e2e] text-[#e2e2e2] hover:border-[#34d59a] hover:bg-[#1a1c1c] hover:text-[#5af2b4]"

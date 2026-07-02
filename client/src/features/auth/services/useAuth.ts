@@ -8,6 +8,7 @@ import {
   signUpWithEmail,
 } from '@/services/auth.service';
 import { authenticatedRequest } from '@/services/api.service';
+import { startDropboxAuthorization } from '@/services/dropbox.service';
 import type { AuthenticatedUserResponse, AuthUser } from '../auth.types';
 
 type SessionUser = {
@@ -89,6 +90,20 @@ export const useAuth = () => {
     }
   };
 
+  const connectDropbox = async () => {
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const authorizationUrl = await startDropboxAuthorization();
+      window.location.assign(authorizationUrl);
+    } catch (dropboxError) {
+      setError(dropboxError instanceof Error ? dropboxError.message : 'Unable to start Dropbox authorization.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const logOut = async () => {
     setIsSubmitting(true);
     setError(null);
@@ -106,6 +121,7 @@ export const useAuth = () => {
 
   return {
     error,
+    connectDropbox,
     isLoading,
     isSubmitting,
     logOut,

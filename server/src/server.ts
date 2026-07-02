@@ -1,10 +1,10 @@
-import express, { Request, Response } from 'express';
+import express, { type Request, type Response } from 'express';
 import logger from './config/logger.js';
-import helmet from "helmet";
+import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
 import securityMiddleware from './middlewares/security.middleware.js';
-import routes from './routes/index.js';
+import apiRoutes from './routes/index.js';
 import { errorMiddleware } from './middlewares/error.middleware.js';
 import env from './config/env.js';
 
@@ -29,7 +29,7 @@ export const createServer = () => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString(), uptime: process.uptime() });
   });
 
-  app.use('/api', routes);
+  app.use('/api', apiRoutes);
   app.use(errorMiddleware);
 
   return app;
