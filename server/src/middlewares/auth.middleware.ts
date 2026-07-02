@@ -28,6 +28,21 @@ const extractBearerToken = (authorizationHeader?: string) => {
   return authorizationHeader.slice('Bearer '.length).trim();
 };
 
+const verifyBearerToken = async (token: string) => {
+  const { payload } = await jwtVerify(token, getJwks(), {
+    issuer: getIssuer(),
+    audience: getIssuer(),
+  });
+
+  const user = mapNeonAuthPayloadToUser(payload);
+
+  if (!user.id) {
+    throw new AppError('Authentication token is missing a subject.', 401);
+  }
+
+  return user;
+};
+
 export const requireAuth = async (req: Request, _res: Response, next: NextFunction) => {
   try {
     const token = extractBearerToken(req.headers.authorization);
@@ -36,18 +51,7 @@ export const requireAuth = async (req: Request, _res: Response, next: NextFuncti
       throw new AppError('Authentication token is required.', 401);
     }
 
-    const { payload } = await jwtVerify(token, getJwks(), {
-      issuer: getIssuer(),
-      audience: getIssuer(),
-    });
-
-    const user = mapNeonAuthPayloadToUser(payload);
-
-    if (!user.id) {
-      throw new AppError('Authentication token is missing a subject.', 401);
-    }
-
-    req.user = user;
+    req.user = await verifyBearerToken(token);
     next();
   } catch (error) {
     if (error instanceof AppError) {
@@ -56,5 +60,19 @@ export const requireAuth = async (req: Request, _res: Response, next: NextFuncti
     }
 
     next(new AppError('Invalid or expired authentication token.', 401));
+  }
+};
+
+export const optionalAuth = async (req: Request, _res: Response, next: NextFunction) => {
+  try {
+    const token = extractBearerToken(req.headers.authorization);
+
+    if (token) {
+      req.user = await verifyBearerToken(token);
+    }
+
+    next();
+  } catch {
+    next();
   }
 };

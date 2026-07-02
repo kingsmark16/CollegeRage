@@ -1,4 +1,5 @@
 import { createInternalNeonAuth } from '@neondatabase/neon-js/auth';
+import type { AuthUser, SessionData } from '@/features/auth/auth.types';
 
 const neonAuthUrl = import.meta.env.VITE_NEON_AUTH_URL as string | undefined;
 
@@ -22,6 +23,40 @@ export type AuthCredentials = {
   name?: string;
 };
 
+const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS ?? '')
+  .split(',')
+  .map((email: string) => email.trim().toLowerCase())
+  .filter(Boolean);
+
+export const normalizeSessionUser = (sessionData: SessionData | null): AuthUser | null => {
+  if (!sessionData?.user) {
+    return null;
+  }
+
+  return {
+    id: sessionData.user.id,
+    email: sessionData.user.email,
+    name: sessionData.user.name,
+    image: sessionData.user.image,
+  };
+};
+
+export const isAdminUser = (user: AuthUser | null) => {
+  if (!user) {
+    return false;
+  }
+
+  if (user.role?.toLowerCase() === 'admin') {
+    return true;
+  }
+
+  if (!user.email) {
+    return adminEmails.length === 0;
+  }
+
+  return adminEmails.length === 0 || adminEmails.includes(user.email.toLowerCase());
+};
+
 export const getCurrentSession = async () => {
   const authClient = getAuthClient();
   const result = await authClient.getSession();
@@ -41,6 +76,14 @@ export const getAuthToken = async () => {
   }
 
   return token;
+};
+
+export const getOptionalAuthToken = async () => {
+  try {
+    return await getNeonAuth().getJWTToken();
+  } catch {
+    return null;
+  }
 };
 
 export const signInWithEmail = async ({ email, password }: AuthCredentials) => {

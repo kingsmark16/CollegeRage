@@ -111,6 +111,61 @@ model DropboxOAuthState {
   @@index([expiresAt])
 }
 
+model AnalyticsVisitor {
+  id          String                  @id @default(uuid())
+  visitorKey  String                  @unique
+  firstSeenAt DateTime                @default(now())
+  lastSeenAt  DateTime                @default(now())
+  sessions    AnalyticsVisitSession[]
+  pageViews   AnalyticsPageView[]
+
+  @@index([lastSeenAt])
+}
+
+model AnalyticsVisitSession {
+  id              String              @id @default(uuid())
+  sessionKey      String              @unique
+  visitorId       String
+  userId          String?
+  userEmail       String?
+  isAuthenticated Boolean             @default(false)
+  ipHash          String?
+  userAgent       String?
+  startedAt       DateTime            @default(now())
+  lastSeenAt      DateTime            @default(now())
+  visitor         AnalyticsVisitor    @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  pageViews       AnalyticsPageView[]
+
+  @@index([visitorId])
+  @@index([userId])
+  @@index([startedAt])
+  @@index([lastSeenAt])
+}
+
+model AnalyticsPageView {
+  id             String                @id @default(uuid())
+  visitorId      String
+  sessionId      String
+  userId         String?
+  userEmail      String?
+  path           String
+  title          String?
+  referrer       String?
+  userAgent      String?
+  ipHash         String?
+  viewportWidth  Int?
+  viewportHeight Int?
+  occurredAt     DateTime              @default(now())
+  visitor        AnalyticsVisitor      @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  session        AnalyticsVisitSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([visitorId])
+  @@index([sessionId])
+  @@index([userId])
+  @@index([path])
+  @@index([occurredAt])
+}
+
 enum MediaType {
   IMAGE
   VIDEO
