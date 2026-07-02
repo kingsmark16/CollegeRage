@@ -4,3 +4,4 @@ node_modules
 api-test.http
 dist
 generated
+logs
