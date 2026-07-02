@@ -90,3 +90,16 @@ export const deleteMediaById = async (id: string) =>
   prisma.media.delete({
     where: { id },
   });
+
+export const updateMediaMetadataById = async (
+  id: string,
+  data: {
+    description?: string | null;
+    sanitizedName?: string;
+  }
+): Promise<MediaWithRelations> =>
+  prisma.media.update({
+    where: { id },
+    data,
+    include: mediaInclude,
+  });

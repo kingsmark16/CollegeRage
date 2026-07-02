@@ -15,6 +15,7 @@ datasource db {
 model Media {
   id               String    @id @default(uuid())
   type             MediaType
+  description      String?
   originalFilename String
   sanitizedName    String
   mimeType         String

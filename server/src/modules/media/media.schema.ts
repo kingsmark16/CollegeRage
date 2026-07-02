@@ -42,4 +42,22 @@ export const uploadRequestValidationSchema = z.object({
     .max(MAX_MEDIA_FILES, `A maximum of ${MAX_MEDIA_FILES} files can be uploaded.`),
 });
 
+export const updateMediaMetadataSchema = z.object({
+  description: z
+    .string()
+    .trim()
+    .max(1000, 'Description must be 1000 characters or less.')
+    .nullable()
+    .optional(),
+  sanitizedName: z
+    .string()
+    .trim()
+    .min(1, 'Sanitized name is required.')
+    .max(180, 'Sanitized name must be 180 characters or less.')
+    .regex(/^[a-zA-Z0-9._-]+$/, 'Sanitized name can only contain letters, numbers, dots, underscores, and hyphens.')
+    .refine((value) => value !== '.' && value !== '..', 'Sanitized name is invalid.')
+    .optional(),
+});
+
 export type ValidatedUploadFile = z.infer<typeof uploadFileValidationSchema>;
+export type UpdateMediaMetadataInput = z.infer<typeof updateMediaMetadataSchema>;

@@ -203,3 +203,30 @@ export const uploadFileToDropbox = async (localPath: string, dropboxPath: string
   const url = await createSharedUrl(client, dropboxPath);
   return { path: dropboxPath, url, sizeBytes };
 };
+
+const isDropboxNotFoundError = (error: unknown) => {
+  if (!(error instanceof DropboxResponseError)) {
+    return false;
+  }
+
+  const details = JSON.stringify(error.error);
+  return details.includes('not_found');
+};
+
+export const deleteFilesFromDropbox = async (dropboxPaths: string[]) => {
+  const client = await getDropboxClient();
+  const uniquePaths = [...new Set(dropboxPaths.filter(Boolean))];
+
+  for (const dropboxPath of uniquePaths) {
+    try {
+      await withRetry(() => client.filesDeleteV2({ path: dropboxPath }), 'filesDeleteV2');
+    } catch (error) {
+      if (isDropboxNotFoundError(error)) {
+        logger.warn('Dropbox file already missing during delete.', { dropboxPath });
+        continue;
+      }
+
+      throw new AppError(`Failed to delete Dropbox file at ${dropboxPath}.`, 502);
+    }
+  }
+};

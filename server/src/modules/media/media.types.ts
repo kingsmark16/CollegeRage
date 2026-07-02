@@ -64,16 +64,25 @@ export type CreateVideoMediaInput = {
 export type MediaUploadResponseItem = {
   id: string;
   type: MediaKind;
+  sanitizedName: string;
+  description: string | null;
   thumbnail?: string;
   url?: string;
   variants?: Record<VideoVariantLabel, string>;
 };
 
 export type MediaWithRelations = Media & {
-  image?: { url: string } | null;
+  image?: {
+    dropboxPath: string;
+    url: string;
+  } | null;
   video?: {
-    thumbnail?: { url: string } | null;
+    thumbnail?: {
+      dropboxPath: string;
+      url: string;
+    } | null;
     variants: Array<{
+      dropboxPath: string;
       quality: VideoVariantQuality;
       url: string;
     }>;

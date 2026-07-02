@@ -4,6 +4,7 @@ export type NeonAuthUser = {
   name?: string;
   image?: string | null;
   role?: string;
+  roles?: string[];
   emailVerified?: boolean;
 };
 

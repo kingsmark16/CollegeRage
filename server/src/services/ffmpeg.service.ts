@@ -56,6 +56,17 @@ const releaseVideoSlot = () => {
   }
 };
 
+const getTargetVariants = (metadata: VideoMetadata) => {
+  const sourceHeight = metadata.height ?? 0;
+  const supportedVariants = VIDEO_VARIANTS.filter((variant) => sourceHeight >= variant.height);
+
+  if (supportedVariants.length > 0) {
+    return supportedVariants;
+  }
+
+  return VIDEO_VARIANTS.slice(0, 1);
+};
+
 const runProcess = async (command: string, args: string[], failureMessage: string) =>
   new Promise<string>((resolve, reject) => {
     const child = spawn(command, args, { windowsHide: true });
@@ -114,6 +125,10 @@ export const probeVideo = async (inputPath: string): Promise<VideoMetadata> => {
 
 const encodeVariant = async (inputPath: string, outputDirectory: string, targetHeight: number): Promise<FfmpegOutput> => {
   const outputPath = safeJoin(outputDirectory, `${targetHeight}p.mp4`);
+  const scaleFilter = [
+    `scale=w=-2:h=min(${targetHeight}\\,ih):force_original_aspect_ratio=decrease`,
+    'scale=w=trunc(iw/2)*2:h=trunc(ih/2)*2',
+  ].join(',');
 
   await runProcess(
     env.FFMPEG_PATH,
@@ -126,7 +141,7 @@ const encodeVariant = async (inputPath: string, outputDirectory: string, targetH
       '-map',
       '0:a?',
       '-vf',
-      `scale=w=-2:h=${targetHeight}:force_original_aspect_ratio=decrease`,
+      scaleFilter,
       '-c:v',
       'libx264',
       '-preset',
@@ -185,9 +200,10 @@ export const processVideo = async (inputPath: string, outputDirectory: string): 
   try {
     await ensureDirectory(outputDirectory);
     const metadata = await probeVideo(inputPath);
+    const targetVariants = getTargetVariants(metadata);
     const outputFiles = [];
 
-    for (const variant of VIDEO_VARIANTS) {
+    for (const variant of targetVariants) {
       const output = await encodeVariant(inputPath, outputDirectory, variant.height);
       outputFiles.push({
         filePath: output.filePath,

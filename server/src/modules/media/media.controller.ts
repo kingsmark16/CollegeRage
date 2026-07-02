@@ -45,8 +45,13 @@ export const getMediaById = asyncHandler(async (req: Request, res: Response) => 
   });
 });
 
-export const updateMedia = asyncHandler(async () => {
-  throw new AppError('Media updates are not supported yet.', 405);
+export const updateMedia = asyncHandler(async (req: Request, res: Response) => {
+  const media = await mediaService.updateMediaMetadata(getRouteId(req.params.id), req.body, req.user);
+
+  res.status(200).json({
+    success: true,
+    file: media,
+  });
 });
 
 export const deleteMedia = asyncHandler(async (req: Request, res: Response) => {
