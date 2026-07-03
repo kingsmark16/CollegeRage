@@ -15,6 +15,7 @@ import {
 } from './media.repository.js';
 import { updateMediaMetadataSchema, uploadRequestValidationSchema } from './media.schema.js';
 import { getFileExtension, readImageMetadata, resolveMediaKind, sanitizeFilename, assertFileSize } from './media.validation.js';
+import { assertAdminUser } from '../auth/auth.service.js';
 import type { NeonAuthUser } from '../auth/auth.types.js';
 import type {
   MediaUploadResponseItem,
@@ -89,22 +90,6 @@ const mapMediaToUploadResponse = (media: MediaWithRelations): MediaUploadRespons
     thumbnail: media.video?.thumbnail?.url ?? '',
     variants: variants ?? ({} as Record<VideoVariantLabel, string>),
   };
-};
-
-const assertAdminUser = (user?: NeonAuthUser) => {
-  const adminEmails = new Set(
-    env.ADMIN_EMAILS.split(',')
-      .map((email) => email.trim().toLowerCase())
-      .filter(Boolean)
-  );
-  const hasAdminRole =
-    user?.role?.toLowerCase() === 'admin' ||
-    user?.roles?.some((role) => role.toLowerCase() === 'admin') ||
-    Boolean(user?.email && adminEmails.has(user.email.toLowerCase()));
-
-  if (!hasAdminRole) {
-    throw new AppError('Only admins can update media metadata.', 403);
-  }
 };
 
 const mapMulterFiles = (files: Express.Multer.File[]): UploadedMediaFile[] => {
@@ -243,7 +228,7 @@ export const updateMediaMetadata = async (
   input: unknown,
   user?: NeonAuthUser
 ) => {
-  assertAdminUser(user);
+  assertAdminUser(user, 'Only admins can update media metadata.');
 
   const media = await findMediaById(id);
 

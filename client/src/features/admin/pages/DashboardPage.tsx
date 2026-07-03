@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions';
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
+import AdminMusicPanel from '@/features/music/components/AdminMusicPanel';
 
 const DashboardPage = () => {
   const { apiUser, error, user } = useAuthSession();
@@ -105,6 +106,8 @@ const DashboardPage = () => {
             </article>
           </div>
         </section>
+
+        <AdminMusicPanel />
       </div>
     </main>
   );

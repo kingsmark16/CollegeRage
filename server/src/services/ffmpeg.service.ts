@@ -25,6 +25,10 @@ type ProbeOutput = {
   };
 };
 
+export type AudioMetadata = {
+  duration?: number;
+};
+
 type FfmpegOutput = {
   filePath: string;
   width: number;
@@ -119,6 +123,29 @@ export const probeVideo = async (inputPath: string): Promise<VideoMetadata> => {
   return {
     width: videoStream.width,
     height: videoStream.height,
+    ...(duration && Number.isFinite(duration) ? { duration } : {}),
+  };
+};
+
+export const probeAudio = async (inputPath: string): Promise<AudioMetadata> => {
+  const output = await runProcess(
+    env.FFPROBE_PATH,
+    ['-v', 'error', '-print_format', 'json', '-show_streams', '-show_format', inputPath],
+    'Unable to inspect uploaded audio'
+  );
+
+  const parsed = JSON.parse(output) as ProbeOutput;
+  const audioStream = parsed.streams?.find((stream) => stream.codec_type === 'audio');
+
+  if (!audioStream) {
+    throw new AppError('Invalid or corrupted audio upload.', 400);
+  }
+
+  const streamDuration = audioStream.duration ? Number(audioStream.duration) : undefined;
+  const formatDuration = parsed.format?.duration ? Number(parsed.format.duration) : undefined;
+  const duration = Number.isFinite(streamDuration) ? streamDuration : formatDuration;
+
+  return {
     ...(duration && Number.isFinite(duration) ? { duration } : {}),
   };
 };

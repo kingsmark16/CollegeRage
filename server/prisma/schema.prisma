@@ -85,6 +85,32 @@ model Thumbnail {
   video       Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
 }
 
+model MusicTrack {
+  id               String   @id @default(uuid())
+  title            String
+  artist           String?
+  description      String?
+  originalFilename String
+  sanitizedName    String
+  mimeType         String
+  extension        String
+  sizeBytes        Int
+  duration         Float?
+  dropboxPath      String   @unique
+  url              String   @unique
+  isActive         Boolean  @default(true)
+  isDefault        Boolean  @default(false)
+  sortOrder        Int      @default(0)
+  uploadedByUserId String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
+  @@index([isDefault])
+  @@index([uploadedByUserId])
+  @@index([createdAt])
+}
+
 model DropboxCredential {
   id                String    @id @default(uuid())
   accountId         String?   @unique

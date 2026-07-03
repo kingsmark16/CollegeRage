@@ -1,4 +1,6 @@
 import type { JWTPayload } from 'jose';
+import AppError from '../../common/errors/AppError.js';
+import env from '../../config/env.js';
 import type { AuthenticatedUserResponse, NeonAuthUser } from './auth.types.js';
 
 const getStringClaim = (payload: JWTPayload, key: string) => {
@@ -80,3 +82,23 @@ export const mapNeonAuthPayloadToUser = (payload: JWTPayload): NeonAuthUser => {
 export const getAuthenticatedUser = (user: NeonAuthUser): AuthenticatedUserResponse => ({
   user,
 });
+
+export const isAdminUser = (user?: NeonAuthUser) => {
+  const adminEmails = new Set(
+    env.ADMIN_EMAILS.split(',')
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean)
+  );
+
+  return (
+    user?.role?.toLowerCase() === 'admin' ||
+    user?.roles?.some((role) => role.toLowerCase() === 'admin') ||
+    Boolean(user?.email && adminEmails.has(user.email.toLowerCase()))
+  );
+};
+
+export const assertAdminUser = (user?: NeonAuthUser, message = 'Only admins can perform this action.') => {
+  if (!isAdminUser(user)) {
+    throw new AppError(message, 403);
+  }
+};
