@@ -1,0 +1,339 @@
+'use client';
+
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Expand, Pause, Play, Settings2, Volume2, VolumeX } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
+type VideoVariant = {
+  label: '480p' | '720p' | '1080p';
+  url: string;
+};
+
+type AdminVideoPlayerProps = {
+  poster?: string;
+  title: string;
+  variants: VideoVariant[];
+  activeVariantLabel: '480p' | '720p' | '1080p' | null;
+  activeVariantUrl: string | null;
+  onVariantSelect: (label: '480p' | '720p' | '1080p') => void;
+};
+
+const formatTime = (value: number) => {
+  if (!Number.isFinite(value) || value < 0) {
+    return '0:00';
+  }
+
+  const minutes = Math.floor(value / 60);
+  const seconds = Math.floor(value % 60)
+    .toString()
+    .padStart(2, '0');
+
+  return `${minutes}:${seconds}`;
+};
+
+const AdminVideoPlayer = ({
+  poster,
+  title,
+  variants,
+  activeVariantLabel,
+  activeVariantUrl,
+  onVariantSelect,
+}: AdminVideoPlayerProps) => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const qualityMenuRef = useRef<HTMLDivElement | null>(null);
+  const pendingResumeTimeRef = useRef<number | null>(null);
+  const pendingResumePlaybackRef = useRef(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [isQualityMenuOpen, setIsQualityMenuOpen] = useState(false);
+
+  const progress = useMemo(() => {
+    if (!duration) {
+      return 0;
+    }
+
+    return (currentTime / duration) * 100;
+  }, [currentTime, duration]);
+
+  useEffect(() => {
+    if (!isQualityMenuOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!qualityMenuRef.current?.contains(event.target as Node)) {
+        setIsQualityMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+    };
+  }, [isQualityMenuOpen]);
+
+  const togglePlayback = async () => {
+    const video = videoRef.current;
+
+    if (!video) {
+      return;
+    }
+
+    if (video.paused) {
+      await video.play();
+      setIsPlaying(true);
+      return;
+    }
+
+    video.pause();
+    setIsPlaying(false);
+  };
+
+  const handleSeek = (value: string) => {
+    const video = videoRef.current;
+
+    if (!video || !duration) {
+      return;
+    }
+
+    const nextProgress = Number(value);
+    const nextTime = (nextProgress / 100) * duration;
+    video.currentTime = nextTime;
+    setCurrentTime(nextTime);
+  };
+
+  const toggleMute = () => {
+    const video = videoRef.current;
+
+    if (!video) {
+      return;
+    }
+
+    const nextMuted = !video.muted;
+    video.muted = nextMuted;
+    setIsMuted(nextMuted);
+
+    if (!nextMuted && video.volume === 0) {
+      video.volume = 0.6;
+      setVolume(0.6);
+    }
+  };
+
+  const enterFullscreen = async () => {
+    const video = videoRef.current;
+
+    if (!video) {
+      return;
+    }
+
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+      return;
+    }
+
+    await video.requestFullscreen();
+  };
+
+  const handleVariantSelect = (label: '480p' | '720p' | '1080p') => {
+    const video = videoRef.current;
+
+    if (video) {
+      pendingResumeTimeRef.current = video.currentTime;
+      pendingResumePlaybackRef.current = !video.paused && !video.ended;
+    }
+
+    setIsQualityMenuOpen(false);
+    onVariantSelect(label);
+  };
+
+  const handleSourceReady = async () => {
+    const video = videoRef.current;
+
+    if (!video) {
+      return;
+    }
+
+    const pendingResumeTime = pendingResumeTimeRef.current;
+
+    if (pendingResumeTime !== null) {
+      const boundedTime =
+        video.duration && Number.isFinite(video.duration)
+          ? Math.min(pendingResumeTime, Math.max(video.duration - 0.1, 0))
+          : pendingResumeTime;
+
+      video.currentTime = Math.max(boundedTime, 0);
+      setCurrentTime(video.currentTime);
+      pendingResumeTimeRef.current = null;
+    }
+
+    if (pendingResumePlaybackRef.current) {
+      pendingResumePlaybackRef.current = false;
+
+      try {
+        await video.play();
+      } catch {
+        setIsPlaying(false);
+      }
+    }
+  };
+
+  return (
+    <div className="relative w-full overflow-hidden border border-white/10 bg-[#050606]">
+      <div className="relative aspect-video w-full bg-black">
+        <video
+          ref={videoRef}
+          className="h-full w-full bg-black object-contain"
+          poster={poster}
+          preload="metadata"
+          src={activeVariantUrl ?? undefined}
+          onCanPlay={() => {
+            void handleSourceReady();
+          }}
+          onClick={() => void togglePlayback()}
+          onDurationChange={(event) => setDuration(event.currentTarget.duration || 0)}
+          onEnded={() => setIsPlaying(false)}
+          onLoadedMetadata={() => {
+            void handleSourceReady();
+          }}
+          onPause={() => setIsPlaying(false)}
+          onPlay={() => setIsPlaying(true)}
+          onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
+          onVolumeChange={(event) => {
+            setIsMuted(event.currentTarget.muted);
+            setVolume(event.currentTarget.volume);
+          }}
+        >
+          Your browser does not support inline video playback.
+        </video>
+
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/50 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
+
+        <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
+          <div className="min-w-0 rounded-full border border-white/10 bg-black/45 px-3 py-1 text-xs uppercase tracking-[0.18em] text-[#f2ede4] backdrop-blur-sm">
+            {activeVariantLabel ?? 'Video'}
+          </div>
+          <div className="truncate rounded-full border border-white/10 bg-black/45 px-3 py-1 text-xs text-[#beb7af] backdrop-blur-sm">
+            {title}
+          </div>
+        </div>
+
+        {!isPlaying ? (
+          <div className="absolute inset-0 grid place-items-center">
+            <button
+              className="grid size-14 place-items-center rounded-full border border-white/15 bg-black/45 text-[#f2ede4] backdrop-blur-md transition hover:scale-105 hover:border-[#c79a31]/60 hover:text-[#f3cf7a] sm:size-20"
+              type="button"
+              onClick={() => void togglePlayback()}
+            >
+              <Play className="size-6 fill-current sm:size-8" />
+            </button>
+          </div>
+        ) : null}
+
+        <div className="absolute inset-x-0 bottom-0 grid gap-3 p-3 sm:gap-4 sm:p-4">
+          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Button
+                size="sm"
+                variant="outline"
+                className="grid size-8 place-items-center border-white/10 bg-black/45 p-0 text-[#f2ede4] hover:bg-white/10 sm:size-10"
+                onClick={() => void togglePlayback()}
+              >
+                {isPlaying ? (
+                  <Pause aria-hidden="true"/>
+                ) : (
+                  <Play aria-hidden="true"/>
+                )}
+                <span className="sr-only">{isPlaying ? 'Pause' : 'Play'}</span>
+              </Button>
+
+              <Button
+                size="icon-sm"
+                variant="outline"
+                className="size-8 border-white/10 bg-black/45 text-[#f2ede4] hover:bg-white/10 sm:size-10"
+                onClick={toggleMute}
+              >
+                {isMuted || volume === 0 ? <VolumeX /> : <Volume2 />}
+                <span className="sr-only">Toggle mute</span>
+              </Button>
+            </div>
+
+            <div className="grid min-w-0 gap-1">
+              <input
+                aria-label="Seek video"
+                className="h-1 min-w-0 w-full cursor-pointer appearance-none bg-white/15 accent-[#c79a31] sm:h-1.5"
+                max={100}
+                min={0}
+                type="range"
+                value={progress}
+                onChange={(event) => handleSeek(event.target.value)}
+              />
+
+              <p className="text-center text-[10px] tabular-nums text-[#beb7af] sm:text-xs">
+                {formatTime(currentTime)} / {formatTime(duration)}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 sm:gap-3">
+              <div ref={qualityMenuRef} className="relative">
+                <Button
+                  size="icon-sm"
+                  variant="outline"
+                  className="size-8 border-white/10 bg-black/45 text-[#f2ede4] hover:bg-white/10 sm:size-10"
+                  onClick={() => setIsQualityMenuOpen((current) => !current)}
+                >
+                  <Settings2 />
+                  <span className="sr-only">Open quality settings</span>
+                </Button>
+
+                {isQualityMenuOpen ? (
+                  <div className="absolute right-0 bottom-11 z-20 flex min-w-36 flex-col border border-white/10 bg-[#0b0d0d]/95 p-2 shadow-2xl backdrop-blur-md sm:bottom-12 sm:min-w-40">
+                    <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8f887e]">
+                      Quality
+                    </p>
+
+                    {variants.map((variant) => (
+                      <button
+                        key={variant.label}
+                        className={cn(
+                          'flex items-center justify-between px-3 py-2 text-left text-xs font-semibold uppercase tracking-[0.18em] transition',
+                          activeVariantLabel === variant.label
+                            ? 'bg-[#c79a31]/15 text-[#f3cf7a]'
+                            : 'text-[#f2ede4] hover:bg-white/10 hover:text-[#f3cf7a]'
+                        )}
+                        type="button"
+                        onClick={() => handleVariantSelect(variant.label)}
+                      >
+                        <span>{variant.label}</span>
+                        {activeVariantLabel === variant.label ? (
+                          <span className="text-[10px] text-[#c79a31]">Active</span>
+                        ) : null}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+
+              <Button
+                size="icon-sm"
+                variant="outline"
+                className="size-8 border-white/10 bg-black/45 text-[#f2ede4] hover:bg-white/10 sm:size-10"
+                onClick={() => void enterFullscreen()}
+              >
+                <Expand />
+                <span className="sr-only">Toggle fullscreen</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AdminVideoPlayer;
