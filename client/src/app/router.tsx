@@ -4,7 +4,10 @@ import AuthLayout from './layouts/AuthLayout';
 import PublicLayout from './layouts/PublicLayout';
 import AdminRoute from './route-guards/AdminRoute';
 import GuestRoute from './route-guards/GuestRoute';
-import DashboardPage from '@/features/admin/pages/DashboardPage';
+import AnalyticsPage from '@/features/admin/pages/AnalyticsPage';
+import MediaPage from '@/features/admin/pages/MediaPage';
+import MusicPage from '@/features/admin/pages/MusicPage';
+import OverviewPage from '@/features/admin/pages/OverviewPage';
 import AuthPage from '@/features/auth/pages/AuthPage';
 import HomePage from '@/features/home/pages/HomePage';
 
@@ -46,7 +49,19 @@ export const appRouter = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <DashboardPage />,
+            element: <OverviewPage />,
+          },
+          {
+            path: 'music',
+            element: <MusicPage />,
+          },
+          {
+            path: 'media',
+            element: <MediaPage />,
+          },
+          {
+            path: 'analytics',
+            element: <AnalyticsPage />,
           },
         ],
       },

@@ -17,3 +17,43 @@ Last updated: 2026-06-27
 
 **Pattern notes:**
 Authentication surfaces use the College Rage brand assets over the Stitch Neon Tech layout: full-bleed mosaic background, dark readability overlay, logo-first header, compact typography, and green/purple accents for brand, focus, verified, and hover states. Keep auth controls dense and centered; avoid decorative cards inside cards.
+
+### Admin Media Page
+
+File: client/src/features/admin/pages/MediaPage.tsx
+Last updated: 2026-07-03
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | `bg-[#151818]`, modal `bg-[#1a1d1d]`, preview well `bg-[#0b0d0d]`, drawer `bg-[#171919]` |
+| Border           | `border border-white/10`, active accent `border-[#c79a31]/70`, dashed empty state `border-dashed border-white/15` |
+| Border radius    | none on panels, pills `rounded-full`, media action circles `rounded-full` |
+| Text - primary   | `text-[#f2ede4]` |
+| Text - secondary | `text-[#beb7af]`, muted `text-[#8f887e]` |
+| Spacing          | page `grid gap-6`, gallery `gap-5`, panels `p-4` and `p-6`, modal/sidebar `p-6`, variant row `mt-3 flex flex-wrap gap-2` |
+| Hover state      | `hover:bg-[#181b1b]`, `hover:border-white/20`, accent hover `hover:border-[#c79a31]/60`, media hover `group-hover:scale-105` |
+| Shadow           | modal `shadow-2xl`, active filter `shadow-[0_0_24px_rgba(199,154,49,0.16)]` |
+| Accent usage     | `text-[#c79a31]`, `bg-[#c79a31]/15`, `text-[#f3cf7a]`, active variant `border-[#c79a31]/70`, CTA inverse button `bg-[#f2ede4] text-[#131110]` |
+
+**Pattern notes:**
+Admin media surfaces follow the Stitch gallery composition but are recolored into the dashboard's charcoal-and-gold palette. Keep gallery cards rectangular and dense, use soft white borders for structure, reserve the gold accent for filters, labels, selected variant buttons, and commit actions, and let overlays/drawers feel like darker continuations of the same workspace rather than separate card systems. Video previews should render in a true black playback well with variant toggles styled like compact pill controls, not as a separate card treatment.
+
+### Admin Video Player
+
+File: client/src/features/media/components/AdminVideoPlayer.tsx
+Last updated: 2026-07-03
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | `bg-[#050606]`, stage `bg-black`, overlay gradients `from-black/50` and `from-black/85` |
+| Border           | `border border-white/10`, overlay controls `border-white/10`, hero play button `border-white/15`, active variant `border-[#c79a31]/70` |
+| Border radius    | container square, controls `rounded-full` |
+| Text - primary   | `text-[#f2ede4]` |
+| Text - secondary | `text-[#beb7af]` |
+| Spacing          | frame header `p-4`, control stack `gap-4 p-4`, control rows `gap-2` and `gap-3`, quality menu `p-2` |
+| Hover state      | `hover:bg-white/10`, `hover:border-[#c79a31]/60`, `hover:text-[#f3cf7a]`, hero play `hover:scale-105` |
+| Shadow           | none; depth comes from backdrop blur and gradient overlays |
+| Accent usage     | sliders `accent-[#c79a31]`, active quality `bg-[#c79a31]/15 text-[#f3cf7a]`, gold hover text/borders, active status `text-[#c79a31]` |
+
+**Pattern notes:**
+Custom admin playback controls should feel embedded in the media stage, not bolted underneath it. Use translucent black control capsules over the video, keep the gold accent reserved for progress, selected quality, and interactive emphasis, and preserve squared outer framing with rounded internal controls so the player still belongs to the broader dashboard system. On smaller screens, hide quality choices behind a settings trigger with a compact anchored menu rather than exposing a full button row.

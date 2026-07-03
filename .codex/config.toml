@@ -12,5 +12,4 @@ Authorization = "Bearer napi_6aer97orxmypvz7hw0szlj62t841hhvreh3pmd9ajkr4vk1i5tx
 [mcp_servers.stitch]
 url = "https://stitch.googleapis.com/mcp"
 
-[mcp_servers.stitch.http_headers]
-"X-Goog-Api-Key" = "AQ.Ab8RN6JsidcQnchJKEaTqkxYqgZwn70P_iIDOJhn4vQBJULFGQ"
+
