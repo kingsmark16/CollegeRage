@@ -57,3 +57,23 @@ Last updated: 2026-07-03
 
 **Pattern notes:**
 Custom admin playback controls should feel embedded in the media stage, not bolted underneath it. Use translucent black control capsules over the video, keep the gold accent reserved for progress, selected quality, and interactive emphasis, and preserve squared outer framing with rounded internal controls so the player still belongs to the broader dashboard system. On smaller screens, hide quality choices behind a settings trigger with a compact anchored menu rather than exposing a full button row.
+
+### Admin Sidebar
+
+File: client/src/features/admin/components/AdminSidebar.tsx
+Last updated: 2026-07-05
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | `[--sidebar:#090b10]`, logo well `bg-[#0f1420]`, footer buttons `bg-[#0d1118]`, active/hover nav `bg-[#121720]`, dashboard inset `bg-[#0f1111]` |
+| Border           | `[--sidebar-border:rgb(255_255_255_/_0.08)]`, `border border-white/10`, button hover `hover:border-[#8f7cff]/45` |
+| Border radius    | outer shell square, logo `rounded-full` |
+| Text - primary   | `[--sidebar-foreground:#d7d2ca]`, nav active `text-[#f5f1ea]` |
+| Text - secondary | group label `text-[#7f89a3]`, idle nav `text-[#b9c0ce]`, idle icons `text-[#7f89a3]`, action hover `text-[#fcfbf8]` |
+| Spacing          | header `px-3 py-6`, content `px-2 pb-2`, footer `px-3 py-4`, nav buttons `px-3 py-2` |
+| Hover state      | `hover:bg-[#121720]`, `hover:text-[#f5f1ea]`, action hover `hover:text-[#fcfbf8]`, logo `hover:scale-[1.02]` |
+| Shadow           | logo `shadow-[0_0_28px_rgba(143,124,255,0.18)]` |
+| Accent usage     | `[--sidebar-primary:#8f7cff]`, active icons `text-[#8f7cff]`, action border hover `hover:border-[#8f7cff]/45` |
+
+**Pattern notes:**
+Admin navigation should read as a darker, cooler control rail than the content area. Keep the shell nearly black, remove inset gutters that expose lighter wrapper tones, use slate-blue hover wells for item focus, and reserve the purple accent for active icons and subtle glow rather than broad fills. Branding in the sidebar is image-led: a larger circular logo mark replaces stacked text identity and user meta blocks, while collapsed navigation should center its icon buttons cleanly within the narrow rail.

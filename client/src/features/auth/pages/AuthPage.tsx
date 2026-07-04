@@ -19,7 +19,7 @@ const AuthPage = ({ mode }: AuthPageProps) => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [validationErrors, setValidationErrors] = useState<AuthFieldErrors>({});
-  const { authMutation } = useAuthActions();
+  const { authMutation, submitAuth } = useAuthActions();
   const { error, isLoading } = useAuthSession();
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -33,7 +33,7 @@ const AuthPage = ({ mode }: AuthPageProps) => {
     }
 
     setValidationErrors({});
-    void authMutation.mutateAsync({
+    void submitAuth({
       mode,
       credentials: result.credentials,
     });
