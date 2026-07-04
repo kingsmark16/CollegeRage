@@ -5,7 +5,7 @@ import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
 
 const OverviewPage = () => {
   const { apiUser, error, user } = useAuthSession();
-  const { connectDropboxMutation, verifyApiMutation } = useAuthActions();
+  const { connectDropbox, connectDropboxMutation, verifyApi, verifyApiMutation } = useAuthActions();
   const isBusy = connectDropboxMutation.isPending || verifyApiMutation.isPending;
 
   return (
@@ -25,7 +25,7 @@ const OverviewPage = () => {
           <div className="mt-6 flex flex-wrap gap-3">
             <Button
               className="border-[#c79a31] bg-[#c79a31] text-[#131110] hover:bg-[#dfb24c]"
-              onClick={() => void verifyApiMutation.mutateAsync()}
+              onClick={() => void verifyApi()}
               disabled={isBusy}
             >
               <ShieldCheck aria-hidden="true" data-icon="inline-start" />
@@ -34,7 +34,7 @@ const OverviewPage = () => {
             <Button
               variant="outline"
               className="border-[#3e3f3f] text-[#f2ede4] hover:bg-[#181b1b]"
-              onClick={() => void connectDropboxMutation.mutateAsync()}
+              onClick={() => void connectDropbox()}
               disabled={isBusy}
             >
               <Cloud aria-hidden="true" data-icon="inline-start" />

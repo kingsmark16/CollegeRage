@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { getErrorMessage, notifyAsync } from '@/lib/toast';
 import { useAdminMedia } from '@/features/media/hooks/useAdminMedia';
 import AdminVideoPlayer from '@/features/media/components/AdminVideoPlayer';
 
@@ -50,9 +51,6 @@ const MediaPage = () => {
   const [draftDescription, setDraftDescription] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  const error =
-    mediaQuery.error ?? uploadMutation.error ?? updateMutation.error ?? deleteMutation.error;
-
   const handleUploadSelection = (event: ChangeEvent<HTMLInputElement>) => {
     setSelectedFiles(Array.from(event.target.files ?? []).slice(0, 10));
   };
@@ -67,8 +65,16 @@ const MediaPage = () => {
       return;
     }
 
-    await uploadMutation.mutateAsync(selectedFiles);
-    setSelectedFiles([]);
+    try {
+      await notifyAsync(uploadMutation.mutateAsync(selectedFiles), {
+        loading: selectedFiles.length === 1 ? 'Uploading media...' : `Uploading ${selectedFiles.length} files...`,
+        success: selectedFiles.length === 1 ? 'Media uploaded successfully.' : 'Media files uploaded successfully.',
+        error: (uploadError) => getErrorMessage(uploadError, 'Media upload failed.'),
+      });
+      setSelectedFiles([]);
+    } catch {
+      // The toast reports the failure; keep the selection available for retry.
+    }
   };
 
   const handleSave = async () => {
@@ -76,14 +82,25 @@ const MediaPage = () => {
       return;
     }
 
-    await updateMutation.mutateAsync({
-      id: selectedMedia.id,
-      input: {
-        sanitizedName: draftName.trim(),
-        description: draftDescription.trim() || null,
-      },
-    });
-    setIsEditOpen(false);
+    try {
+      await notifyAsync(
+        updateMutation.mutateAsync({
+          id: selectedMedia.id,
+          input: {
+            sanitizedName: draftName.trim(),
+            description: draftDescription.trim() || null,
+          },
+        }),
+        {
+          loading: 'Updating media...',
+          success: 'Media updated successfully.',
+          error: (updateError) => getErrorMessage(updateError, 'Media update failed.'),
+        }
+      );
+      setIsEditOpen(false);
+    } catch {
+      // The toast reports the failure; keep the editor open for correction or retry.
+    }
   };
 
   const handleDelete = async () => {
@@ -91,9 +108,17 @@ const MediaPage = () => {
       return;
     }
 
-    await deleteMutation.mutateAsync(selectedMedia.id);
-    setIsPreviewOpen(false);
-    setIsEditOpen(false);
+    try {
+      await notifyAsync(deleteMutation.mutateAsync(selectedMedia.id), {
+        loading: 'Deleting media...',
+        success: 'Media deleted successfully.',
+        error: (deleteError) => getErrorMessage(deleteError, 'Media delete failed.'),
+      });
+      setIsPreviewOpen(false);
+      setIsEditOpen(false);
+    } catch {
+      // The toast reports the failure; keep the media preview visible.
+    }
   };
 
   return (
@@ -126,9 +151,9 @@ const MediaPage = () => {
         </div>
       </section>
 
-      {error ? (
+      {mediaQuery.error ? (
         <div className="border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {error instanceof Error ? error.message : 'Media action failed.'}
+          {getErrorMessage(mediaQuery.error, 'Media could not be loaded.')}
         </div>
       ) : null}
 

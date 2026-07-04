@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Eye, EyeOff, Music, Star, Trash2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { getErrorMessage, notifyAsync } from '@/lib/toast';
 import { useAdminMusicTracks } from '../hooks/useAdminMusicTracks';
 import type { MusicTrack } from '../music.types';
 
@@ -13,8 +14,6 @@ const formatDuration = (duration: number | null) => {
   const seconds = Math.floor(duration % 60).toString().padStart(2, '0');
   return `${minutes}:${seconds}`;
 };
-
-const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : 'Music action failed.');
 
 const getTitleFromFilename = (filename: string) =>
   filename
@@ -34,7 +33,6 @@ const AdminMusicPanel = () => {
   const { deleteMutation, tracksQuery, updateMutation, uploadMutation } = useAdminMusicTracks();
   const tracks = tracksQuery.data ?? [];
   const isBusy = uploadMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
-  const error = uploadMutation.error ?? updateMutation.error ?? deleteMutation.error ?? tracksQuery.error;
 
   const resetForm = () => {
     setFile(null);
@@ -53,16 +51,27 @@ const AdminMusicPanel = () => {
       return;
     }
 
-    await uploadMutation.mutateAsync({
-      file,
-      title,
-      artist,
-      description,
-      isActive,
-      isDefault,
-      sortOrder,
-    });
-    resetForm();
+    try {
+      await notifyAsync(
+        uploadMutation.mutateAsync({
+          file,
+          title,
+          artist,
+          description,
+          isActive,
+          isDefault,
+          sortOrder,
+        }),
+        {
+          loading: 'Uploading track...',
+          success: 'Track uploaded successfully.',
+          error: (error) => getErrorMessage(error, 'Music upload failed.'),
+        }
+      );
+      resetForm();
+    } catch {
+      // The toast reports the failure; keep the form values for retry.
+    }
   };
 
   const handleFileChange = (selectedFile: File | null) => {
@@ -76,17 +85,53 @@ const AdminMusicPanel = () => {
     setTitle('');
   };
 
-  const toggleActive = (track: MusicTrack) =>
-    updateMutation.mutateAsync({
-      id: track.id,
-      input: { isActive: !track.isActive },
-    });
+  const toggleActive = async (track: MusicTrack) => {
+    try {
+      await notifyAsync(
+        updateMutation.mutateAsync({
+          id: track.id,
+          input: { isActive: !track.isActive },
+        }),
+        {
+          loading: track.isActive ? 'Hiding track...' : 'Showing track...',
+          success: track.isActive ? 'Track hidden.' : 'Track is now visible.',
+          error: (error) => getErrorMessage(error, 'Unable to update track visibility.'),
+        }
+      );
+    } catch {
+      // The toast reports the failure; no additional UI change is needed here.
+    }
+  };
 
-  const setDefault = (track: MusicTrack) =>
-    updateMutation.mutateAsync({
-      id: track.id,
-      input: { isDefault: true, isActive: true },
-    });
+  const setDefault = async (track: MusicTrack) => {
+    try {
+      await notifyAsync(
+        updateMutation.mutateAsync({
+          id: track.id,
+          input: { isDefault: true, isActive: true },
+        }),
+        {
+          loading: 'Setting default track...',
+          success: 'Default track updated.',
+          error: (error) => getErrorMessage(error, 'Unable to update the default track.'),
+        }
+      );
+    } catch {
+      // The toast reports the failure; no additional UI change is needed here.
+    }
+  };
+
+  const deleteTrack = async (track: MusicTrack) => {
+    try {
+      await notifyAsync(deleteMutation.mutateAsync(track.id), {
+        loading: 'Deleting track...',
+        success: 'Track deleted successfully.',
+        error: (error) => getErrorMessage(error, 'Unable to delete track.'),
+      });
+    } catch {
+      // The toast reports the failure; no additional UI change is needed here.
+    }
+  };
 
   return (
     <section className="grid gap-5 py-2 lg:grid-cols-[0.9fr_1.1fr]">
@@ -100,9 +145,9 @@ const AdminMusicPanel = () => {
           Add original audio files for the visitor playlist. Active tracks will be available to the public player.
         </p>
 
-        {error ? (
+        {tracksQuery.error ? (
           <div className="mt-5 border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-            {getErrorMessage(error)}
+            {getErrorMessage(tracksQuery.error, 'Unable to load music tracks.')}
           </div>
         ) : null}
 
@@ -245,7 +290,7 @@ const AdminMusicPanel = () => {
                   <Button
                     size="sm"
                     variant="destructive"
-                    onClick={() => void deleteMutation.mutateAsync(track.id)}
+                    onClick={() => void deleteTrack(track)}
                     disabled={isBusy}
                   >
                     <Trash2 aria-hidden="true" />

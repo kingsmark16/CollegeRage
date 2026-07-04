@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { appToast, getErrorMessage, notifyAsync } from '@/lib/toast';
 import { authenticatedRequest, getApiErrorMessage } from '@/services/api.service';
 import {
   type AuthCredentials,
@@ -16,7 +17,6 @@ type AuthMode = 'sign-in' | 'sign-up';
 export const useAuthActions = () => {
   const queryClient = useQueryClient();
   const setApiUser = useAuthSessionStore((state) => state.setApiUser);
-  const setError = useAuthSessionStore((state) => state.setError);
   const resetSession = useAuthSessionStore((state) => state.resetSession);
 
   const refreshSession = async () => {
@@ -33,35 +33,23 @@ export const useAuthActions = () => {
       return signInWithEmail(credentials);
     },
     onSuccess: async () => {
-      setError(null);
       setApiUser(null);
       await refreshSession();
-    },
-    onError: (error) => {
-      setError(getApiErrorMessage(error, 'Authentication failed.'));
     },
   });
 
   const verifyApiMutation = useMutation({
     mutationFn: () => authenticatedRequest<AuthenticatedUserResponse>('/auth/me'),
     onSuccess: (response) => {
-      setError(null);
       setApiUser(response.user);
     },
-    onError: (error) => {
-      setError(getApiErrorMessage(error, 'Unable to verify API session.'));
+    onError: () => {
+      setApiUser(null);
     },
   });
 
   const connectDropboxMutation = useMutation({
     mutationFn: startDropboxAuthorization,
-    onSuccess: (authorizationUrl) => {
-      setError(null);
-      window.location.assign(authorizationUrl);
-    },
-    onError: (error) => {
-      setError(getApiErrorMessage(error, 'Unable to start Dropbox authorization.'));
-    },
   });
 
   const signOutMutation = useMutation({
@@ -70,15 +58,60 @@ export const useAuthActions = () => {
       resetSession();
       await refreshSession();
     },
-    onError: (error) => {
-      setError(getApiErrorMessage(error, 'Unable to sign out.'));
-    },
   });
+
+  const submitAuth = async ({
+    mode,
+    credentials,
+  }: {
+    mode: AuthMode;
+    credentials: AuthCredentials;
+  }) => {
+    return notifyAsync(authMutation.mutateAsync({ mode, credentials }), {
+      loading: mode === 'sign-in' ? 'Signing in...' : 'Creating account...',
+      success: mode === 'sign-in' ? 'Signed in successfully.' : 'Account created successfully.',
+      error: (error) => getApiErrorMessage(error, 'Authentication failed.'),
+    });
+  };
+
+  const verifyApi = async () => {
+    return notifyAsync(verifyApiMutation.mutateAsync(), {
+      loading: 'Verifying API session...',
+      success: (response) => `API verified for ${response.user.email ?? response.user.id}.`,
+      error: (error) => getApiErrorMessage(error, 'Unable to verify API session.'),
+    });
+  };
+
+  const connectDropbox = async () => {
+    const toastId = appToast.loading('Preparing Dropbox connection...');
+
+    try {
+      const authorizationUrl = await connectDropboxMutation.mutateAsync();
+      appToast.success('Redirecting to Dropbox...', { id: toastId });
+      window.location.assign(authorizationUrl);
+      return authorizationUrl;
+    } catch (error) {
+      appToast.error(getErrorMessage(error, 'Unable to start Dropbox authorization.'), { id: toastId });
+      throw error;
+    }
+  };
+
+  const signOutUser = async () => {
+    return notifyAsync(signOutMutation.mutateAsync(), {
+      loading: 'Signing out...',
+      success: 'Signed out successfully.',
+      error: (error) => getApiErrorMessage(error, 'Unable to sign out.'),
+    });
+  };
 
   return {
     authMutation,
+    connectDropbox,
     connectDropboxMutation,
+    signOutUser,
     signOutMutation,
+    submitAuth,
+    verifyApi,
     verifyApiMutation,
   };
 };

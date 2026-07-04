@@ -12,7 +12,7 @@ const AdminLayout = () => {
       <AnalyticsTracker />
       <SidebarProvider defaultOpen>
         <AdminSidebar />
-        <SidebarInset className="min-h-screen bg-[#0f1111] text-[#f2ede4]">
+        <SidebarInset className="min-h-screen bg-[#10141b] text-[#f2ede4] md:peer-data-[variant=inset]:m-0 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:shadow-none md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-0">
           <AdminHeader />
           <div className="flex flex-1 flex-col">
             <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
