@@ -77,3 +77,43 @@ Last updated: 2026-07-05
 
 **Pattern notes:**
 Admin navigation should read as a darker, cooler control rail than the content area. Keep the shell nearly black, remove inset gutters that expose lighter wrapper tones, use slate-blue hover wells for item focus, and reserve the purple accent for active icons and subtle glow rather than broad fills. Branding in the sidebar is image-led: a larger circular logo mark replaces stacked text identity and user meta blocks, while collapsed navigation should center its icon buttons cleanly within the narrow rail.
+
+### Admin Music Panel
+
+File: client/src/features/music/components/AdminMusicPanel.tsx
+Last updated: 2026-07-06
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | `bg-[#151818]`, form wells `bg-[#121515]`, list cards `bg-black/10`, selected toggle `bg-[#1d1a12]` |
+| Border           | `border border-white/10`, selected toggle `border-[#c79a31]/65`, browse chip `border-[#c79a31]/55`, action states `border-[#465256]`, `border-[#7a6128]`, `border-[#7a2b2b]` |
+| Border radius    | none on panels, internal status icon wells square, badges and chips square |
+| Text - primary   | `text-[#f2ede4]` |
+| Text - secondary | `text-[#beb7af]`, muted `text-[#8f887e]`, selected support `text-[#e7d7b0]` |
+| Spacing          | section `grid gap-5`, panels `p-6`, form `gap-4`, toggle cards `px-4 py-4`, list items `p-4 sm:p-5` |
+| Hover state      | `hover:bg-[#181b1b]`, browse `hover:border-[#c79a31]/45`, show `hover:bg-[#223034]`, default `hover:bg-[#312713]`, delete `hover:bg-[#381919]` |
+| Shadow           | selected toggle `shadow-[0_0_24px_rgba(199,154,49,0.12)]` |
+| Accent usage     | `text-[#c79a31]`, `bg-[#c79a31]/12`, `text-[#f3cf7a]`, CTA `bg-[#c79a31] text-[#131110]` |
+
+**Pattern notes:**
+Admin music surfaces should stay in the same charcoal-and-gold dashboard family as media, but use richer state color coding for actions: cool teal for visibility, warm gold for default selection, and deep red for destructive controls. Upload toggles should read like selectable command tiles rather than browser checkboxes, with the checked state communicated through both a gold border wash and a compact check indicator.
+
+### Admin Music Player
+
+File: client/src/features/music/components/AdminMusicPlayer.tsx
+Last updated: 2026-07-06
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | `bg-[linear-gradient(180deg,#111515_0%,#0b0e0e_100%)]`, play well `bg-[#171b1b]` |
+| Border           | `border border-white/10`, play ring `border-[#c79a31]/30`, inner ring `border-white/8`, control buttons `border-white/10` |
+| Border radius    | outer shell square, transport control `rounded-full` |
+| Text - primary   | `text-[#f2ede4]` |
+| Text - secondary | `text-[#8f887e]`, footnote `text-[#6e685f]` |
+| Spacing          | panel `p-5 sm:p-6`, main row `gap-4`, timeline `mt-4 gap-2`, footer `pt-4` |
+| Hover state      | `hover:border-[#c79a31]/65`, `hover:bg-[#1b2020]`, control hover `hover:bg-[#1d2222] hover:text-[#f3cf7a]` |
+| Shadow           | play control `shadow-[0_0_0_1px_rgba(255,255,255,0.03)]` |
+| Accent usage     | progress and volume `accent-[#c79a31]`, animated bars `bg-[#c79a31]`, hover text `text-[#f3cf7a]` |
+
+**Pattern notes:**
+The music player should feel like a quiet studio transport sitting inside the admin dashboard, not a native browser embed. Keep the frame squared and architectural, then soften the interaction points with one circular hero control, gold-accented sliders, and subdued equalizer bars that come alive only while audio is playing.
