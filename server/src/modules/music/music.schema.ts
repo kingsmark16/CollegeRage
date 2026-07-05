@@ -16,16 +16,13 @@ export const musicUploadFileSchema = z.object({
 export const createMusicTrackSchema = z.object({
   title: z.string().trim().min(1, 'Title is required.').max(180).optional(),
   artist: z.string().trim().max(180).nullable().optional(),
-  description: z.string().trim().max(1000).nullable().optional(),
   isActive: z.coerce.boolean().optional(),
   isDefault: z.coerce.boolean().optional(),
-  sortOrder: z.coerce.number().int().min(0).max(100000).optional(),
 });
 
 export const updateMusicTrackSchema = z.object({
   title: z.string().trim().min(1).max(180).optional(),
   artist: z.string().trim().max(180).nullable().optional(),
-  description: z.string().trim().max(1000).nullable().optional(),
   sanitizedName: z
     .string()
     .trim()
@@ -36,7 +33,6 @@ export const updateMusicTrackSchema = z.object({
     .optional(),
   isActive: z.boolean().optional(),
   isDefault: z.boolean().optional(),
-  sortOrder: z.number().int().min(0).max(100000).optional(),
 });
 
 export type MusicUploadFileInput = z.infer<typeof musicUploadFileSchema>;

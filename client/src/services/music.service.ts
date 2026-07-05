@@ -46,7 +46,6 @@ export const uploadMusicTrack = async (input: UploadMusicTrackInput) => {
   formData.append('file', input.file);
   formData.append('isActive', String(input.isActive));
   formData.append('isDefault', String(input.isDefault));
-  formData.append('sortOrder', String(input.sortOrder));
 
   if (input.title?.trim()) {
     formData.append('title', input.title.trim());
@@ -54,10 +53,6 @@ export const uploadMusicTrack = async (input: UploadMusicTrackInput) => {
 
   if (input.artist?.trim()) {
     formData.append('artist', input.artist.trim());
-  }
-
-  if (input.description?.trim()) {
-    formData.append('description', input.description.trim());
   }
 
   try {

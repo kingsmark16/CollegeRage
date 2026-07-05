@@ -24,7 +24,6 @@ const mapMusicTrackToResponse = (track: MusicTrackEntity): MusicTrackResponse =>
   id: track.id,
   title: track.title,
   artist: track.artist,
-  description: track.description,
   sanitizedName: track.sanitizedName,
   mimeType: track.mimeType,
   extension: track.extension,
@@ -33,7 +32,6 @@ const mapMusicTrackToResponse = (track: MusicTrackEntity): MusicTrackResponse =>
   url: track.url,
   isActive: track.isActive,
   isDefault: track.isDefault,
-  sortOrder: track.sortOrder,
   createdAt: track.createdAt.toISOString(),
   updatedAt: track.updatedAt.toISOString(),
 });
@@ -78,14 +76,12 @@ export const uploadMusicTrack = async (
       file: uploadedFile,
       title: parsedInput.title?.trim() || uploadedFile.sanitizedName,
       artist: parsedInput.artist?.trim() || null,
-      description: parsedInput.description?.trim() || null,
       duration: metadata.duration ?? null,
       dropboxPath: asset.path,
       url: asset.url,
       sizeBytes: asset.sizeBytes,
       isActive: parsedInput.isActive ?? true,
       isDefault: parsedInput.isDefault ?? false,
-      sortOrder: parsedInput.sortOrder ?? 0,
       uploadedByUserId: user?.id,
     });
 
@@ -136,10 +132,6 @@ export const updateMusicTrack = async (
     updateData.artist = parsedInput.artist?.trim() || null;
   }
 
-  if (parsedInput.description !== undefined) {
-    updateData.description = parsedInput.description?.trim() || null;
-  }
-
   if (parsedInput.sanitizedName !== undefined) {
     updateData.sanitizedName = parsedInput.sanitizedName;
   }
@@ -150,10 +142,6 @@ export const updateMusicTrack = async (
 
   if (parsedInput.isDefault !== undefined) {
     updateData.isDefault = parsedInput.isDefault;
-  }
-
-  if (parsedInput.sortOrder !== undefined) {
-    updateData.sortOrder = parsedInput.sortOrder;
   }
 
   if (Object.keys(updateData).length === 0) {

@@ -7,7 +7,7 @@ import {
   Music,
   Pause,
   Play,
-  Sparkles,
+  Star,
   Trash2,
   Upload,
 } from 'lucide-react';
@@ -38,13 +38,12 @@ const getTitleFromFilename = (filename: string) =>
 
 type ToggleCardProps = {
   checked: boolean;
-  description: string;
-  icon: typeof Eye;
+  description?: string;
   label: string;
   onToggle: () => void;
 };
 
-const ToggleCard = ({ checked, description, icon: Icon, label, onToggle }: ToggleCardProps) => {
+const ToggleCard = ({ checked, description, label, onToggle }: ToggleCardProps) => {
   return (
     <button
       className={cn(
@@ -56,24 +55,13 @@ const ToggleCard = ({ checked, description, icon: Icon, label, onToggle }: Toggl
       type="button"
       onClick={onToggle}
     >
-      <div className="flex min-w-0 items-start gap-3">
-        <div
-          className={cn(
-            'mt-0.5 grid size-9 shrink-0 place-items-center border transition',
-            checked
-              ? 'border-[#c79a31]/60 bg-[#c79a31]/12 text-[#f3cf7a]'
-              : 'border-white/10 bg-[#161919] text-[#8f887e]'
-          )}
-        >
-          <Icon className="size-4" />
-        </div>
-
-        <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em]">{label}</p>
+      <div className="min-w-0">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em]">{label}</p>
+        {description ? (
           <p className={cn('mt-1 text-sm leading-6', checked ? 'text-[#e7d7b0]' : 'text-[#8f887e]')}>
             {description}
           </p>
-        </div>
+        ) : null}
       </div>
 
       <div
@@ -93,8 +81,6 @@ const AdminMusicPanel = () => {
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
-  const [description, setDescription] = useState('');
-  const [sortOrder, setSortOrder] = useState(1);
   const [isActive, setIsActive] = useState(true);
   const [isDefault, setIsDefault] = useState(false);
   const [expandedTrackId, setExpandedTrackId] = useState<string | null>(null);
@@ -121,8 +107,6 @@ const AdminMusicPanel = () => {
     setFile(null);
     setTitle('');
     setArtist('');
-    setDescription('');
-    setSortOrder(1);
     setIsActive(true);
     setIsDefault(false);
   };
@@ -140,10 +124,8 @@ const AdminMusicPanel = () => {
           file,
           title,
           artist,
-          description,
           isActive,
           isDefault,
-          sortOrder,
         }),
         {
           loading: 'Uploading track...',
@@ -216,17 +198,6 @@ const AdminMusicPanel = () => {
     }
   };
 
-  const handleSortOrderChange = (value: string) => {
-    const nextValue = Number(value);
-
-    if (!Number.isFinite(nextValue)) {
-      setSortOrder(1);
-      return;
-    }
-
-    setSortOrder(Math.max(1, Math.trunc(nextValue)));
-  };
-
   const togglePlayer = (trackId: string) => {
     setExpandedTrackId((current) => (current === trackId ? null : trackId));
   };
@@ -291,30 +262,14 @@ const AdminMusicPanel = () => {
             />
           </label>
 
-          <label className="grid gap-2 text-sm text-[#f2ede4]">
-            Track
-            <Input
-              className="border-white/10 bg-[#121515] text-[#f2ede4] placeholder:text-[#6f6a63]"
-              min={1}
-              step={1}
-              type="number"
-              value={sortOrder}
-              onChange={(event) => handleSortOrderChange(event.target.value)}
-            />
-          </label>
-
           <div className="grid gap-4 sm:grid-cols-2">
             <ToggleCard
               checked={isActive}
-              description="Track is visible to visitors in the music selector."
-              icon={Eye}
               label="Show track"
               onToggle={() => setIsActive((current) => !current)}
             />
             <ToggleCard
               checked={isDefault}
-              description="Starts as the selected soundtrack when the site loads."
-              icon={Sparkles}
               label="Set as default"
               onToggle={() => setIsDefault((current) => !current)}
             />
@@ -384,11 +339,8 @@ const AdminMusicPanel = () => {
                     </span>
                   </div>
                   <p className="mt-1 text-sm text-[#beb7af]">
-                    {track.artist || 'Unknown artist'} | {formatDuration(track.duration)} | track {Math.max(1, track.sortOrder)}
+                    {track.artist || 'Unknown artist'} | {formatDuration(track.duration)}
                   </p>
-                  {track.description ? (
-                    <p className="mt-2 text-sm leading-6 text-[#beb7af]">{track.description}</p>
-                  ) : null}
                 </div>
                 <div ref={activeMenuTrackId === track.id ? actionsMenuRef : null} className="relative self-start">
                   <Button
@@ -426,7 +378,7 @@ const AdminMusicPanel = () => {
                           void setDefault(track);
                         }}
                       >
-                        <Sparkles className="size-4" />
+                        <Star className="size-4" />
                         Default
                       </button>
                       <button
