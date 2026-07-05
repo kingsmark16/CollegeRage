@@ -1,10 +1,24 @@
-import { useState, type FormEvent } from 'react';
-import { Eye, EyeOff, Music, Star, Trash2, Upload } from 'lucide-react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import {
+  Check,
+  Eye,
+  EyeOff,
+  Ellipsis,
+  Music,
+  Pause,
+  Play,
+  Star,
+  Trash2,
+  Upload,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import { getErrorMessage, notifyAsync } from '@/lib/toast';
+import AdminMusicPlayer from './AdminMusicPlayer';
 import { useAdminMusicTracks } from '../hooks/useAdminMusicTracks';
 import type { MusicTrack } from '../music.types';
-
+ 
 const formatDuration = (duration: number | null) => {
   if (!duration) {
     return 'Unknown length';
@@ -22,24 +36,77 @@ const getTitleFromFilename = (filename: string) =>
     .replace(/\s+/g, ' ')
     .trim();
 
+type ToggleCardProps = {
+  checked: boolean;
+  description?: string;
+  label: string;
+  onToggle: () => void;
+};
+
+const ToggleCard = ({ checked, description, label, onToggle }: ToggleCardProps) => {
+  return (
+    <button
+      className={cn(
+        'flex items-start justify-between gap-4 border px-4 py-4 text-left transition',
+        checked
+          ? 'border-[#c79a31]/65 bg-[#1d1a12] text-[#f3cf7a] shadow-[0_0_24px_rgba(199,154,49,0.12)]'
+          : 'border-white/10 bg-[#121515] text-[#f2ede4] hover:border-white/20 hover:bg-[#181b1b]'
+      )}
+      type="button"
+      onClick={onToggle}
+    >
+      <div className="min-w-0">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em]">{label}</p>
+        {description ? (
+          <p className={cn('mt-1 text-sm leading-6', checked ? 'text-[#e7d7b0]' : 'text-[#8f887e]')}>
+            {description}
+          </p>
+        ) : null}
+      </div>
+
+      <div
+        className={cn(
+          'grid size-6 shrink-0 place-items-center border transition',
+          checked ? 'border-[#c79a31]/60 bg-[#c79a31] text-[#131110]' : 'border-white/10 bg-[#141717] text-transparent'
+        )}
+      >
+        <Check className="size-3.5" />
+      </div>
+    </button>
+  );
+};
+
 const AdminMusicPanel = () => {
+  const actionsMenuRef = useRef<HTMLDivElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
-  const [description, setDescription] = useState('');
-  const [sortOrder, setSortOrder] = useState(0);
   const [isActive, setIsActive] = useState(true);
   const [isDefault, setIsDefault] = useState(false);
+  const [expandedTrackId, setExpandedTrackId] = useState<string | null>(null);
+  const [activeMenuTrackId, setActiveMenuTrackId] = useState<string | null>(null);
   const { deleteMutation, tracksQuery, updateMutation, uploadMutation } = useAdminMusicTracks();
   const tracks = tracksQuery.data ?? [];
   const isBusy = uploadMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
+
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!actionsMenuRef.current?.contains(event.target as Node)) {
+        setActiveMenuTrackId(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+    };
+  }, []);
 
   const resetForm = () => {
     setFile(null);
     setTitle('');
     setArtist('');
-    setDescription('');
-    setSortOrder(0);
     setIsActive(true);
     setIsDefault(false);
   };
@@ -57,10 +124,8 @@ const AdminMusicPanel = () => {
           file,
           title,
           artist,
-          description,
           isActive,
           isDefault,
-          sortOrder,
         }),
         {
           loading: 'Uploading track...',
@@ -133,18 +198,18 @@ const AdminMusicPanel = () => {
     }
   };
 
+  const togglePlayer = (trackId: string) => {
+    setExpandedTrackId((current) => (current === trackId ? null : trackId));
+  };
+
   return (
     <section className="grid gap-5 py-2 lg:grid-cols-[0.9fr_1.1fr]">
       <article className="border border-white/10 bg-[#151818] p-6">
         <div className="flex items-center gap-3 text-[#c79a31]">
           <Music className="size-5" />
-          <p className="text-xs uppercase tracking-[0.24em]">Background music</p>
+          <p className="text-xs uppercase tracking-[0.24em]">Music</p>
         </div>
         <h2 className="mt-4 text-2xl font-semibold">Upload soundtrack</h2>
-        <p className="mt-3 text-sm leading-7 text-[#beb7af]">
-          Add original audio files for the visitor playlist. Active tracks will be available to the public player.
-        </p>
-
         {tracksQuery.error ? (
           <div className="mt-5 border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
             {getErrorMessage(tracksQuery.error, 'Unable to load music tracks.')}
@@ -152,20 +217,35 @@ const AdminMusicPanel = () => {
         ) : null}
 
         <form className="mt-6 grid gap-4" onSubmit={(event) => void handleSubmit(event)}>
-          <label className="grid gap-2 text-sm text-[#f2ede4]">
-            Audio file
-            <input
-              className="border border-[#3e3f3f] bg-transparent px-4 py-3 text-sm text-[#beb7af] file:mr-4 file:border-0 file:bg-[#c79a31] file:px-3 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-widest file:text-[#131110]"
-              type="file"
-              accept=".mp3,.m4a,.aac,.wav,.ogg,.flac,audio/*"
-              onChange={(event) => handleFileChange(event.target.files?.[0] ?? null)}
-            />
-          </label>
+          <div className="grid gap-2 text-sm text-[#f2ede4]">
+            <span>Audio file</span>
+            <label className="flex cursor-pointer items-center justify-between gap-4 border border-white/10 bg-[#121515] px-4 py-4 transition hover:border-[#c79a31]/45 hover:bg-[#181b1b]">
+              <div className="min-w-0">
+                <p className="truncate text-xs font-semibold uppercase tracking-[0.18em] text-[#f2ede4]">
+                  {file ? file.name : 'Select soundtrack'}
+                </p>
+                <p className="mt-1 text-sm text-[#8f887e]">
+                  MP3, M4A, AAC, WAV, OGG, or FLAC
+                </p>
+              </div>
+
+              <span className="inline-flex h-9 shrink-0 items-center justify-center border border-[#c79a31]/55 bg-[#c79a31]/12 px-4 text-xs font-semibold uppercase tracking-[0.18em] text-[#f3cf7a]">
+                Browse
+              </span>
+
+              <input
+                accept=".mp3,.m4a,.aac,.wav,.ogg,.flac,audio/*"
+                className="hidden"
+                type="file"
+                onChange={(event) => handleFileChange(event.target.files?.[0] ?? null)}
+              />
+            </label>
+          </div>
 
           <label className="grid gap-2 text-sm text-[#f2ede4]">
             Title
-            <input
-              className="border border-[#3e3f3f] bg-transparent px-4 py-3 text-sm text-[#f2ede4] outline-none focus:border-[#c79a31]"
+            <Input
+              className="border-white/10 bg-[#121515] text-[#f2ede4] placeholder:text-[#6f6a63]"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               placeholder="Selected filename will appear here"
@@ -174,43 +254,25 @@ const AdminMusicPanel = () => {
 
           <label className="grid gap-2 text-sm text-[#f2ede4]">
             Artist
-            <input
-              className="border border-[#3e3f3f] bg-transparent px-4 py-3 text-sm text-[#f2ede4] outline-none focus:border-[#c79a31]"
+            <Input
+              className="border-white/10 bg-[#121515] text-[#f2ede4] placeholder:text-[#6f6a63]"
               value={artist}
               onChange={(event) => setArtist(event.target.value)}
               placeholder="Optional"
             />
           </label>
 
-          <label className="grid gap-2 text-sm text-[#f2ede4]">
-            Description
-            <textarea
-              className="min-h-24 resize-y border border-[#3e3f3f] bg-transparent px-4 py-3 text-sm text-[#f2ede4] outline-none focus:border-[#c79a31]"
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              placeholder="Optional"
+          <div className="grid gap-4 sm:grid-cols-2">
+            <ToggleCard
+              checked={isActive}
+              label="Show track"
+              onToggle={() => setIsActive((current) => !current)}
             />
-          </label>
-
-          <div className="grid gap-4 sm:grid-cols-3">
-            <label className="grid gap-2 text-sm text-[#f2ede4]">
-              Sort
-              <input
-                className="border border-[#3e3f3f] bg-transparent px-4 py-3 text-sm text-[#f2ede4] outline-none focus:border-[#c79a31]"
-                value={sortOrder}
-                min={0}
-                onChange={(event) => setSortOrder(Number(event.target.value))}
-                type="number"
-              />
-            </label>
-            <label className="flex items-center gap-3 border border-[#3e3f3f] px-4 py-3 text-sm text-[#f2ede4]">
-              <input checked={isActive} onChange={(event) => setIsActive(event.target.checked)} type="checkbox" />
-              Active
-            </label>
-            <label className="flex items-center gap-3 border border-[#3e3f3f] px-4 py-3 text-sm text-[#f2ede4]">
-              <input checked={isDefault} onChange={(event) => setIsDefault(event.target.checked)} type="checkbox" />
-              Default
-            </label>
+            <ToggleCard
+              checked={isDefault}
+              label="Set as default"
+              onToggle={() => setIsDefault((current) => !current)}
+            />
           </div>
 
           <Button
@@ -245,10 +307,27 @@ const AdminMusicPanel = () => {
           ) : null}
 
           {tracks.map((track) => (
-            <div key={track.id} className="border border-white/10 bg-black/10 p-4">
+            <div key={track.id} className="border border-white/10 bg-black/10 p-4 sm:p-5">
+              {(() => {
+                const isPlayerOpen = expandedTrackId === track.id;
+
+                return (
+                  <>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      className={cn(
+                        'grid size-9 shrink-0 place-items-center border transition',
+                        isPlayerOpen
+                          ? 'border-[#c79a31]/60 bg-[#c79a31]/12 text-[#f3cf7a]'
+                          : 'border-white/10 bg-[#141717] text-[#f2ede4] hover:border-[#c79a31]/45 hover:bg-[#181b1b] hover:text-[#f3cf7a]'
+                      )}
+                      type="button"
+                      onClick={() => togglePlayer(track.id)}
+                    >
+                      {isPlayerOpen ? <Pause className="size-4" /> : <Play className="ml-0.5 size-4 fill-current" />}
+                    </button>
                     <h3 className="text-lg font-semibold text-[#f2ede4]">{track.title}</h3>
                     {track.isDefault ? (
                       <span className="border border-[#c79a31]/50 px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#d7b15f]">
@@ -260,45 +339,72 @@ const AdminMusicPanel = () => {
                     </span>
                   </div>
                   <p className="mt-1 text-sm text-[#beb7af]">
-                    {track.artist || 'Unknown artist'} | {formatDuration(track.duration)} | sort {track.sortOrder}
+                    {track.artist || 'Unknown artist'} | {formatDuration(track.duration)}
                   </p>
-                  {track.description ? (
-                    <p className="mt-2 text-sm leading-6 text-[#beb7af]">{track.description}</p>
+                </div>
+                <div ref={activeMenuTrackId === track.id ? actionsMenuRef : null} className="relative self-start">
+                  <Button
+                    size="icon-sm"
+                    variant="outline"
+                    className="border-white/10 bg-[#141717] text-[#f2ede4] hover:border-[#c79a31]/45 hover:bg-[#181b1b] hover:text-[#f3cf7a]"
+                    onClick={() =>
+                      setActiveMenuTrackId((current) => (current === track.id ? null : track.id))
+                    }
+                    disabled={isBusy}
+                    type="button"
+                  >
+                    <Ellipsis aria-hidden="true" />
+                    <span className="sr-only">Track actions</span>
+                  </Button>
+
+                  {activeMenuTrackId === track.id ? (
+                    <div className="absolute right-0 top-11 z-20 grid min-w-40 overflow-hidden border border-white/10 bg-[#121515] shadow-2xl">
+                      <button
+                        className="flex items-center gap-3 px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[#d6e3e3] transition hover:bg-[#223034] hover:text-white"
+                        type="button"
+                        onClick={() => {
+                          setActiveMenuTrackId(null);
+                          void toggleActive(track);
+                        }}
+                      >
+                        {track.isActive ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                        {track.isActive ? 'Hide' : 'Show'}
+                      </button>
+                      <button
+                        className="flex items-center gap-3 px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[#f0d38a] transition hover:bg-[#312713] hover:text-[#ffe3a0]"
+                        type="button"
+                        onClick={() => {
+                          setActiveMenuTrackId(null);
+                          void setDefault(track);
+                        }}
+                      >
+                        <Star className="size-4" />
+                        Default
+                      </button>
+                      <button
+                        className="flex items-center gap-3 px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[#ff9e9e] transition hover:bg-[#381919] hover:text-[#ffd2d2]"
+                        type="button"
+                        onClick={() => {
+                          setActiveMenuTrackId(null);
+                          void deleteTrack(track);
+                        }}
+                      >
+                        <Trash2 className="size-4" />
+                        Delete
+                      </button>
+                    </div>
                   ) : null}
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-[#3e3f3f] text-[#f2ede4] hover:bg-[#181b1b]"
-                    onClick={() => void toggleActive(track)}
-                    disabled={isBusy}
-                  >
-                    {track.isActive ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
-                    {track.isActive ? 'Hide' : 'Show'}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-[#3e3f3f] text-[#f2ede4] hover:bg-[#181b1b]"
-                    onClick={() => void setDefault(track)}
-                    disabled={isBusy || track.isDefault}
-                  >
-                    <Star aria-hidden="true" />
-                    Default
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => void deleteTrack(track)}
-                    disabled={isBusy}
-                  >
-                    <Trash2 aria-hidden="true" />
-                    Delete
-                  </Button>
-                </div>
               </div>
-              <audio className="mt-4 w-full" controls preload="metadata" src={track.url} />
+
+              {isPlayerOpen ? (
+                <div className="mt-4">
+                  <AdminMusicPlayer autoPlay artist={track.artist} title={track.title} url={track.url} />
+                </div>
+              ) : null}
+                  </>
+                );
+              })()}
             </div>
           ))}
         </div>

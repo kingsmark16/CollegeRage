@@ -3,7 +3,6 @@ import type { Prisma } from '../../generated/prisma/index.js';
 import type { CreateMusicTrackData, MusicTrackEntity } from './music.types.js';
 
 const orderBy = [
-  { sortOrder: 'asc' as const },
   { createdAt: 'desc' as const },
 ];
 
@@ -20,7 +19,6 @@ export const createMusicTrack = async (input: CreateMusicTrackData): Promise<Mus
       data: {
         title: input.title,
         artist: input.artist ?? null,
-        description: input.description ?? null,
         originalFilename: input.file.originalFilename,
         sanitizedName: input.file.sanitizedName,
         mimeType: input.file.mimeType,
@@ -31,7 +29,6 @@ export const createMusicTrack = async (input: CreateMusicTrackData): Promise<Mus
         url: input.url,
         isActive: input.isActive,
         isDefault: input.isDefault,
-        sortOrder: input.sortOrder,
         uploadedByUserId: input.uploadedByUserId ?? null,
       },
     });
