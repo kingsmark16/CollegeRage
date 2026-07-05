@@ -58,8 +58,12 @@ const AdminMusicPlayer = ({ autoPlay = false, artist, title, url }: AdminMusicPl
     }
 
     if (audio.paused) {
-      await audio.play();
-      setIsPlaying(true);
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch {
+        setIsPlaying(false);
+      }
       return;
     }
 
