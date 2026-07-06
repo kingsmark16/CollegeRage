@@ -77,6 +77,7 @@ Last updated: 2026-07-05
 
 **Pattern notes:**
 Admin navigation should read as a darker, cooler control rail than the content area. Keep the shell nearly black, remove inset gutters that expose lighter wrapper tones, use slate-blue hover wells for item focus, and reserve the purple accent for active icons and subtle glow rather than broad fills. Branding in the sidebar is image-led: a larger circular logo mark replaces stacked text identity and user meta blocks, while collapsed navigation should center its icon buttons cleanly within the narrow rail.
+On mobile, the sheet-backed sidebar must inherit the same dark sidebar surface and border treatment as the desktop rail so the drawer does not flash the default light sheet background.
 
 ### Admin Music Panel
 
