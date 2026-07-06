@@ -21,22 +21,22 @@ Authentication surfaces use the College Rage brand assets over the Stitch Neon T
 ### Admin Media Page
 
 File: client/src/features/admin/pages/MediaPage.tsx
-Last updated: 2026-07-03
+Last updated: 2026-07-06
 
 | Property         | Class |
 | ---------------- | ----- |
 | Background       | `bg-[#151818]`, modal `bg-[#1a1d1d]`, preview well `bg-[#0b0d0d]`, drawer `bg-[#171919]` |
-| Border           | `border border-white/10`, active accent `border-[#c79a31]/70`, dashed empty state `border-dashed border-white/15` |
+| Border           | `border border-white/10`, active accent `border-[#c79a31]/70`, dashed empty state `border-dashed border-white/15`, modal info action `border-[#3c5362]`, close/cancel neutral `border-[#4a4540]`, edit action `border-[#705929]`, delete action `border-[#7a2b2b]` |
 | Border radius    | none on panels, pills `rounded-full`, media action circles `rounded-full` |
 | Text - primary   | `text-[#f2ede4]` |
 | Text - secondary | `text-[#beb7af]`, muted `text-[#8f887e]` |
 | Spacing          | page `grid gap-6`, gallery `gap-5`, panels `p-4` and `p-6`, modal/sidebar `p-6`, variant row `mt-3 flex flex-wrap gap-2` |
-| Hover state      | `hover:bg-[#181b1b]`, `hover:border-white/20`, accent hover `hover:border-[#c79a31]/60`, media hover `group-hover:scale-105` |
+| Hover state      | `hover:bg-[#181b1b]`, `hover:border-white/20`, accent hover `hover:border-[#c79a31]/60`, media hover `group-hover:scale-105`, modal info `hover:bg-[#1b2d38]`, close/cancel `hover:bg-[#211b18]`, edit `hover:bg-[#312713]`, delete `hover:bg-[#381919]` |
 | Shadow           | modal `shadow-2xl`, active filter `shadow-[0_0_24px_rgba(199,154,49,0.16)]` |
-| Accent usage     | `text-[#c79a31]`, `bg-[#c79a31]/15`, `text-[#f3cf7a]`, active variant `border-[#c79a31]/70`, CTA inverse button `bg-[#f2ede4] text-[#131110]` |
+| Accent usage     | `text-[#c79a31]`, `bg-[#c79a31]/15`, `text-[#f3cf7a]`, active variant `border-[#c79a31]/70`, CTA inverse button `bg-[#f2ede4] text-[#131110]`, modal controls use cool blue for view toggles, warm stone for neutral dismissal, gold-brown for edit, and deep red for destructive actions |
 
 **Pattern notes:**
-Admin media surfaces follow the Stitch gallery composition but are recolored into the dashboard's charcoal-and-gold palette. Keep gallery cards rectangular and dense, use soft white borders for structure, reserve the gold accent for filters, labels, selected variant buttons, and commit actions, and let overlays/drawers feel like darker continuations of the same workspace rather than separate card systems. Video previews should render in a true black playback well with variant toggles styled like compact pill controls, not as a separate card treatment.
+Admin media surfaces follow the Stitch gallery composition but are recolored into the dashboard's charcoal-and-gold palette. Keep gallery cards rectangular and dense, use soft white borders for structure, reserve the gold accent for filters, labels, selected variant buttons, and commit actions, and let overlays/drawers feel like darker continuations of the same workspace rather than separate card systems. Video previews should render in a true black playback well with variant toggles styled like compact pill controls, not as a separate card treatment. Within the modal, avoid black-on-black buttons: give each action family its own low-saturation role color so controls stay legible against the dark surface without overpowering the media.
 
 ### Admin Video Player
 

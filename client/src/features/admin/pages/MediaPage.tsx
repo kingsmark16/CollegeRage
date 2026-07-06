@@ -271,7 +271,7 @@ const MediaPage = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-white/10 bg-black/45 text-[#f2ede4] hover:bg-white/10"
+                  className="border-[#3c5362] bg-[#132028]/92 text-[#d7e7ee] hover:border-[#5f8599] hover:bg-[#1b2d38] hover:text-[#ffffff]"
                   onClick={() => setIsInfoVisible((current) => !current)}
                 >
                   <FlipHorizontal2 aria-hidden="true" data-icon="inline-start" />
@@ -280,7 +280,7 @@ const MediaPage = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-white/10 bg-black/45 text-[#f2ede4] hover:bg-white/10"
+                  className="border-[#4a4540] bg-[#171311]/92 text-[#efe6da] hover:border-[#7b746b] hover:bg-[#211b18] hover:text-[#ffffff]"
                   onClick={() => {
                     setIsInfoVisible(false);
                     setIsPreviewOpen(false);
@@ -328,7 +328,7 @@ const MediaPage = () => {
                       <div className="mx-auto flex w-full max-w-2xl flex-wrap justify-center gap-3">
                         <Button
                           variant="outline"
-                          className="border-white/10 bg-transparent text-[#f2ede4] hover:bg-white/5"
+                          className="border-[#705929] bg-[#221b0f] text-[#f0d38a] hover:border-[#c79a31] hover:bg-[#312713] hover:text-[#ffe3a0]"
                           onClick={() => {
                             primeDrafts();
                             setIsEditOpen(true);
@@ -337,7 +337,11 @@ const MediaPage = () => {
                           <Pencil aria-hidden="true" data-icon="inline-start" />
                           Edit
                         </Button>
-                        <Button variant="destructive" onClick={() => void handleDelete()}>
+                        <Button
+                          variant="destructive"
+                          className="border border-[#7a2b2b] bg-[#2a1414] text-[#ff9e9e] hover:border-[#b74242] hover:bg-[#381919] hover:text-[#ffd2d2]"
+                          onClick={() => void handleDelete()}
+                        >
                           <Trash2 aria-hidden="true" data-icon="inline-start" />
                           Delete
                         </Button>
@@ -395,13 +399,13 @@ const MediaPage = () => {
           <SheetFooter className="border-t border-white/10 px-6 py-5 sm:flex-row">
             <Button
               variant="outline"
-              className="border-white/10 bg-transparent text-[#f2ede4] hover:bg-white/5"
+              className="border-[#4a4540] bg-[#171311] text-[#efe6da] hover:border-[#7b746b] hover:bg-[#211b18] hover:text-[#ffffff]"
               onClick={() => setIsEditOpen(false)}
             >
               Cancel
             </Button>
             <Button
-              className="border-[#c79a31] bg-[#c79a31] text-[#131110] hover:bg-[#dfb24c]"
+              className="border-[#c79a31] bg-[#c79a31] text-[#131110] hover:border-[#e5bc63] hover:bg-[#dfb24c]"
               disabled={!selectedMedia || !draftName.trim() || updateMutation.isPending}
               onClick={() => void handleSave()}
             >
