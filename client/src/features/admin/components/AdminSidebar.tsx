@@ -1,5 +1,5 @@
 import { Link, NavLink } from 'react-router-dom';
-import { Cloud, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import screenLogo from '@/assets/screen.png';
 import { cn } from '@/lib/utils';
 import {
@@ -21,8 +21,8 @@ import { useAuthActions } from '@/features/auth/hooks/useAuthActions';
 import { adminNavigationItems } from '../admin-navigation';
 
 const AdminSidebar = () => {
-  const { connectDropbox, connectDropboxMutation, signOutMutation, signOutUser } = useAuthActions();
-  const isBusy = connectDropboxMutation.isPending || signOutMutation.isPending;
+  const { signOutMutation, signOutUser } = useAuthActions();
+  const isBusy = signOutMutation.isPending;
 
   return (
     <Sidebar
@@ -87,15 +87,6 @@ const AdminSidebar = () => {
       </SidebarContent>
 
       <SidebarFooter className="gap-2 px-3 py-4">
-        <Button
-          variant="outline"
-          className="w-full justify-start border-white/10 bg-[#0d1118] text-[#f5f1ea] hover:border-[#8f7cff]/45 hover:bg-[#121720] hover:text-[#fcfbf8] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
-          onClick={() => void connectDropbox()}
-          disabled={isBusy}
-        >
-          <Cloud aria-hidden="true" />
-          <span className="group-data-[collapsible=icon]:hidden">Connect Dropbox</span>
-        </Button>
         <Button
           variant="outline"
           className="w-full justify-start border-white/10 bg-[#0d1118] text-[#f5f1ea] hover:border-[#8f7cff]/45 hover:bg-[#121720] hover:text-[#fcfbf8] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
