@@ -58,6 +58,26 @@ Last updated: 2026-07-03
 **Pattern notes:**
 Custom admin playback controls should feel embedded in the media stage, not bolted underneath it. Use translucent black control capsules over the video, keep the gold accent reserved for progress, selected quality, and interactive emphasis, and preserve squared outer framing with rounded internal controls so the player still belongs to the broader dashboard system. On smaller screens, hide quality choices behind a settings trigger with a compact anchored menu rather than exposing a full button row.
 
+### Admin Overview Metrics
+
+File: client/src/features/admin/pages/OverviewPage.tsx
+Last updated: 2026-07-06
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | `bg-[#151818]`, metric tile `bg-[#111414]`, chart tooltip `bg-[#101313]`, progress well `bg-[#0f1212]` |
+| Border           | `border border-white/10`, Dropbox status `border-[#3c5362]`, empty chart `border-dashed border-white/15` |
+| Border radius    | none on panels, metric tiles, chart wells, and tooltips |
+| Text - primary   | `text-[#f2ede4]` |
+| Text - secondary | `text-[#beb7af]`, muted axis/tile text `text-[#8f887e]` |
+| Spacing          | page `grid gap-6`, dashboard panels `p-6`, chart section `mt-6 grid gap-6`, metric tiles `px-4 py-3` |
+| Hover state      | inherits button hover patterns from admin media and auth actions |
+| Shadow           | chart tooltip `shadow-2xl` |
+| Accent usage     | storage progress `bg-[#c79a31]`, radar stroke/fill `#c79a31`, radar dots `#f3cf7a`, tooltip value `text-[#f3cf7a]` |
+
+**Pattern notes:**
+Admin overview metrics should read as operational dashboard surfaces: dense, rectangular, and scan-friendly. Use the existing charcoal panels and soft white borders, reserve gold for primary storage emphasis, and keep the media-by-type chart inside the Dropbox storage container rather than creating a separate analytics panel. The media storage visualization uses one shadcn-style radar chart with visible dots so the dashboard stays compact while still showing image, video, and music balance.
+
 ### Admin Sidebar
 
 File: client/src/features/admin/components/AdminSidebar.tsx
