@@ -160,8 +160,20 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
-          style={{ '--sidebar-width': SIDEBAR_WIDTH_MOBILE } as React.CSSProperties}
+          className="w-(--sidebar-width) border-r border-white/10 bg-[#080b11] p-0 text-[#d7d2ca] [&>button]:hidden"
+          style={
+            {
+              '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
+              '--sidebar': '#080b11',
+              '--sidebar-foreground': '#d7d2ca',
+              '--sidebar-accent': '#141a24',
+              '--sidebar-accent-foreground': '#f5f1ea',
+              '--sidebar-border': 'rgb(255 255 255 / 0.08)',
+              '--sidebar-primary': '#8f7cff',
+              '--sidebar-primary-foreground': '#ffffff',
+              '--sidebar-ring': '#8f7cff',
+            } as React.CSSProperties
+          }
           side={side}
         >
           <SheetHeader className="sr-only">
