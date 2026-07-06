@@ -14,6 +14,7 @@ import type { DropboxTokenResponse, StoredDropboxCredential } from './dropbox.ty
 
 const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 const DROPBOX_SCOPES = [
+  'account_info.read',
   'files.content.write',
   'files.content.read',
   'sharing.write',

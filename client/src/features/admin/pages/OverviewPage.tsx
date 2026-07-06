@@ -1,12 +1,61 @@
-import { BarChart3, Cloud, ShieldCheck, Upload } from 'lucide-react';
+import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from 'recharts';
+import { BarChart3, Cloud, Database, HardDrive, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions';
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
+import { useDashboardOverview } from '@/features/dashboard/hooks/useDashboardOverview';
+
+const chartConfig = {
+  images: {
+    label: 'Images',
+    color: '#c79a31',
+  },
+  videos: {
+    label: 'Videos',
+    color: '#5f8599',
+  },
+  music: {
+    label: 'Music',
+    color: '#8f7cff',
+  },
+} satisfies ChartConfig;
+
+const formatBytes = (bytes: number | null | undefined) => {
+  if (!bytes) {
+    return '0 B';
+  }
+
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const exponent = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+  const value = bytes / 1024 ** exponent;
+
+  return `${value.toFixed(value >= 10 || exponent === 0 ? 0 : 1)} ${units[exponent]}`;
+};
+
+const formatPercent = (value: number | null | undefined) => {
+  if (value === null || value === undefined) {
+    return 'Unavailable';
+  }
+
+  return `${value.toFixed(value >= 10 ? 0 : 1)}%`;
+};
 
 const OverviewPage = () => {
-  const { apiUser, error, user } = useAuthSession();
-  const { connectDropbox, connectDropboxMutation, verifyApi, verifyApiMutation } = useAuthActions();
-  const isBusy = connectDropboxMutation.isPending || verifyApiMutation.isPending;
+  const { error, user } = useAuthSession();
+  const { connectDropbox, connectDropboxMutation } = useAuthActions();
+  const dashboardQuery = useDashboardOverview();
+  const isBusy = connectDropboxMutation.isPending;
+  const overview = dashboardQuery.data;
+  const storagePercent = overview?.dropbox.usagePercent ?? 0;
+  const isDropboxConnected = Boolean(overview?.dropbox.connected && !overview?.dropbox.requiresReconnect);
+  const mediaRadarData =
+    overview?.media.breakdown.map((item) => ({
+      ...item,
+      storageBytes: item.sizeBytes,
+    })) ?? [];
+  const hasMediaStorage = mediaRadarData.some((item) => item.sizeBytes > 0);
 
   return (
     <div className="grid gap-6">
@@ -16,68 +65,142 @@ const OverviewPage = () => {
         </div>
       ) : null}
 
-      <section className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
-        <article className="border border-white/10 bg-[#151818] p-6">
-          <p className="text-xs uppercase tracking-[0.22em] text-[#c79a31]">Session</p>
-          <h2 className="mt-3 text-2xl font-semibold">Signed in admin</h2>
-          <p className="mt-4 text-sm leading-7 text-[#beb7af]">{user?.email ?? user?.name ?? user?.id}</p>
-
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Button
-              className="border-[#c79a31] bg-[#c79a31] text-[#131110] hover:bg-[#dfb24c]"
-              onClick={() => void verifyApi()}
-              disabled={isBusy}
-            >
-              <ShieldCheck aria-hidden="true" data-icon="inline-start" />
-              Verify API
-            </Button>
-            <Button
-              variant="outline"
-              className="border-[#3e3f3f] text-[#f2ede4] hover:bg-[#181b1b]"
-              onClick={() => void connectDropbox()}
-              disabled={isBusy}
-            >
-              <Cloud aria-hidden="true" data-icon="inline-start" />
-              Connect Dropbox
-            </Button>
-          </div>
-
-          {apiUser ? (
-            <div className="mt-6 border border-[#c79a31]/40 bg-[#c79a31]/8 px-4 py-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-[#d7b15f]">Express API verified</p>
-              <p className="mt-2 text-sm text-[#f2ede4]">{apiUser.email ?? apiUser.id}</p>
-            </div>
-          ) : null}
-        </article>
-
-        <div className="grid gap-5">
-          <article className="border border-white/10 bg-[#151818] p-6">
-            <div className="flex items-center gap-3 text-[#c79a31]">
-              <Upload className="size-5" />
-              <p className="text-xs uppercase tracking-[0.24em]">Media operations</p>
-            </div>
-            <p className="mt-4 text-lg font-semibold">Admin shell is ready for expansion</p>
-            <p className="mt-3 text-sm leading-7 text-[#beb7af]">
-              Your private area now has a stable structure for media management, soundtrack uploads, and future
-              moderation tools.
-            </p>
-          </article>
-
-          <article className="border border-white/10 bg-[#151818] p-6">
-            <div className="flex items-center gap-3 text-[#c79a31]">
-              <BarChart3 className="size-5" />
-              <p className="text-xs uppercase tracking-[0.24em]">Analytics</p>
-            </div>
-            <p className="mt-4 text-lg font-semibold">Visitor insights can slot in cleanly</p>
-            <p className="mt-3 text-sm leading-7 text-[#beb7af]">
-              The dashboard shell gives analytics its own home when you are ready to surface page views, sessions, and
-              track engagement data.
-            </p>
-          </article>
+      {dashboardQuery.error ? (
+        <div className="border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {dashboardQuery.error instanceof Error ? dashboardQuery.error.message : 'Unable to load dashboard overview.'}
         </div>
+      ) : null}
+
+      <section className="grid gap-5">
+        <article className="border border-white/10 bg-[#151818] p-6">
+          <div className="grid gap-8 xl:grid-cols-[0.9fr_1.1fr] xl:items-start">
+            <div className="flex flex-col">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-3 text-[#c79a31]">
+                    <HardDrive className="size-5" />
+                    <p className="text-xs uppercase tracking-[0.24em]">Dropbox storage</p>
+                  </div>
+                  <p className="mt-4 text-3xl font-semibold text-[#f2ede4]">
+                    {dashboardQuery.isLoading ? 'Loading' : formatPercent(overview?.dropbox.usagePercent)}
+                  </p>
+                  <p className="mt-2 text-sm text-[#beb7af]">
+                    {overview?.dropbox.message
+                      ? overview.dropbox.message
+                      : overview?.dropbox.connected
+                      ? `${formatBytes(overview.dropbox.usedBytes)} used of ${formatBytes(overview.dropbox.allocatedBytes)}`
+                      : 'Connect Dropbox to show account quota.'}
+                  </p>
+                </div>
+
+                <div className="border border-[#3c5362] bg-[#132028]/70 px-3 py-2 text-xs uppercase tracking-[0.18em] text-[#d7e7ee]">
+                  {overview?.dropbox.requiresReconnect ? 'Reconnect' : overview?.dropbox.allocationType ?? 'Not connected'}
+                </div>
+              </div>
+
+              <div className="mt-8">
+                {dashboardQuery.isLoading ? (
+                  <Skeleton className="h-4 w-full bg-white/5" />
+                ) : (
+                  <div className="h-4 border border-white/10 bg-[#0f1212]">
+                    <div
+                      className="h-full bg-[#c79a31] transition-[width]"
+                      style={{ width: `${Math.min(100, Math.max(0, storagePercent))}%` }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                <MetricTile icon={Database} label="App files" value={formatBytes(overview?.media.totalSizeBytes)} />
+                <MetricTile icon={Upload} label="Assets" value={(overview?.media.totalCount ?? 0).toLocaleString()} />
+                <MetricTile
+                  icon={Cloud}
+                  label="Dropbox"
+                  value={
+                    overview?.dropbox.requiresReconnect ? 'Reconnect' : overview?.dropbox.connected ? 'Connected' : 'Disconnected'
+                  }
+                />
+              </div>
+
+              <div className="mt-4 flex flex-col gap-3 border border-white/10 bg-[#111414] px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <p className="text-xs uppercase tracking-[0.18em] text-[#8f887e]">Admin account</p>
+                  <p className="mt-2 truncate text-sm font-semibold text-[#f2ede4]">
+                    {user?.email ?? user?.name ?? user?.id ?? 'Unavailable'}
+                  </p>
+                </div>
+
+                <Button
+                  variant="outline"
+                  className="border-[#3c5362] bg-[#132028]/92 text-[#d7e7ee] hover:border-[#5f8599] hover:bg-[#1b2d38] hover:text-[#ffffff] sm:shrink-0"
+                  onClick={() => void connectDropbox()}
+                  disabled={isBusy || isDropboxConnected}
+                >
+                  <Cloud aria-hidden="true" data-icon="inline-start" />
+                  Connect Dropbox
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-col">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-3 text-[#c79a31]">
+                    <BarChart3 className="size-5" />
+                    <p className="text-xs uppercase tracking-[0.24em]">Media by type</p>
+                  </div>
+                  <p className="mt-4 text-lg font-semibold text-[#f2ede4]">Dropbox-backed assets</p>
+                </div>
+                <p className="text-sm text-[#beb7af]">{formatBytes(overview?.media.totalSizeBytes)} tracked</p>
+              </div>
+
+              {dashboardQuery.isLoading ? (
+                <Skeleton className="mt-6 h-64 w-full bg-white/5" />
+              ) : hasMediaStorage ? (
+                <ChartContainer className="mt-6 h-[230px] w-full sm:h-[260px] lg:h-[230px]" config={chartConfig}>
+                  <RadarChart data={mediaRadarData} cx="50%" cy="58%" outerRadius="78%">
+                    <ChartTooltip content={<ChartTooltipContent valueFormatter={(value) => formatBytes(value)} />} />
+                    <PolarGrid gridType="polygon" stroke="rgb(255 255 255 / 0.12)" />
+                    <PolarAngleAxis dataKey="label" tick={{ fill: '#beb7af', fontSize: 12 }} />
+                    <Radar
+                      dataKey="storageBytes"
+                      name="Storage"
+                      stroke="#c79a31"
+                      fill="#c79a31"
+                      fillOpacity={0.24}
+                      strokeWidth={2}
+                      dot={{ r: 4, fill: '#f3cf7a', stroke: '#151818', strokeWidth: 2 }}
+                    />
+                  </RadarChart>
+                </ChartContainer>
+              ) : (
+                <div className="mt-6 border border-dashed border-white/15 bg-[#121515] px-6 py-14 text-center text-sm text-[#beb7af]">
+                  Upload media or music to start building storage analytics.
+                </div>
+              )}
+            </div>
+          </div>
+        </article>
       </section>
     </div>
   );
 };
+
+type MetricTileProps = {
+  icon: typeof Database;
+  label: string;
+  value: string;
+};
+
+const MetricTile = ({ icon: Icon, label, value }: MetricTileProps) => (
+  <div className="border border-white/10 bg-[#111414] px-4 py-3">
+    <div className="flex items-center gap-2 text-[#8f887e]">
+      <Icon className="size-4" />
+      <p className="text-xs uppercase tracking-[0.18em]">{label}</p>
+    </div>
+    <p className="mt-3 truncate text-sm font-semibold text-[#f2ede4]">{value}</p>
+  </div>
+);
 
 export default OverviewPage;

@@ -15,6 +15,13 @@ type DropboxUploadResult = {
   sizeBytes: number;
 };
 
+export type DropboxSpaceUsage = {
+  usedBytes: number;
+  allocatedBytes: number | null;
+  usagePercent: number | null;
+  allocationType: 'individual' | 'team' | 'other';
+};
+
 const normalizeDropboxRoot = (root: string) => {
   const normalized = `/${root.replace(/^\/+|\/+$/g, '')}`;
   return normalized === '/' ? '' : normalized;
@@ -63,6 +70,15 @@ const toDirectUrl = (url: string) => {
   parsedUrl.searchParams.set('raw', '1');
   parsedUrl.searchParams.delete('dl');
   return parsedUrl.toString();
+};
+
+const isDropboxMissingScopeError = (error: unknown, scope: string) => {
+  if (!(error instanceof DropboxResponseError)) {
+    return false;
+  }
+
+  const details = JSON.stringify(error.error);
+  return details.includes('missing_scope') && details.includes(scope);
 };
 
 const sleep = (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds));
@@ -202,6 +218,40 @@ export const uploadFileToDropbox = async (localPath: string, dropboxPath: string
 
   const url = await createSharedUrl(client, dropboxPath);
   return { path: dropboxPath, url, sizeBytes };
+};
+
+export const getDropboxSpaceUsage = async (): Promise<DropboxSpaceUsage> => {
+  const client = await getDropboxClient();
+  let response: Awaited<ReturnType<Dropbox['usersGetSpaceUsage']>>;
+
+  try {
+    response = await client.usersGetSpaceUsage();
+  } catch (error) {
+    if (isDropboxMissingScopeError(error, 'account_info.read')) {
+      throw new AppError('Dropbox account info permission is missing. Reconnect Dropbox to show storage usage.', 409);
+    }
+
+    logger.warn('Dropbox storage usage lookup failed.', { error });
+    throw new AppError('Unable to read Dropbox storage usage.', 502);
+  }
+
+  const { allocation, used } = response.result;
+  let allocatedBytes: number | null = null;
+
+  if (allocation['.tag'] === 'individual') {
+    allocatedBytes = allocation.allocated;
+  }
+
+  if (allocation['.tag'] === 'team') {
+    allocatedBytes = allocation.user_within_team_space_allocated || allocation.allocated;
+  }
+
+  return {
+    usedBytes: used,
+    allocatedBytes,
+    usagePercent: allocatedBytes && allocatedBytes > 0 ? Math.min(100, (used / allocatedBytes) * 100) : null,
+    allocationType: allocation['.tag'],
+  };
 };
 
 const isDropboxNotFoundError = (error: unknown) => {
