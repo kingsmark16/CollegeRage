@@ -1,4 +1,4 @@
-import { BarChart3, Cloud, Disc3, LayoutDashboard, Upload } from 'lucide-react';
+import { Cloud, Disc3, LayoutDashboard, Upload } from 'lucide-react';
 
 export const adminNavigationItems = [
   {
@@ -18,12 +18,6 @@ export const adminNavigationItems = [
     href: '/admin/media',
     icon: Upload,
     description: 'Image and video tools live here next.',
-  },
-  {
-    title: 'Analytics',
-    href: '/admin/analytics',
-    icon: BarChart3,
-    description: 'Visitor and activity insights will surface here.',
   },
 ] as const;
 

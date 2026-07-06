@@ -11,6 +11,8 @@ import env from './config/env.js';
 export const createServer = () => {
   const app = express();
 
+  app.set('trust proxy', 1);
+
   app
     .use(helmet())
     .use(cors({ credentials: true, origin: env.CLIENT_ORIGIN }))

@@ -1,8 +1,13 @@
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from 'recharts';
 import { BarChart3, Cloud, Database, HardDrive, Upload } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { Skeleton } from '@/components/ui/skeleton';
+import AnalyticsPageViewsChart from '@/features/analytics/components/AnalyticsPageViewsChart';
+import AnalyticsVisitorList from '@/features/analytics/components/AnalyticsVisitorList';
+import OverviewVisitorsCard from '@/features/analytics/components/OverviewVisitorsCard';
+import type { AnalyticsRange } from '@/features/analytics/analytics.types';
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions';
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
 import { useDashboardOverview } from '@/features/dashboard/hooks/useDashboardOverview';
@@ -43,6 +48,8 @@ const formatPercent = (value: number | null | undefined) => {
 };
 
 const OverviewPage = () => {
+  const [analyticsRange, setAnalyticsRange] = useState<AnalyticsRange>('7d');
+  const [analyticsPage, setAnalyticsPage] = useState(1);
   const { error, user } = useAuthSession();
   const { connectDropbox, connectDropboxMutation } = useAuthActions();
   const dashboardQuery = useDashboardOverview();
@@ -56,6 +63,11 @@ const OverviewPage = () => {
       storageBytes: item.sizeBytes,
     })) ?? [];
   const hasMediaStorage = mediaRadarData.some((item) => item.sizeBytes > 0);
+
+  const handleAnalyticsRangeChange = (nextRange: AnalyticsRange) => {
+    setAnalyticsRange(nextRange);
+    setAnalyticsPage(1);
+  };
 
   return (
     <div className="grid gap-6">
@@ -182,6 +194,10 @@ const OverviewPage = () => {
             </div>
           </div>
         </article>
+
+        <OverviewVisitorsCard />
+        <AnalyticsPageViewsChart range={analyticsRange} onRangeChange={handleAnalyticsRangeChange} />
+        <AnalyticsVisitorList range={analyticsRange} page={analyticsPage} onPageChange={setAnalyticsPage} />
       </section>
     </div>
   );

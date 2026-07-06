@@ -34,3 +34,21 @@ export const getMetrics = asyncHandler(async (req: Request, res: Response) => {
 
   sendSuccess(res, metrics);
 });
+
+export const getUniqueVisitorsTimeseries = asyncHandler(async (req: Request, res: Response) => {
+  const timeseries = await analyticsService.getAnalyticsVisitorsTimeseries(req.query);
+
+  sendSuccess(res, timeseries);
+});
+
+export const getPageViewsTimeseries = asyncHandler(async (req: Request, res: Response) => {
+  const timeseries = await analyticsService.getAnalyticsPageViewsTimeseries(req.query);
+
+  sendSuccess(res, timeseries);
+});
+
+export const getVisitorList = asyncHandler(async (req: Request, res: Response) => {
+  const visitorList = await analyticsService.getAnalyticsVisitorList(req.query);
+
+  sendSuccess(res, visitorList);
+});

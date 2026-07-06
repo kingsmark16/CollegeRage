@@ -78,6 +78,26 @@ Last updated: 2026-07-06
 **Pattern notes:**
 Admin overview metrics should read as operational dashboard surfaces: dense, rectangular, and scan-friendly. Use the existing charcoal panels and soft white borders, reserve gold for primary storage emphasis, and keep the media-by-type chart inside the Dropbox storage container rather than creating a separate analytics panel. The media storage visualization uses one shadcn-style radar chart with visible dots so the dashboard stays compact while still showing image, video, and music balance.
 
+### Admin Analytics Visitor Table
+
+File: client/src/features/analytics/components/AnalyticsVisitorList.tsx
+Last updated: 2026-07-07
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | `bg-[#151818]`, table wrapper `bg-[#111414]` |
+| Border           | `border border-white/10`, row divider `border-b border-white/10`, error `border-destructive/40` |
+| Border radius    | none on panel, table wrapper, rows, and badges |
+| Text - primary   | `text-[#f2ede4]` |
+| Text - secondary | `text-[#beb7af]`, muted labels `text-[#8f887e]` |
+| Spacing          | panel `p-4 sm:p-6`, content `gap-6`, cells `px-3 py-3`, pagination `pt-4` |
+| Hover state      | pagination buttons `hover:border-[#5f8599] hover:bg-[#1a232b] hover:text-[#f2ede4]` |
+| Shadow           | none |
+| Accent usage     | section label `text-[#c79a31]`, authenticated badge `border-emerald-500/30 bg-emerald-500/10 text-emerald-300` |
+
+**Pattern notes:**
+Admin analytics tables should stay compact and dense while keeping overflow contained inside the table wrapper. Use smaller table typography, clipped/truncated long cells, and `max-w-full overflow-x-auto` on the inner table container so wide operational data can be inspected without creating horizontal scroll on the whole page. Keep status badges square and understated, with green reserved for authenticated visitor state.
+
 ### Admin Sidebar
 
 File: client/src/features/admin/components/AdminSidebar.tsx

@@ -18,5 +18,20 @@ export const analyticsMetricsQuerySchema = z.object({
   to: z.coerce.date().optional(),
 });
 
+export const analyticsVisitorsTimeseriesRangeSchema = z.enum(['7d', '30d', '90d']);
+
+export const analyticsVisitorsTimeseriesQuerySchema = z.object({
+  range: analyticsVisitorsTimeseriesRangeSchema.default('7d'),
+});
+
+export const analyticsVisitorListQuerySchema = z.object({
+  range: analyticsVisitorsTimeseriesRangeSchema.default('7d'),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(50).default(10),
+});
+
 export type PageViewEventInput = z.infer<typeof pageViewEventSchema>;
 export type AnalyticsMetricsQuery = z.infer<typeof analyticsMetricsQuerySchema>;
+export type AnalyticsVisitorsTimeseriesRange = z.infer<typeof analyticsVisitorsTimeseriesRangeSchema>;
+export type AnalyticsVisitorsTimeseriesQuery = z.infer<typeof analyticsVisitorsTimeseriesQuerySchema>;
+export type AnalyticsVisitorListQuery = z.infer<typeof analyticsVisitorListQuerySchema>;
