@@ -4,7 +4,6 @@ import AuthLayout from './layouts/AuthLayout';
 import PublicLayout from './layouts/PublicLayout';
 import AdminRoute from './route-guards/AdminRoute';
 import GuestRoute from './route-guards/GuestRoute';
-import AnalyticsPage from '@/features/admin/pages/AnalyticsPage';
 import MediaPage from '@/features/admin/pages/MediaPage';
 import MusicPage from '@/features/admin/pages/MusicPage';
 import OverviewPage from '@/features/admin/pages/OverviewPage';
@@ -61,7 +60,7 @@ export const appRouter = createBrowserRouter([
           },
           {
             path: 'analytics',
-            element: <AnalyticsPage />,
+            element: <Navigate to="/admin" replace />,
           },
         ],
       },

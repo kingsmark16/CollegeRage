@@ -45,18 +45,25 @@ type ChartTooltipContentProps = {
   label?: ReactNode;
   payload?: ChartTooltipPayloadItem[];
   valueFormatter?: (value: number, name: string) => string;
+  labelFormatter?: (label: ReactNode) => ReactNode;
 };
 
 export const ChartTooltip = Tooltip;
 
-export const ChartTooltipContent = ({ active, label, payload, valueFormatter }: ChartTooltipContentProps) => {
+export const ChartTooltipContent = ({
+  active,
+  label,
+  payload,
+  valueFormatter,
+  labelFormatter,
+}: ChartTooltipContentProps) => {
   if (!active || !payload?.length) {
     return null;
   }
 
   return (
     <div className="min-w-36 border border-white/10 bg-[#101313] px-3 py-2 text-xs text-[#f2ede4] shadow-2xl">
-      {label ? <p className="mb-2 font-semibold text-[#f2ede4]">{label}</p> : null}
+      {label ? <p className="mb-2 font-semibold text-[#f2ede4]">{labelFormatter ? labelFormatter(label) : label}</p> : null}
       <div className="grid gap-1.5">
         {payload.map((item) => {
           const value = typeof item.value === 'number' ? item.value : Number(item.value ?? 0);
