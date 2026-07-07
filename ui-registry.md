@@ -158,3 +158,23 @@ Last updated: 2026-07-06
 
 **Pattern notes:**
 The music player should feel like a quiet studio transport sitting inside the admin dashboard, not a native browser embed. Keep the frame squared and architectural, then soften the interaction points with one circular hero control, gold-accented sliders, and subdued equalizer bars that come alive only while audio is playing.
+
+### Public Landing Dome Gallery
+
+File: client/src/features/home/pages/HomePage.tsx
+Last updated: 2026-07-07
+
+| Property         | Class |
+| ---------------- | ----- |
+| Background       | `bg-[#101212]`, header `bg-[#101212]/95`, gallery overlay `bg-[linear-gradient(180deg,rgba(16,18,18,0.16)_0%,rgba(16,18,18,0)_34%,rgba(16,18,18,0.68)_100%)]`, empty state `bg-[#101212]` |
+| Border           | `border-b border-white/10`, outline button `border-white/20`, CTA `border-[#c79a31]`, error `border-destructive/40` |
+| Border radius    | page shell none, gallery media tiles `8px`, opened media `8px` |
+| Text - primary   | `text-[#f2ede4]` |
+| Text - secondary | `text-[#d7d2ca]`, muted `text-[#beb7af]`, empty state `text-[#8f887e]` |
+| Spacing          | shell `h-dvh min-h-screen`, header `px-5 py-5`, responsive `sm:px-8 lg:px-10`, header inner `gap-4`, gallery stage `flex-1 basis-0`, DomeGallery `fit={0.78} fitBasis="max" segments={24} maxVerticalRotationDeg={3} padFactor={0.1} maxPad={56} verticalStageOffset="-8%"`, error well `px-5 pb-10 sm:px-8 sm:pb-14 lg:px-10` |
+| Hover state      | outline `hover:bg-[#1c2020]`, CTA `hover:bg-[#f3cf7a]` |
+| Shadow           | header `shadow-[0_18px_40px_rgba(0,0,0,0.32)]`, outline button `shadow-[0_0_0_1px_rgba(255,255,255,0.03)]`, opened media `box-shadow:0 10px 30px rgba(0,0,0,.35)` |
+| Accent usage     | CTA `bg-[#c79a31] text-[#131110]`, DomeGallery overlay blur `#101212` |
+
+**Pattern notes:**
+The public landing page should be media-first: the React Bits dome owns the viewport area below a normal-flow header, keeping the gallery interactive and unobscured. Keep first-viewport content unframed, avoid stacked cards, use a brighter near-solid header surface for navigation clarity, and reserve gold for route actions. DomeGallery should use a fuller `fit={0.78}`, lower `segments={24}`, and very calm `maxVerticalRotationDeg={3}` with capped viewer padding and a small mobile upward stage offset so the visible media belt stays large and steady on narrow screens. Thumbnail tiles stay cropped with `object-fit: cover`, but opened media must use `object-fit: contain` on a `#050606` backing surface so the full image aspect ratio is visible. Uploaded videos enter the dome through thumbnails or the best available generated variant preview, while image records use their direct asset URL.

@@ -1,93 +1,118 @@
-import { ArrowRight, LogIn, ShieldCheck } from 'lucide-react';
+import { ImageOff, LogIn, ShieldCheck } from 'lucide-react';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import heroImage from '@/assets/hero.png';
 import { Button } from '@/components/ui/button';
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
+import type { MediaItem } from '@/features/media/media.types';
+import DomeGallery from '../components/DomeGallery';
+import { usePublicMediaGallery } from '../hooks/usePublicMediaGallery';
+
+type GalleryImage = {
+  src: string;
+  alt: string;
+};
+
+const getMediaPreviewUrl = (item: MediaItem) => {
+  if (item.type === 'image') {
+    return item.url ?? '';
+  }
+
+  return item.thumbnail ?? item.variants?.['720p'] ?? item.variants?.['480p'] ?? item.variants?.['1080p'] ?? '';
+};
+
+const getMediaAltText = (item: MediaItem) => {
+  return item.description?.trim() || item.sanitizedName;
+};
 
 const HomePage = () => {
   const { isAdmin, isLoading, user } = useAuthSession();
+  const mediaGalleryQuery = usePublicMediaGallery();
   const dashboardHref = isAdmin ? '/admin' : '/auth/sign-in';
 
+  const galleryImages = useMemo<GalleryImage[]>(() => {
+    return (mediaGalleryQuery.data ?? [])
+      .map((item) => ({
+        src: getMediaPreviewUrl(item),
+        alt: getMediaAltText(item),
+      }))
+      .filter((item) => item.src.length > 0);
+  }, [mediaGalleryQuery.data]);
+
+  const hasGalleryImages = galleryImages.length > 0;
+
   return (
-    <main className="min-h-screen bg-[#161513] text-[#f4efe7]">
-      <section className="relative min-h-screen overflow-hidden">
-        <img
-          src={heroImage}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover opacity-40"
-        />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(218,165,32,0.26),transparent_32%),linear-gradient(180deg,rgba(22,21,19,0.72),rgba(22,21,19,0.96))]" />
+    <main className="min-h-screen bg-[#101212] text-[#f2ede4]">
+      <section className="flex h-dvh min-h-screen flex-col overflow-hidden">
+        <header className="relative z-20 border-b border-white/10 bg-[#101212]/95 px-5 py-5 shadow-[0_18px_40px_rgba(0,0,0,0.32)] backdrop-blur-md sm:px-8 lg:px-10">
+          <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4">
+            <Link to="/" className="min-w-0">
+              <p className="truncate text-base font-semibold uppercase tracking-[0.28em] text-[#f2ede4] sm:text-lg">
+                College Rage
+              </p>
+              <p className="mt-1 hidden text-xs uppercase tracking-[0.24em] text-[#beb7af] sm:block">
+                Relive the glory
+              </p>
+            </Link>
 
-        <div className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-6 sm:px-8 lg:px-10">
-          <header className="flex items-center justify-between border-b border-white/10 py-4">
-            <div>
-              <p className="text-lg font-semibold uppercase tracking-[0.28em] text-[#f4efe7]">College Rage</p>
-              <p className="mt-1 text-xs uppercase tracking-[0.24em] text-[#c7bfb2]">Relive the glory</p>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Button asChild variant="outline" className="border-[#4a4339] text-[#f4efe7] hover:bg-[#231f1a]">
-                <Link to="/auth/sign-in">
+            <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+              <Button
+                asChild
+                variant="outline"
+                className="border-white/20 bg-[#151818] text-[#f2ede4] shadow-[0_0_0_1px_rgba(255,255,255,0.03)] hover:bg-[#1c2020]"
+              >
+                <Link to="/auth/sign-in" aria-label="Sign in">
                   <LogIn aria-hidden="true" data-icon="inline-start" />
-                  Sign in
+                  <span className="hidden sm:inline">Sign in</span>
                 </Link>
               </Button>
-              <Button asChild className="border-[#b88928] bg-[#b88928] text-[#171411] hover:bg-[#d4a542]">
+              <Button asChild className="border-[#c79a31] bg-[#c79a31] text-[#131110] hover:bg-[#f3cf7a]">
                 <Link to={dashboardHref}>
                   <ShieldCheck aria-hidden="true" data-icon="inline-start" />
-                  Dashboard
+                  <span>{isLoading ? 'Checking' : user && isAdmin ? 'Dashboard' : 'Admin'}</span>
                 </Link>
               </Button>
             </div>
-          </header>
+          </div>
+        </header>
 
-          <div className="grid flex-1 items-center gap-12 py-14 lg:grid-cols-[1.2fr_0.8fr] lg:py-20">
-            <div className="max-w-3xl">
-              <p className="text-sm uppercase tracking-[0.32em] text-[#d4a542]">Public home</p>
-              <h1 className="mt-5 max-w-3xl font-heading text-5xl leading-tight sm:text-6xl">
-                The home page everyone can enter, with the admin path kept separate and clean.
-              </h1>
-              <p className="mt-6 max-w-2xl text-base leading-8 text-[#d2cbc2] sm:text-lg">
-                Visitors land here first. Anonymous users can explore the public front door, while the admin gets a
-                dedicated private dashboard with media tooling, Dropbox setup, and backend verification.
-              </p>
-
-              <div className="mt-8 flex flex-wrap gap-4">
-                <Button asChild className="border-[#b88928] bg-[#b88928] text-[#171411] hover:bg-[#d4a542]">
-                  <Link to={dashboardHref}>
-                    <ArrowRight aria-hidden="true" data-icon="inline-start" />
-                    {isLoading ? 'Checking session' : user && isAdmin ? 'Open dashboard' : 'Admin sign in'}
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" className="border-[#4a4339] text-[#f4efe7] hover:bg-[#231f1a]">
-                  <Link to="/auth/sign-up">Create account</Link>
-                </Button>
+        <div className="relative min-h-0 flex-1 basis-0 overflow-hidden">
+          {hasGalleryImages ? (
+            <DomeGallery
+              images={galleryImages}
+              fit={0.78}
+              fitBasis="max"
+              minRadius={300}
+              maxRadius={800}
+              padFactor={0.1}
+              maxPad={56}
+              verticalStageOffset="-8%"
+              maxVerticalRotationDeg={4}
+              segments={24}
+              dragDampening={1.4}
+              grayscale={false}
+              overlayBlurColor="#101212"
+              imageBorderRadius="8px"
+              openedImageBorderRadius="8px"
+            />
+          ) : (
+            <div className="grid h-full place-items-center bg-[#101212]">
+              <div className="flex flex-col items-center gap-4 text-center text-[#8f887e]">
+                <ImageOff className="size-10" aria-hidden="true" />
+                <p className="max-w-sm text-sm leading-6">
+                  {mediaGalleryQuery.isLoading ? 'Loading media gallery...' : 'No public media is available yet.'}
+                </p>
               </div>
             </div>
+          )}
 
-            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-1">
-              <article className="border border-white/10 bg-black/20 p-6 backdrop-blur-sm">
-                <p className="text-xs uppercase tracking-[0.22em] text-[#d4a542]">Public</p>
-                <h2 className="mt-3 text-xl font-semibold">Home for everyone</h2>
-                <p className="mt-3 text-sm leading-7 text-[#c7bfb2]">
-                  Anonymous visitors can reach the site without bumping into admin tools or auth-only workflows.
-                </p>
-              </article>
-              <article className="border border-white/10 bg-black/20 p-6 backdrop-blur-sm">
-                <p className="text-xs uppercase tracking-[0.22em] text-[#d4a542]">Auth</p>
-                <h2 className="mt-3 text-xl font-semibold">Dedicated sign-in and sign-up</h2>
-                <p className="mt-3 text-sm leading-7 text-[#c7bfb2]">
-                  Auth routes stay focused, and signed-in admin visits get redirected straight to the dashboard.
-                </p>
-              </article>
-              <article className="border border-white/10 bg-black/20 p-6 backdrop-blur-sm">
-                <p className="text-xs uppercase tracking-[0.22em] text-[#d4a542]">Admin</p>
-                <h2 className="mt-3 text-xl font-semibold">Private control surface</h2>
-                <p className="mt-3 text-sm leading-7 text-[#c7bfb2]">
-                  The dashboard becomes the private workspace for media, integrations, and analytics as the app grows.
-                </p>
-              </article>
-            </div>
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(16,18,18,0.16)_0%,rgba(16,18,18,0)_34%,rgba(16,18,18,0.68)_100%)]" />
+
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 mx-auto flex w-full max-w-7xl px-5 pb-10 sm:px-8 sm:pb-14 lg:px-10">
+            {mediaGalleryQuery.isError ? (
+              <p className="pointer-events-auto max-w-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-[#f2ede4]">
+                Media could not be loaded right now.
+              </p>
+            ) : null}
           </div>
         </div>
       </section>
