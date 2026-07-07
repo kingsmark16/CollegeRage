@@ -29,6 +29,8 @@ export const getAdminMedia = async () => {
   }
 };
 
+export const getPublicMedia = getAdminMedia;
+
 export const uploadMediaFiles = async (files: File[]) => {
   const formData = new FormData();
 
