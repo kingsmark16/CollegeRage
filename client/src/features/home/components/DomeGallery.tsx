@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useGesture } from '@use-gesture/react';
 
 type ImageItem = string | { src: string; alt?: string };
@@ -32,6 +32,13 @@ type ItemDef = {
   y: number;
   sizeX: number;
   sizeY: number;
+};
+
+type DomeLayout = {
+  items: ItemDef[];
+  effectiveSegments: number;
+  rowsPerColumn: number;
+  columnCount: number;
 };
 
 type CustomStyle = CSSProperties & Record<`--${string}`, string | number>;
@@ -96,10 +103,109 @@ const getPointerKind = (pointerType: string): PointerKind => {
   return 'mouse';
 };
 
-function buildItems(pool: ImageItem[], seg: number): ItemDef[] {
-  const xCols = Array.from({ length: seg }, (_, i) => -37 + i * 2);
-  const evenYs = [-4, -2, 0, 2, 4];
-  const oddYs = [-3, -1, 1, 3, 5];
+const getAspectFitRect = (maxWidth: number, maxHeight: number, aspect: number) => {
+  if (!Number.isFinite(aspect) || aspect <= 0) {
+    return { width: maxWidth, height: maxHeight };
+  }
+
+  const frameAspect = maxWidth / maxHeight;
+
+  if (frameAspect > aspect) {
+    const height = maxHeight;
+    return { width: height * aspect, height };
+  }
+
+  const width = maxWidth;
+  return { width, height: width / aspect };
+};
+
+const getImageRetryDelay = (attempt: number) => {
+  return Math.min(750 * 2 ** Math.min(attempt, 5), 20000);
+};
+
+const INITIAL_ACTIVE_IMAGE_COUNT = 56;
+const ACTIVE_IMAGE_BATCH_SIZE = 16;
+const ACTIVE_IMAGE_BATCH_INTERVAL_MS = 120;
+const RETRY_BLINK_DURATION_MS = 220;
+
+const getRowsPerColumn = (imageCount: number) => {
+  if (imageCount <= 40) return 6;
+  if (imageCount <= 140) return 7;
+  if (imageCount <= 280) return 8;
+  return 9;
+};
+
+const getMinimumColumnCount = (imageCount: number, preferredSegments: number) => {
+  if (imageCount <= 0) return preferredSegments;
+  if (imageCount <= 20) return clamp(Math.ceil(imageCount / 2), 8, preferredSegments);
+  if (imageCount <= 60) return Math.min(preferredSegments, 16);
+
+  return 1;
+};
+
+const createSeededRandom = (seed: number) => {
+  let state = seed >>> 0;
+
+  return () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 0x100000000;
+  };
+};
+
+const hashString = (value: string) => {
+  let hash = 2166136261;
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return hash >>> 0;
+};
+
+const shuffleWithSeed = <T,>(items: T[], seed: number) => {
+  const shuffledItems = [...items];
+  const random = createSeededRandom(seed);
+
+  for (let index = shuffledItems.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [shuffledItems[index], shuffledItems[swapIndex]] = [shuffledItems[swapIndex], shuffledItems[index]];
+  }
+
+  return shuffledItems;
+};
+
+function buildLayout(pool: ImageItem[], preferredSegments: number, layoutSeed: number): DomeLayout {
+  const normalizedImages = pool.reduce<{ src: string; alt: string }[]>((images, image) => {
+    const nextImage =
+      typeof image === 'string'
+        ? { src: image, alt: '' }
+        : { src: image.src || '', alt: image.alt || '' };
+
+    if (nextImage.src.length === 0 || images.some((existingImage) => existingImage.src === nextImage.src)) {
+      return images;
+    }
+
+    return [...images, nextImage];
+  }, []);
+
+  if (normalizedImages.length === 0) {
+    return {
+      items: [],
+      effectiveSegments: preferredSegments,
+      rowsPerColumn: 0,
+      columnCount: 0
+    };
+  }
+
+  const rowsPerColumn = getRowsPerColumn(normalizedImages.length);
+  const minimumColumnCount = getMinimumColumnCount(normalizedImages.length, preferredSegments);
+  const columnCount = Math.max(minimumColumnCount, Math.ceil(normalizedImages.length / rowsPerColumn));
+  const xStart = -(columnCount - 1);
+  const xCols = Array.from({ length: columnCount }, (_, i) => xStart + i * 2);
+  const yStart = -(rowsPerColumn - 1);
+  const evenYs = Array.from({ length: rowsPerColumn }, (_, i) => yStart + i * 2);
+  const oddYs = evenYs.map(y => y + 1);
 
   const coords = xCols.flatMap((x, c) => {
     const ys = c % 2 === 0 ? evenYs : oddYs;
@@ -107,36 +213,26 @@ function buildItems(pool: ImageItem[], seg: number): ItemDef[] {
   });
 
   const totalSlots = coords.length;
-  if (pool.length === 0) {
-    return coords.map(c => ({ ...c, src: '', alt: '' }));
-  }
-  const normalizedImages = pool.map(image => {
-    if (typeof image === 'string') {
-      return { src: image, alt: '' };
-    }
-    return { src: image.src || '', alt: image.alt || '' };
-  });
+  const coordIndexes =
+    normalizedImages.length === 1
+      ? [Math.floor(totalSlots / 2)]
+      : normalizedImages.map((_, i) => Math.round((i * (totalSlots - 1)) / (normalizedImages.length - 1)));
+  const slottedCoords = coordIndexes.map(index => coords[index]);
+  const shuffledImages = shuffleWithSeed(
+    normalizedImages,
+    hashString(`${layoutSeed}:${normalizedImages.map(image => image.src).join('|')}`)
+  );
 
-  const usedImages = Array.from({ length: totalSlots }, (_, i) => normalizedImages[i % normalizedImages.length]);
-
-  for (let i = 1; i < usedImages.length; i++) {
-    if (usedImages[i].src === usedImages[i - 1].src) {
-      for (let j = i + 1; j < usedImages.length; j++) {
-        if (usedImages[j].src !== usedImages[i].src) {
-          const tmp = usedImages[i];
-          usedImages[i] = usedImages[j];
-          usedImages[j] = tmp;
-          break;
-        }
-      }
-    }
-  }
-
-  return coords.map((c, i) => ({
-    ...c,
-    src: usedImages[i].src,
-    alt: usedImages[i].alt
-  }));
+  return {
+    items: shuffledImages.map((image, i) => ({
+      ...slottedCoords[i],
+      src: image.src,
+      alt: image.alt
+    })),
+    effectiveSegments: columnCount,
+    rowsPerColumn,
+    columnCount
+  };
 }
 
 function computeItemBaseRotation(offsetX: number, offsetY: number, sizeX: number, sizeY: number, segments: number) {
@@ -145,6 +241,16 @@ function computeItemBaseRotation(offsetX: number, offsetY: number, sizeX: number
   const rotateX = unit * (offsetY - (sizeY - 1) / 2);
   return { rotateX, rotateY };
 }
+
+const getInitialVisibilityScore = (item: ItemDef, segments: number) => {
+  const baseRotation = computeItemBaseRotation(item.x, item.y, item.sizeX, item.sizeY, segments);
+  const normalizedY = wrapAngleSigned(baseRotation.rotateY);
+  const normalizedX = baseRotation.rotateX;
+  const horizontalVisibility = Math.max(0, Math.cos((normalizedY * Math.PI) / 180));
+  const verticalVisibility = Math.max(0, Math.cos((normalizedX * Math.PI) / 180));
+
+  return horizontalVisibility * 0.78 + verticalVisibility * 0.22;
+};
 
 export default function DomeGallery({
   images = DEFAULT_IMAGES,
@@ -161,8 +267,8 @@ export default function DomeGallery({
   enlargeTransitionMs = DEFAULTS.enlargeTransitionMs,
   segments = DEFAULTS.segments,
   dragDampening = 2,
-  openedImageWidth = '400px',
-  openedImageHeight = '400px',
+  openedImageWidth,
+  openedImageHeight,
   imageBorderRadius = '30px',
   openedImageBorderRadius = '30px',
   grayscale = true
@@ -193,6 +299,13 @@ export default function DomeGallery({
   const openingRef = useRef(false);
   const openStartedAtRef = useRef(0);
   const lastDragEndAt = useRef(0);
+  const retryTimersRef = useRef<Map<string, number>>(new Map());
+  const retryBlinkTimersRef = useRef<Map<string, number>>(new Map());
+  const retryAttemptsRef = useRef<Map<string, number>>(new Map());
+  const sessionLayoutSeedRef = useRef<number>(Math.floor(Math.random() * 0x100000000));
+  const [imageRetryKeys, setImageRetryKeys] = useState<Record<string, number>>({});
+  const [loadedImageSources, setLoadedImageSources] = useState<Record<string, boolean>>({});
+  const [retryBlinkSources, setRetryBlinkSources] = useState<Record<string, boolean>>({});
 
   const scrollLockedRef = useRef(false);
   const lockScroll = useCallback(() => {
@@ -207,7 +320,172 @@ export default function DomeGallery({
     document.body.classList.remove('dg-scroll-lock');
   }, []);
 
-  const items = useMemo(() => buildItems(images, segments), [images, segments]);
+  const layout = useMemo(
+    () => buildLayout(images, segments, sessionLayoutSeedRef.current),
+    [images, segments]
+  );
+  const { items } = layout;
+  const effectiveSegments = layout.effectiveSegments;
+  const prioritizedItems = useMemo(
+    () =>
+      [...items].sort(
+        (leftItem, rightItem) =>
+          getInitialVisibilityScore(rightItem, effectiveSegments) - getInitialVisibilityScore(leftItem, effectiveSegments)
+      ),
+    [effectiveSegments, items]
+  );
+  const imageSources = useMemo(
+    () => Array.from(new Set(prioritizedItems.map(item => item.src).filter(Boolean))),
+    [prioritizedItems]
+  );
+  const imageSourcesKey = useMemo(() => imageSources.join('\n'), [imageSources]);
+  const imageSourcePriority = useMemo(
+    () =>
+      imageSources.reduce<Record<string, number>>((priorityMap, src, index) => {
+        priorityMap[src] = index;
+        return priorityMap;
+      }, {}),
+    [imageSources]
+  );
+  const [activeImageState, setActiveImageState] = useState({ imageSourcesKey: '', count: 0 });
+  const activeImageCount =
+    activeImageState.imageSourcesKey === imageSourcesKey
+      ? activeImageState.count
+      : Math.min(INITIAL_ACTIVE_IMAGE_COUNT, imageSources.length);
+  const activeImageSources = useMemo(
+    () => new Set(imageSources.slice(0, activeImageCount)),
+    [activeImageCount, imageSources]
+  );
+
+  const clearImageRetryTimer = useCallback((src: string) => {
+    const timer = retryTimersRef.current.get(src);
+    if (timer === undefined) return;
+
+    window.clearTimeout(timer);
+    retryTimersRef.current.delete(src);
+  }, []);
+
+  const clearImageRetryBlinkTimer = useCallback((src: string) => {
+    const timer = retryBlinkTimersRef.current.get(src);
+    if (timer === undefined) return;
+
+    window.clearTimeout(timer);
+    retryBlinkTimersRef.current.delete(src);
+  }, []);
+
+  const markImageLoaded = useCallback(
+    (src: string) => {
+      clearImageRetryTimer(src);
+      clearImageRetryBlinkTimer(src);
+      retryAttemptsRef.current.delete(src);
+      setRetryBlinkSources(currentSources => {
+        if (!currentSources[src]) return currentSources;
+
+        const nextSources = { ...currentSources };
+        delete nextSources[src];
+        return nextSources;
+      });
+      setLoadedImageSources(currentSources => {
+        if (currentSources[src]) return currentSources;
+
+        return {
+          ...currentSources,
+          [src]: true
+        };
+      });
+    },
+    [clearImageRetryBlinkTimer, clearImageRetryTimer]
+  );
+
+  const scheduleImageRetry = useCallback(
+    (src: string) => {
+      if (src.length === 0 || retryTimersRef.current.has(src)) return;
+
+      const attempt = retryAttemptsRef.current.get(src) ?? 0;
+      const retryDelay = getImageRetryDelay(attempt);
+      const blinkDelay = Math.max(retryDelay - RETRY_BLINK_DURATION_MS, 0);
+
+      clearImageRetryBlinkTimer(src);
+      setLoadedImageSources(currentSources => {
+        if (!(src in currentSources)) return currentSources;
+
+        const nextSources = { ...currentSources };
+        delete nextSources[src];
+        return nextSources;
+      });
+
+      const blinkTimer = window.setTimeout(() => {
+        retryBlinkTimersRef.current.delete(src);
+        setRetryBlinkSources(currentSources => ({
+          ...currentSources,
+          [src]: true
+        }));
+      }, blinkDelay);
+
+      const timer = window.setTimeout(() => {
+        retryTimersRef.current.delete(src);
+        clearImageRetryBlinkTimer(src);
+        retryAttemptsRef.current.set(src, attempt + 1);
+        setRetryBlinkSources(currentSources => {
+          if (!currentSources[src]) return currentSources;
+
+          const nextSources = { ...currentSources };
+          delete nextSources[src];
+          return nextSources;
+        });
+        setImageRetryKeys(currentKeys => ({
+          ...currentKeys,
+          [src]: (currentKeys[src] ?? 0) + 1
+        }));
+      }, retryDelay);
+
+      retryBlinkTimersRef.current.set(src, blinkTimer);
+      retryTimersRef.current.set(src, timer);
+    },
+    [clearImageRetryBlinkTimer]
+  );
+
+  useEffect(() => {
+    if (activeImageCount >= imageSources.length) return;
+
+    const timer = window.setTimeout(() => {
+      setActiveImageState(currentState => {
+        const currentCount = currentState.imageSourcesKey === imageSourcesKey ? currentState.count : activeImageCount;
+
+        return {
+          imageSourcesKey,
+          count: Math.min(currentCount + ACTIVE_IMAGE_BATCH_SIZE, imageSources.length)
+        };
+      });
+    }, ACTIVE_IMAGE_BATCH_INTERVAL_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [activeImageCount, imageSources.length, imageSourcesKey]);
+
+  useEffect(() => {
+    const retryAttempts = retryAttemptsRef.current;
+    const retryBlinkTimers = retryBlinkTimersRef.current;
+    const retryTimers = retryTimersRef.current;
+
+    return () => {
+      retryAttempts.clear();
+      retryBlinkTimers.forEach(timer => window.clearTimeout(timer));
+      retryBlinkTimers.clear();
+      retryTimers.forEach(timer => window.clearTimeout(timer));
+      retryTimers.clear();
+    };
+  }, [imageSources]);
+
+  useEffect(() => {
+    const nextImageSources = new Set(imageSources);
+
+    setLoadedImageSources(currentSources =>
+      Object.fromEntries(Object.entries(currentSources).filter(([src]) => nextImageSources.has(src)))
+    );
+    setRetryBlinkSources(currentSources =>
+      Object.fromEntries(Object.entries(currentSources).filter(([src]) => nextImageSources.has(src)))
+    );
+  }, [imageSources]);
 
   const applyTransform = (xDeg: number, yDeg: number) => {
     const el = sphereRef.current;
@@ -253,7 +531,7 @@ export default function DomeGallery({
       radius = clamp(radius, responsiveMinRadius, maxRadius);
       lockedRadiusRef.current = Math.round(radius);
 
-      const viewerPad = clamp(Math.round(minDim * padFactor), 8, maxPad);
+      const viewerPad = clamp(Math.round(minDim * padFactor), 0, maxPad);
       root.style.setProperty('--radius', `${lockedRadiusRef.current}px`);
       root.style.setProperty('--viewer-pad', `${viewerPad}px`);
       root.style.setProperty('--overlay-blur-color', overlayBlurColor);
@@ -267,6 +545,7 @@ export default function DomeGallery({
       if (enlargedOverlay && frameRef.current && mainRef.current) {
         const frameR = frameRef.current.getBoundingClientRect();
         const mainR = mainRef.current.getBoundingClientRect();
+        const imageAspect = Number.parseFloat(enlargedOverlay.dataset.aspect ?? '');
 
         const hasCustomSize = openedImageWidth && openedImageHeight;
         if (hasCustomSize) {
@@ -281,6 +560,15 @@ export default function DomeGallery({
 
           enlargedOverlay.style.left = `${centeredLeft}px`;
           enlargedOverlay.style.top = `${centeredTop}px`;
+        } else if (Number.isFinite(imageAspect) && imageAspect > 0) {
+          const fitted = getAspectFitRect(frameR.width, frameR.height, imageAspect);
+          const centeredLeft = frameR.left - mainR.left + (frameR.width - fitted.width) / 2;
+          const centeredTop = frameR.top - mainR.top + (frameR.height - fitted.height) / 2;
+
+          enlargedOverlay.style.left = `${centeredLeft}px`;
+          enlargedOverlay.style.top = `${centeredTop}px`;
+          enlargedOverlay.style.width = `${fitted.width}px`;
+          enlargedOverlay.style.height = `${fitted.height}px`;
         } else {
           enlargedOverlay.style.left = `${frameR.left - mainR.left}px`;
           enlargedOverlay.style.top = `${frameR.top - mainR.top}px`;
@@ -592,7 +880,7 @@ export default function DomeGallery({
     const offsetY = getDataNumber(parent, 'offsetY', 0);
     const sizeX = getDataNumber(parent, 'sizeX', 2);
     const sizeY = getDataNumber(parent, 'sizeY', 2);
-    const parentRot = computeItemBaseRotation(offsetX, offsetY, sizeX, sizeY, segments);
+    const parentRot = computeItemBaseRotation(offsetX, offsetY, sizeX, sizeY, effectiveSegments);
     const parentY = normalizeAngle(parentRot.rotateY);
     const globalY = normalizeAngle(rotationRef.current.y);
     let rotY = -(parentY + globalY) % 360;
@@ -627,21 +915,43 @@ export default function DomeGallery({
     };
     el.style.visibility = 'hidden';
     el.style.zIndex = '0';
-    const overlay = document.createElement('div');
-    overlay.className = 'enlarge';
-    overlay.style.cssText = `position:absolute; left:${frameR.left - mainR.left}px; top:${frameR.top - mainR.top}px; width:${frameR.width}px; height:${frameR.height}px; opacity:0; z-index:30; will-change:transform,opacity; transform-origin:top left; transition:transform ${enlargeTransitionMs}ms ease, opacity ${enlargeTransitionMs}ms ease; border-radius:${openedImageBorderRadius}; overflow:hidden; background:#050606; box-shadow:0 10px 30px rgba(0,0,0,.35);`;
-    const rawSrc = parent.dataset.src || (el.querySelector('img') as HTMLImageElement)?.src || '';
-    const rawAlt = parent.dataset.alt || (el.querySelector('img') as HTMLImageElement)?.alt || '';
+    const sourceImage = el.querySelector('img') as HTMLImageElement | null;
+    const rawSrc = parent.dataset.src || sourceImage?.src || '';
+    const rawAlt = parent.dataset.alt || sourceImage?.alt || '';
     const img = document.createElement('img');
-    img.src = rawSrc;
     img.alt = rawAlt;
     img.style.cssText = `width:100%; height:100%; object-fit:contain; background:#050606; filter:${grayscale ? 'grayscale(1)' : 'none'};`;
+    const imageAspect =
+      sourceImage && sourceImage.naturalWidth > 0 && sourceImage.naturalHeight > 0
+        ? sourceImage.naturalWidth / sourceImage.naturalHeight
+        : tileR.width / tileR.height;
+    const targetSize = getAspectFitRect(frameR.width, frameR.height, imageAspect);
+    const targetLeft = frameR.left - mainR.left + (frameR.width - targetSize.width) / 2;
+    const targetTop = frameR.top - mainR.top + (frameR.height - targetSize.height) / 2;
+    const overlay = document.createElement('div');
+    overlay.className = 'enlarge';
+    overlay.dataset.aspect = String(imageAspect);
+    overlay.style.cssText = `position:absolute; left:${targetLeft}px; top:${targetTop}px; width:${targetSize.width}px; height:${targetSize.height}px; opacity:0; z-index:30; will-change:transform,opacity; transform-origin:top left; transition:transform ${enlargeTransitionMs}ms ease, opacity ${enlargeTransitionMs}ms ease; border-radius:${openedImageBorderRadius}; overflow:hidden; background:#050606; box-shadow:0 10px 30px rgba(0,0,0,.35);`;
+    img.addEventListener('load', () => {
+      if (img.naturalWidth <= 0 || img.naturalHeight <= 0 || !overlay.parentElement) return;
+      const loadedAspect = img.naturalWidth / img.naturalHeight;
+      const currentAspect = Number.parseFloat(overlay.dataset.aspect ?? '');
+      if (Math.abs(loadedAspect - currentAspect) < 0.01) return;
+
+      const fitted = getAspectFitRect(frameR.width, frameR.height, loadedAspect);
+      overlay.dataset.aspect = String(loadedAspect);
+      overlay.style.left = `${frameR.left - mainR.left + (frameR.width - fitted.width) / 2}px`;
+      overlay.style.top = `${frameR.top - mainR.top + (frameR.height - fitted.height) / 2}px`;
+      overlay.style.width = `${fitted.width}px`;
+      overlay.style.height = `${fitted.height}px`;
+    });
+    img.src = rawSrc;
     overlay.appendChild(img);
     viewerRef.current!.appendChild(overlay);
-    const tx0 = tileR.left - frameR.left;
-    const ty0 = tileR.top - frameR.top;
-    const sx0 = tileR.width / frameR.width;
-    const sy0 = tileR.height / frameR.height;
+    const tx0 = tileR.left - mainR.left - targetLeft;
+    const ty0 = tileR.top - mainR.top - targetTop;
+    const sx0 = tileR.width / targetSize.width;
+    const sy0 = tileR.height / targetSize.height;
 
     const validSx0 = isFinite(sx0) && sx0 > 0 ? sx0 : 1;
     const validSy0 = isFinite(sy0) && sy0 > 0 ? sy0 : 1;
@@ -690,8 +1000,15 @@ export default function DomeGallery({
   };
 
   useEffect(() => {
+    const retryBlinkTimers = retryBlinkTimersRef.current;
+    const retryTimers = retryTimersRef.current;
+
     return () => {
       document.body.classList.remove('dg-scroll-lock');
+      retryBlinkTimers.forEach(timer => window.clearTimeout(timer));
+      retryBlinkTimers.clear();
+      retryTimers.forEach(timer => window.clearTimeout(timer));
+      retryTimers.clear();
     };
   }, []);
 
@@ -740,6 +1057,7 @@ export default function DomeGallery({
       transform-origin: 50% 50%;
       backface-visibility: hidden;
       transition: transform 300ms;
+      contain: layout paint style;
       transform: rotateY(calc(var(--rot-y) * (var(--offset-x) + ((var(--item-size-x) - 1) / 2)) + var(--rot-y-delta, 0deg))) 
                  rotateX(calc(var(--rot-x) * (var(--offset-y) - ((var(--item-size-y) - 1) / 2)) + var(--rot-x-delta, 0deg))) 
                  translateZ(var(--radius));
@@ -752,7 +1070,7 @@ export default function DomeGallery({
     
     @media (max-aspect-ratio: 1/1) {
       .viewer-frame {
-        height: auto !important;
+        height: 100% !important;
         width: 100% !important;
       }
     }
@@ -779,11 +1097,154 @@ export default function DomeGallery({
       pointer-events: auto;
       -webkit-transform: translateZ(0);
       transform: translateZ(0);
+      isolation: isolate;
+      contain: paint;
+      background:
+        linear-gradient(145deg, rgba(14, 16, 16, 0.94), rgba(24, 28, 28, 0.88)),
+        linear-gradient(135deg, rgba(242, 237, 228, 0.04), rgba(199, 154, 49, 0.05));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+    .item__image::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 105, 180, 0.8),
+        rgba(255, 194, 92, 0.88),
+        rgba(118, 255, 214, 0.82),
+        rgba(108, 162, 255, 0.82),
+        rgba(255, 105, 180, 0.8)
+      );
+      background-size: 220% 220%;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 180ms ease;
+      pointer-events: none;
+    }
+    .item__image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background:
+        linear-gradient(135deg, rgba(255, 99, 171, 0.08), transparent 34%),
+        linear-gradient(315deg, rgba(103, 224, 255, 0.08), transparent 40%);
+      opacity: 0;
+      transition: opacity 180ms ease;
+      pointer-events: none;
+    }
+    .item__image[data-loading='true']::before,
+    .item__image[data-loading='true']::after {
+      opacity: 1;
+    }
+    .item__image[data-loading-animated='true']::before {
+      animation: dg-border-spectrum 3200ms linear infinite;
+      will-change: background-position;
+    }
+    .item__image[data-loading='true'] {
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+        0 0 12px rgba(255, 110, 199, 0.08),
+        0 0 18px rgba(93, 176, 255, 0.06);
+    }
+    .item__image[data-loading-animated='true'] {
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.09),
+        0 0 16px rgba(255, 110, 199, 0.1),
+        0 0 22px rgba(255, 194, 92, 0.08),
+        0 0 28px rgba(93, 176, 255, 0.08);
+    }
+    .item__image[data-retrying='true']::before,
+    .item__image[data-retrying='true']::after {
+      animation-duration: 900ms;
+      opacity: 1;
     }
     .item__image--reference {
       position: absolute;
       inset: 10px;
       pointer-events: none;
+    }
+    .item__media {
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      transition: opacity 220ms ease;
+    }
+    .item__loading-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 22% 18%, rgba(255, 121, 198, 0.16), transparent 30%),
+        radial-gradient(circle at 80% 24%, rgba(255, 201, 102, 0.14), transparent 32%),
+        radial-gradient(circle at 54% 82%, rgba(90, 218, 255, 0.12), transparent 34%),
+        linear-gradient(140deg, rgba(36, 18, 48, 0.28), rgba(31, 49, 72, 0.22) 44%, rgba(16, 18, 18, 0.16));
+      opacity: 0;
+      transition: opacity 180ms ease, filter 180ms ease;
+    }
+    .item__loading-overlay::before {
+      content: '';
+      position: absolute;
+      inset: -35%;
+      background:
+        linear-gradient(
+          112deg,
+          transparent 16%,
+          rgba(255, 107, 183, 0.04) 30%,
+          rgba(255, 211, 97, 0.34) 45%,
+          rgba(97, 236, 255, 0.26) 56%,
+          rgba(120, 165, 255, 0.08) 65%,
+          transparent 80%
+        );
+      transform: translateX(-62%) rotate(8deg);
+    }
+    .item__loading-overlay::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 30%, rgba(0, 0, 0, 0.12));
+      opacity: 0.9;
+    }
+    .item__loading-overlay[data-visible='true'] {
+      opacity: 1;
+    }
+    .item__loading-overlay[data-animated='true']::before {
+      animation: dg-tile-sheen 1700ms ease-in-out infinite;
+      will-change: transform;
+    }
+    .item__loading-overlay[data-retrying='true'] {
+      animation: dg-retry-blink 220ms steps(2, end) 1;
+      filter: saturate(1.15);
+    }
+    @keyframes dg-tile-sheen {
+      0% {
+        transform: translateX(-62%) rotate(8deg);
+      }
+      100% {
+        transform: translateX(62%) rotate(8deg);
+      }
+    }
+    @keyframes dg-retry-blink {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.22;
+      }
+    }
+    @keyframes dg-border-spectrum {
+      0% {
+        background-position: 0% 50%;
+      }
+      100% {
+        background-position: 200% 50%;
+      }
     }
   `;
 
@@ -795,8 +1256,8 @@ export default function DomeGallery({
         className="sphere-root relative w-full h-full"
         style={customStyle(
           {
-            '--segments-x': segments,
-            '--segments-y': segments,
+            '--segments-x': effectiveSegments,
+            '--segments-y': effectiveSegments,
             '--overlay-blur-color': overlayBlurColor,
             '--tile-radius': imageBorderRadius,
             '--enlarge-radius': openedImageBorderRadius,
@@ -812,70 +1273,116 @@ export default function DomeGallery({
             WebkitUserSelect: 'none'
           }}
         >
+          <div
+            className="absolute inset-[12%] m-auto z-[1] pointer-events-none"
+            style={{
+              background:
+                'radial-gradient(circle at 50% 48%, rgba(199,154,49,0.16), transparent 36%), radial-gradient(circle at 50% 52%, rgba(242,237,228,0.08), transparent 52%)',
+              filter: 'blur(38px)',
+              transform: 'scale(1.04)'
+            }}
+          />
           <div className="stage">
             <div ref={sphereRef} className="sphere">
-              {items.map((it, i) => (
-                <div
-                  key={`${it.x},${it.y},${i}`}
-                  className="sphere-item absolute m-auto"
-                  data-src={it.src}
-                  data-alt={it.alt}
-                  data-offset-x={it.x}
-                  data-offset-y={it.y}
-                  data-size-x={it.sizeX}
-                  data-size-y={it.sizeY}
-                  style={customStyle(
-                    {
-                      '--offset-x': it.x,
-                      '--offset-y': it.y,
-                      '--item-size-x': it.sizeX,
-                      '--item-size-y': it.sizeY,
-                      top: '-999px',
-                      bottom: '-999px',
-                      left: '-999px',
-                      right: '-999px'
-                    }
-                  )}
-                >
+              {items.map((it, i) => {
+                const isImageActive = activeImageSources.has(it.src);
+                const isImageLoaded = Boolean(loadedImageSources[it.src]);
+                const isRetryBlinking = Boolean(retryBlinkSources[it.src]);
+                const showLoadingOverlay = !isImageLoaded;
+                const animateLoadingTile = (isImageActive && !isImageLoaded) || isRetryBlinking;
+                const priorityIndex = imageSourcePriority[it.src] ?? Number.MAX_SAFE_INTEGER;
+                const fetchPriority = priorityIndex < Math.min(INITIAL_ACTIVE_IMAGE_COUNT, 24) ? 'high' : 'auto';
+
+                return (
                   <div
-                    className="item__image absolute block overflow-hidden cursor-pointer bg-gray-200 transition-transform duration-300"
-                    role="button"
-                    tabIndex={0}
-                    aria-label={it.alt || 'Open image'}
-                    onClick={e => {
-                      if (draggingRef.current) return;
-                      if (movedRef.current) return;
-                      if (e.timeStamp - lastDragEndAt.current < 80) return;
-                      if (openingRef.current) return;
-                      openItemFromElement(e.currentTarget as HTMLElement);
-                    }}
-                    onPointerUp={e => {
-                      if ((e.nativeEvent as PointerEvent).pointerType !== 'touch') return;
-                      if (draggingRef.current) return;
-                      if (movedRef.current) return;
-                      if (e.timeStamp - lastDragEndAt.current < 80) return;
-                      if (openingRef.current) return;
-                      openItemFromElement(e.currentTarget as HTMLElement);
-                    }}
-                    style={{
-                      inset: '10px',
-                      borderRadius: `var(--tile-radius, ${imageBorderRadius})`,
-                      backfaceVisibility: 'hidden'
-                    }}
+                    key={`${it.x},${it.y},${i}`}
+                    className="sphere-item absolute m-auto"
+                    data-src={it.src}
+                    data-alt={it.alt}
+                    data-offset-x={it.x}
+                    data-offset-y={it.y}
+                    data-size-x={it.sizeX}
+                    data-size-y={it.sizeY}
+                    style={customStyle(
+                      {
+                        '--offset-x': it.x,
+                        '--offset-y': it.y,
+                        '--item-size-x': it.sizeX,
+                        '--item-size-y': it.sizeY,
+                        top: '-999px',
+                        bottom: '-999px',
+                        left: '-999px',
+                        right: '-999px'
+                      }
+                    )}
                   >
-                    <img
-                      src={it.src}
-                      draggable={false}
-                      alt={it.alt}
-                      className="w-full h-full object-cover pointer-events-none"
-                      style={{
-                        backfaceVisibility: 'hidden',
-                        filter: `var(--image-filter, ${grayscale ? 'grayscale(1)' : 'none'})`
+                    <div
+                      className="item__image absolute block overflow-hidden cursor-pointer bg-[#171a1a] transition-transform duration-300"
+                      data-loading={showLoadingOverlay}
+                      data-loading-animated={animateLoadingTile}
+                      data-retrying={isRetryBlinking}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={it.alt || 'Open image'}
+                      onClick={e => {
+                        if (draggingRef.current) return;
+                        if (movedRef.current) return;
+                        if (e.timeStamp - lastDragEndAt.current < 80) return;
+                        if (openingRef.current) return;
+                        openItemFromElement(e.currentTarget as HTMLElement);
                       }}
-                    />
+                      onPointerUp={e => {
+                        if ((e.nativeEvent as PointerEvent).pointerType !== 'touch') return;
+                        if (draggingRef.current) return;
+                        if (movedRef.current) return;
+                        if (e.timeStamp - lastDragEndAt.current < 80) return;
+                        if (openingRef.current) return;
+                        openItemFromElement(e.currentTarget as HTMLElement);
+                      }}
+                      style={{
+                        inset: '10px',
+                        borderRadius: `var(--tile-radius, ${imageBorderRadius})`,
+                        backfaceVisibility: 'hidden'
+                      }}
+                    >
+                      <div
+                        className="item__loading-overlay"
+                        data-visible={showLoadingOverlay}
+                        data-animated={animateLoadingTile}
+                        data-retrying={isRetryBlinking}
+                        aria-hidden="true"
+                      />
+                      {isImageActive ? (
+                        <img
+                          key={`${it.src}-${imageRetryKeys[it.src] ?? 0}`}
+                          src={it.src}
+                          draggable={false}
+                          alt={it.alt}
+                          loading="eager"
+                          decoding="async"
+                          fetchPriority={fetchPriority}
+                          onLoad={() => markImageLoaded(it.src)}
+                          onError={() => scheduleImageRetry(it.src)}
+                          className="item__media object-cover"
+                          style={{
+                            opacity: isImageLoaded ? 1 : 0,
+                            backfaceVisibility: 'hidden',
+                            filter: `var(--image-filter, ${grayscale ? 'grayscale(1)' : 'none'})`
+                          }}
+                        />
+                      ) : (
+                        <div
+                          className="item__media"
+                          aria-hidden="true"
+                          style={{
+                            opacity: 0
+                          }}
+                        />
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -923,7 +1430,7 @@ export default function DomeGallery({
             />
             <div
               ref={frameRef}
-              className="viewer-frame h-full aspect-square flex"
+              className="viewer-frame h-full w-full flex"
               style={{
                 borderRadius: `var(--enlarge-radius, ${openedImageBorderRadius})`
               }}
