@@ -13,11 +13,11 @@ type GalleryImage = {
 };
 
 const getMediaPreviewUrl = (item: MediaItem) => {
-  if (item.type === 'image') {
-    return item.url ?? '';
+  if (item.type !== 'image') {
+    return '';
   }
 
-  return item.thumbnail ?? item.variants?.['720p'] ?? item.variants?.['480p'] ?? item.variants?.['1080p'] ?? '';
+  return item.url ?? '';
 };
 
 const getMediaAltText = (item: MediaItem) => {
@@ -83,11 +83,10 @@ const HomePage = () => {
               fitBasis="max"
               minRadius={300}
               maxRadius={800}
-              padFactor={0.1}
-              maxPad={56}
+              padFactor={0}
+              maxPad={0}
               verticalStageOffset="-8%"
-              maxVerticalRotationDeg={4}
-              segments={24}
+              maxVerticalRotationDeg={20}
               dragDampening={1.4}
               grayscale={false}
               overlayBlurColor="#101212"
