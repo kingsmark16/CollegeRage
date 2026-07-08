@@ -35,31 +35,24 @@ const LandingHeaderMusicPlayer = ({ onPlaybackStateChange, tracks }: LandingHead
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const continuePlaybackOnTrackChangeRef = useRef(false);
   const progressId = useId();
-  const [audioPortalTarget, setAudioPortalTarget] = useState<HTMLElement | null>(null);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(() => getInitialTrackIndex(tracks));
   const [isAudioLoading, setIsAudioLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const currentTrack = tracks[currentTrackIndex] ?? tracks[0] ?? null;
-
-  useEffect(() => {
-    if (!currentTrack) {
-      setCurrentTrackIndex(0);
-      setIsPlaying(false);
-      return;
+  const audioPortalTarget = typeof document === 'undefined' ? null : document.body;
+  const resolvedTrackIndex = useMemo(() => {
+    if (!tracks.length) {
+      return -1;
     }
 
-    setCurrentTrackIndex((currentIndex) => {
-      const selectedTrack = tracks[currentIndex];
+    if (tracks[currentTrackIndex]) {
+      return currentTrackIndex;
+    }
 
-      if (selectedTrack && tracks.some((track) => track.id === selectedTrack.id)) {
-        return currentIndex;
-      }
-
-      return getInitialTrackIndex(tracks);
-    });
-  }, [currentTrack, tracks]);
+    return getInitialTrackIndex(tracks);
+  }, [currentTrackIndex, tracks]);
+  const currentTrack = resolvedTrackIndex >= 0 ? tracks[resolvedTrackIndex] ?? null : null;
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -69,14 +62,6 @@ const LandingHeaderMusicPlayer = ({ onPlaybackStateChange, tracks }: LandingHead
     }
 
     audio.volume = 0.8;
-  }, []);
-
-  useEffect(() => {
-    if (typeof document === 'undefined') {
-      return;
-    }
-
-    setAudioPortalTarget(document.body);
   }, []);
 
   useEffect(() => {
@@ -138,7 +123,7 @@ const LandingHeaderMusicPlayer = ({ onPlaybackStateChange, tracks }: LandingHead
 
     const normalizedIndex = (nextIndex + tracks.length) % tracks.length;
 
-    if (normalizedIndex === currentTrackIndex) {
+    if (normalizedIndex === resolvedTrackIndex) {
       if (!shouldPlay || !audio) {
         return;
       }
@@ -198,6 +183,16 @@ const LandingHeaderMusicPlayer = ({ onPlaybackStateChange, tracks }: LandingHead
     [tracks]
   );
 
+  if (!currentTrack) {
+    return (
+      <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="flex min-w-0 items-center rounded-[22px] border border-white/10 bg-[#141818] px-3 py-2 text-[10px] uppercase tracking-[0.16em] text-[#8f887e]">
+          No soundtrack
+        </div>
+      </div>
+    );
+  }
+
   const audioElement = (
     <audio
       ref={audioRef}
@@ -207,7 +202,7 @@ const LandingHeaderMusicPlayer = ({ onPlaybackStateChange, tracks }: LandingHead
       onDurationChange={(event) => setDuration(event.currentTarget.duration || 0)}
       onEnded={() => {
         setIsAudioLoading(false);
-        void selectTrack(currentTrackIndex + 1, true);
+        void selectTrack(resolvedTrackIndex + 1, true);
       }}
       onLoadStart={() => setIsAudioLoading(true)}
       onPause={() => {
@@ -223,16 +218,6 @@ const LandingHeaderMusicPlayer = ({ onPlaybackStateChange, tracks }: LandingHead
       onWaiting={() => setIsAudioLoading(true)}
     />
   );
-
-  if (!currentTrack) {
-    return (
-      <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
-        <div className="flex min-w-0 items-center rounded-[22px] border border-white/10 bg-[#141818] px-3 py-2 text-[10px] uppercase tracking-[0.16em] text-[#8f887e]">
-          No soundtrack
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-2.5">
@@ -255,7 +240,7 @@ const LandingHeaderMusicPlayer = ({ onPlaybackStateChange, tracks }: LandingHead
             <button
               className="grid size-7 shrink-0 place-items-center rounded-full text-[#c8b78f] transition hover:bg-white/6 hover:text-[#f3cf7a]"
               type="button"
-              onClick={() => void selectTrack(currentTrackIndex - 1, isPlaying)}
+              onClick={() => void selectTrack(resolvedTrackIndex - 1, isPlaying)}
             >
               <SkipBack className="size-3.5" />
               <span className="sr-only">Previous track</span>
@@ -281,7 +266,7 @@ const LandingHeaderMusicPlayer = ({ onPlaybackStateChange, tracks }: LandingHead
             <button
               className="grid size-7 shrink-0 place-items-center rounded-full text-[#c8b78f] transition hover:bg-white/6 hover:text-[#f3cf7a]"
               type="button"
-              onClick={() => void selectTrack(currentTrackIndex + 1, isPlaying)}
+              onClick={() => void selectTrack(resolvedTrackIndex + 1, isPlaying)}
             >
               <SkipForward className="size-3.5" />
               <span className="sr-only">Next track</span>
@@ -348,7 +333,7 @@ const LandingHeaderMusicPlayer = ({ onPlaybackStateChange, tracks }: LandingHead
           <div className="min-w-0 flex-1">
             <select
               className="min-w-0 flex-1 rounded-full border border-white/10 bg-[#171b1b] px-3 py-1.5 text-[11px] font-medium text-[#f2ede4] outline-none transition hover:border-white/20 focus:border-[#c79a31]/65"
-              value={String(currentTrackIndex)}
+              value={String(resolvedTrackIndex)}
               onChange={(event) => void selectTrack(Number(event.target.value), isPlaying)}
             >
               {selectOptions.map((option) => (
