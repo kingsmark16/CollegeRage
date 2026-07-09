@@ -212,12 +212,21 @@ function buildLayout(pool: ImageItem[], preferredSegments: number, layoutSeed: n
     return ys.map(y => ({ x, y, sizeX: 2, sizeY: 2 }));
   });
 
-  const totalSlots = coords.length;
-  const coordIndexes =
-    normalizedImages.length === 1
-      ? [Math.floor(totalSlots / 2)]
-      : normalizedImages.map((_, i) => Math.round((i * (totalSlots - 1)) / (normalizedImages.length - 1)));
-  const slottedCoords = coordIndexes.map(index => coords[index]);
+  const scoredCoords = coords
+    .map((coord) => {
+      const { rotateX, rotateY } = computeItemBaseRotation(coord.x, coord.y, coord.sizeX, coord.sizeY, columnCount);
+      const normalizedY = wrapAngleSigned(rotateY);
+      const horizontalVisibility = Math.max(0, Math.cos((normalizedY * Math.PI) / 180));
+      const verticalVisibility = Math.max(0, Math.cos((rotateX * Math.PI) / 180));
+      const lowerBias = coord.y;
+
+      return {
+        coord,
+        score: horizontalVisibility * 0.78 + verticalVisibility * 0.22 - lowerBias * 0.015
+      };
+    })
+    .sort((leftItem, rightItem) => rightItem.score - leftItem.score);
+  const slottedCoords = scoredCoords.slice(0, normalizedImages.length).map((item) => item.coord);
   const shuffledImages = shuffleWithSeed(
     normalizedImages,
     hashString(`${layoutSeed}:${normalizedImages.map(image => image.src).join('|')}`)
