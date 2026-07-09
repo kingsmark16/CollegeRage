@@ -119,16 +119,16 @@ const HomePage = () => {
           >
             <button
               aria-label="Close music player"
-              className={`absolute inset-0 bg-black/18 transition duration-200 ${
+              className={`absolute inset-0 z-0 bg-black/18 transition duration-200 ${
                 isMusicPlayerOpen ? 'pointer-events-auto' : 'pointer-events-none'
               }`}
               type="button"
               onClick={() => setIsMusicPlayerOpen(false)}
             />
 
-            <div className="pointer-events-none absolute inset-x-0 top-24 flex justify-center px-3 sm:top-28">
+            <div className="pointer-events-none absolute inset-x-0 top-24 z-10 flex justify-center px-3 sm:top-28">
             <div
-              className={`w-full max-w-[820px] rounded-[28px] border border-white/10 bg-[#101212]/98 shadow-[0_30px_60px_rgba(0,0,0,0.38)] transition duration-200 ${
+              className={`relative w-full max-w-[820px] rounded-[28px] border border-white/10 bg-[#101212]/98 shadow-[0_30px_60px_rgba(0,0,0,0.38)] transition duration-200 ${
                 isMusicPlayerOpen
                   ? 'pointer-events-auto translate-y-0 scale-100'
                   : 'pointer-events-none -translate-y-4 scale-[0.98]'

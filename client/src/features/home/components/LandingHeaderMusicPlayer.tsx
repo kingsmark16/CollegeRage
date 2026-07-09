@@ -327,12 +327,12 @@ const LandingHeaderMusicPlayer = ({ onPlaybackStateChange, tracks }: LandingHead
         </div>
       </div>
 
-      <div className="sm:w-[220px] sm:flex-none">
+      <div className="min-w-0 sm:w-[220px] sm:flex-none">
         <div className="flex min-w-0 items-center gap-2 rounded-[18px] border border-white/10 bg-[#171b1b] px-3 py-2">
           <span className="shrink-0 text-[9px] uppercase tracking-[0.16em] text-[#8f887e]">Track</span>
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 overflow-hidden">
             <select
-              className="min-w-0 flex-1 rounded-full border border-white/10 bg-[#171b1b] px-3 py-1.5 text-[11px] font-medium text-[#f2ede4] outline-none transition hover:border-white/20 focus:border-[#c79a31]/65"
+              className="block w-full min-w-0 truncate rounded-full border border-white/10 bg-[#171b1b] px-3 py-1.5 pr-8 text-[11px] font-medium text-[#f2ede4] outline-none transition hover:border-white/20 focus:border-[#c79a31]/65"
               value={String(resolvedTrackIndex)}
               onChange={(event) => void selectTrack(Number(event.target.value), isPlaying)}
             >
