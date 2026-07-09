@@ -12,10 +12,11 @@ type VideoVariant = {
 
 type AdminVideoPlayerProps = {
   poster?: string;
-  title: string;
   variants: VideoVariant[];
   activeVariantLabel: '480p' | '720p' | '1080p' | null;
   activeVariantUrl: string | null;
+  isOpen: boolean;
+  className?: string;
   onVariantSelect: (label: '480p' | '720p' | '1080p') => void;
 };
 
@@ -34,16 +35,17 @@ const formatTime = (value: number) => {
 
 const AdminVideoPlayer = ({
   poster,
-  title,
   variants,
   activeVariantLabel,
   activeVariantUrl,
+  isOpen,
+  className,
   onVariantSelect,
 }: AdminVideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const qualityMenuRef = useRef<HTMLDivElement | null>(null);
   const pendingResumeTimeRef = useRef<number | null>(null);
-  const pendingResumePlaybackRef = useRef(false);
+  const pendingResumePlaybackRef = useRef(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -76,6 +78,23 @@ const AdminVideoPlayer = ({
       document.removeEventListener('mousedown', handlePointerDown);
     };
   }, [isQualityMenuOpen]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+
+    if (!video) {
+      return;
+    }
+
+    if (!isOpen) {
+      video.pause();
+      setIsPlaying(false);
+      return;
+    }
+
+    pendingResumePlaybackRef.current = true;
+    void handleSourceReady();
+  }, [isOpen, activeVariantUrl]);
 
   const togglePlayback = async () => {
     const video = videoRef.current;
@@ -154,7 +173,7 @@ const AdminVideoPlayer = ({
   const handleSourceReady = async () => {
     const video = videoRef.current;
 
-    if (!video) {
+    if (!video || !isOpen) {
       return;
     }
 
@@ -183,7 +202,7 @@ const AdminVideoPlayer = ({
   };
 
   return (
-    <div className="relative w-full overflow-hidden border border-white/10 bg-[#050606]">
+    <div className={cn('relative w-full overflow-hidden border border-white/10 bg-[#050606]', className)}>
       <div className="relative aspect-video w-full bg-black">
         <video
           ref={videoRef}
@@ -215,39 +234,36 @@ const AdminVideoPlayer = ({
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
 
         <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
-          <div className="min-w-0 rounded-full border border-white/10 bg-black/45 px-3 py-1 text-xs uppercase tracking-[0.18em] text-[#f2ede4] backdrop-blur-sm">
+          <div className="min-w-0 rounded-full border border-white/10 bg-black/45 px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-[#f2ede4] backdrop-blur-sm sm:px-3 sm:text-xs">
             {activeVariantLabel ?? 'Video'}
-          </div>
-          <div className="truncate rounded-full border border-white/10 bg-black/45 px-3 py-1 text-xs text-[#beb7af] backdrop-blur-sm">
-            {title}
           </div>
         </div>
 
         {!isPlaying ? (
           <div className="absolute inset-0 grid place-items-center">
             <button
-              className="grid size-14 place-items-center rounded-full border border-white/15 bg-black/45 text-[#f2ede4] backdrop-blur-md transition hover:scale-105 hover:border-[#c79a31]/60 hover:text-[#f3cf7a] sm:size-20"
+              className="grid size-12 place-items-center rounded-full border border-white/16 bg-[#1b2128]/88 text-[#f2ede4] backdrop-blur-md transition hover:scale-[1.03] hover:border-[#d3aa51]/60 hover:bg-[#26313b]/94 hover:text-[#f8d98f] active:scale-100 active:border-[#e0b862]/70 active:bg-[#2f3b47]/96 active:text-[#ffe3a8] sm:size-20"
               type="button"
               onClick={() => void togglePlayback()}
             >
-              <Play className="size-6 fill-current sm:size-8" />
+              <Play className="size-5 fill-current sm:size-8" />
             </button>
           </div>
         ) : null}
 
-        <div className="absolute inset-x-0 bottom-0 grid gap-3 p-3 sm:gap-4 sm:p-4">
-          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 sm:gap-3">
-            <div className="flex items-center gap-2 sm:gap-3">
+        <div className="absolute inset-x-0 bottom-0 grid gap-2 p-2.5 sm:gap-4 sm:p-4">
+          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3">
               <Button
                 size="sm"
                 variant="outline"
-                className="grid size-8 place-items-center border-white/10 bg-black/45 p-0 text-[#f2ede4] hover:bg-white/10 sm:size-10"
+                className="grid size-7 place-items-center border-white/12 bg-[#171d24]/88 p-0 text-[#f2ede4] hover:border-[#d3aa51]/40 hover:bg-[#25303a]/94 hover:text-[#fff1c8] active:border-[#e0b862]/55 active:bg-[#2d3843]/96 active:text-[#ffe3a8] sm:size-10"
                 onClick={() => void togglePlayback()}
               >
                 {isPlaying ? (
-                  <Pause aria-hidden="true"/>
+                  <Pause aria-hidden="true" className="size-3.5 sm:size-4" />
                 ) : (
-                  <Play aria-hidden="true"/>
+                  <Play aria-hidden="true" className="size-3.5 sm:size-4" />
                 )}
                 <span className="sr-only">{isPlaying ? 'Pause' : 'Play'}</span>
               </Button>
@@ -255,10 +271,10 @@ const AdminVideoPlayer = ({
               <Button
                 size="icon-sm"
                 variant="outline"
-                className="size-8 border-white/10 bg-black/45 text-[#f2ede4] hover:bg-white/10 sm:size-10"
+                className="size-7 border-white/12 bg-[#171d24]/88 text-[#f2ede4] hover:border-[#d3aa51]/40 hover:bg-[#25303a]/94 hover:text-[#fff1c8] active:border-[#e0b862]/55 active:bg-[#2d3843]/96 active:text-[#ffe3a8] sm:size-10"
                 onClick={toggleMute}
               >
-                {isMuted || volume === 0 ? <VolumeX /> : <Volume2 />}
+                {isMuted || volume === 0 ? <VolumeX className="size-3.5 sm:size-4" /> : <Volume2 className="size-3.5 sm:size-4" />}
                 <span className="sr-only">Toggle mute</span>
               </Button>
             </div>
@@ -274,20 +290,20 @@ const AdminVideoPlayer = ({
                 onChange={(event) => handleSeek(event.target.value)}
               />
 
-              <p className="text-center text-[10px] tabular-nums text-[#beb7af] sm:text-xs">
+              <p className="text-center text-[9px] tabular-nums text-[#beb7af] sm:text-xs">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </p>
             </div>
 
-            <div className="flex items-center justify-end gap-2 sm:gap-3">
+            <div className="flex items-center justify-end gap-1.5 sm:gap-3">
               <div ref={qualityMenuRef} className="relative">
                 <Button
                   size="icon-sm"
                   variant="outline"
-                  className="size-8 border-white/10 bg-black/45 text-[#f2ede4] hover:bg-white/10 sm:size-10"
+                  className="size-7 border-white/12 bg-[#171d24]/88 text-[#f2ede4] hover:border-[#d3aa51]/40 hover:bg-[#25303a]/94 hover:text-[#fff1c8] active:border-[#e0b862]/55 active:bg-[#2d3843]/96 active:text-[#ffe3a8] sm:size-10"
                   onClick={() => setIsQualityMenuOpen((current) => !current)}
                 >
-                  <Settings2 />
+                  <Settings2 className="size-3.5 sm:size-4" />
                   <span className="sr-only">Open quality settings</span>
                 </Button>
 
@@ -301,7 +317,7 @@ const AdminVideoPlayer = ({
                       <button
                         key={variant.label}
                         className={cn(
-                          'flex items-center justify-between px-3 py-2 text-left text-xs font-semibold uppercase tracking-[0.18em] transition',
+                          'flex items-center justify-between px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.18em] transition sm:text-xs',
                           activeVariantLabel === variant.label
                             ? 'bg-[#c79a31]/15 text-[#f3cf7a]'
                             : 'text-[#f2ede4] hover:bg-white/10 hover:text-[#f3cf7a]'
@@ -319,15 +335,15 @@ const AdminVideoPlayer = ({
                 ) : null}
               </div>
 
-              <Button
-                size="icon-sm"
-                variant="outline"
-                className="size-8 border-white/10 bg-black/45 text-[#f2ede4] hover:bg-white/10 sm:size-10"
-                onClick={() => void enterFullscreen()}
-              >
-                <Expand />
-                <span className="sr-only">Toggle fullscreen</span>
-              </Button>
+                <Button
+                  size="icon-sm"
+                  variant="outline"
+                  className="size-7 border-white/12 bg-[#171d24]/88 text-[#f2ede4] hover:border-[#d3aa51]/40 hover:bg-[#25303a]/94 hover:text-[#fff1c8] active:border-[#e0b862]/55 active:bg-[#2d3843]/96 active:text-[#ffe3a8] sm:size-10"
+                  onClick={() => void enterFullscreen()}
+                >
+                  <Expand className="size-3.5 sm:size-4" />
+                  <span className="sr-only">Toggle fullscreen</span>
+                </Button>
             </div>
           </div>
         </div>

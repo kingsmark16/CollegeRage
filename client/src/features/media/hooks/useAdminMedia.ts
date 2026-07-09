@@ -4,7 +4,7 @@ import { deleteMedia, getAdminMediaPage, updateMedia, uploadMediaFiles } from '@
 import type { MediaFilter, MediaItem, UpdateMediaInput } from '../media.types';
 
 export const adminMediaQueryKey = ['media', 'admin'] as const;
-const variantPreferenceOrder = ['720p', '1080p', '480p'] as const;
+const variantPreferenceOrder = ['480p', '720p', '1080p'] as const;
 const ADMIN_MEDIA_PAGE_SIZE = 15;
 
 export const useAdminMedia = () => {
