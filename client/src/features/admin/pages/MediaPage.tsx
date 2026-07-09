@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent } from 'react';
-import { Film, FlipHorizontal2, Image as ImageIcon, Pencil, Play, Trash2, Upload } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Film, FlipHorizontal2, Image as ImageIcon, Pencil, Play, Trash2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -15,6 +15,8 @@ import { cn } from '@/lib/utils';
 import { getErrorMessage, notifyAsync } from '@/lib/toast';
 import { useAdminMedia } from '@/features/media/hooks/useAdminMedia';
 import AdminVideoPlayer from '@/features/media/components/AdminVideoPlayer';
+import RetryingMediaImage from '@/features/media/components/RetryingMediaImage';
+import { getPaginationItems } from '@/features/media/utils/pagination';
 
 const getPreviewUrl = (item: ReturnType<typeof useAdminMedia>['selectedMedia']) => {
   if (!item) {
@@ -28,17 +30,22 @@ const getPreviewUrl = (item: ReturnType<typeof useAdminMedia>['selectedMedia']) 
   return item.thumbnail ?? item.variants?.['720p'] ?? item.variants?.['480p'] ?? item.variants?.['1080p'] ?? '';
 };
 
+const PAGE_BUTTON_BASE_CLASSNAME =
+  'h-9 min-w-9 rounded-full border px-3 text-xs font-semibold text-[#beb7af] transition hover:text-[#f2ede4]';
+
 const MediaPage = () => {
   const {
     activeVariantLabel,
     activeVariantUrl,
     deleteMutation,
     filter,
-    filteredItems,
+    items,
     mediaQuery,
+    page,
     selectedMedia,
     selectedMediaVariantEntries,
     setFilter,
+    setPage,
     setSelectedMediaId,
     setSelectedVariantLabel,
     updateMutation,
@@ -50,6 +57,7 @@ const MediaPage = () => {
   const [draftName, setDraftName] = useState('');
   const [draftDescription, setDraftDescription] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const paginationItems = mediaQuery.data ? getPaginationItems(page, mediaQuery.data.totalPages) : [];
 
   const handleUploadSelection = (event: ChangeEvent<HTMLInputElement>) => {
     setSelectedFiles(Array.from(event.target.files ?? []).slice(0, 10));
@@ -179,6 +187,10 @@ const MediaPage = () => {
             </button>
           ))}
         </div>
+
+        <p className="text-sm text-[#8f887e]">
+          {mediaQuery.data ? `${mediaQuery.data.totalItems.toLocaleString()} media items` : 'Loading media'}
+        </p>
       </section>
 
       <section className="grid gap-3 grid-cols-3 lg:grid-cols-5">
@@ -194,13 +206,13 @@ const MediaPage = () => {
             ))
           : null}
 
-        {!mediaQuery.isLoading && filteredItems.length === 0 ? (
+        {!mediaQuery.isLoading && items.length === 0 ? (
           <div className="col-span-full border border-dashed border-white/15 bg-[#121515] px-6 py-16 text-center text-sm text-[#beb7af]">
             No media has been uploaded for this filter yet.
           </div>
         ) : null}
 
-        {filteredItems.map((item) => {
+        {items.map((item) => {
           const previewUrl = getPreviewUrl(item);
 
           return (
@@ -217,10 +229,14 @@ const MediaPage = () => {
             >
               <div className="relative aspect-[4/3] overflow-hidden bg-[#0f1212]">
                 {previewUrl ? (
-                  <img
+                  <RetryingMediaImage
                     alt={item.sanitizedName}
-                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                    iconClassName="size-8"
+                    imgClassName="object-cover duration-500 group-hover:scale-105"
+                    key={previewUrl}
+                    overlayClassName="bg-[#0f1212]/88"
                     src={previewUrl}
+                    wrapperClassName="h-full w-full"
                   />
                 ) : (
                   <div className="grid h-full place-items-center text-[#6f6a63]">
@@ -246,6 +262,61 @@ const MediaPage = () => {
           );
         })}
       </section>
+
+      {mediaQuery.data && mediaQuery.data.totalPages > 1 ? (
+        <section className="flex flex-col items-center gap-3 border-t border-white/10 pt-4 text-center lg:flex-row lg:justify-between lg:text-left">
+          <p className="text-sm text-[#8f887e] lg:flex-none">
+            Page {page} of {mediaQuery.data.totalPages}
+          </p>
+
+          <div className="flex w-full flex-col items-center gap-2 lg:w-auto lg:flex-row lg:justify-end">
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="border-white/10 bg-[#121515] text-[#beb7af] hover:border-[#5f8599] hover:bg-[#1a232b] hover:text-[#f2ede4]"
+                disabled={page <= 1 || mediaQuery.isFetching}
+                onClick={() => setPage(page - 1)}
+              >
+                <ChevronLeft />
+                Prev
+              </Button>
+              {paginationItems.map((item, index) =>
+                item === 'ellipsis' ? (
+                  <span key={`ellipsis-${index}`} className="px-1 text-sm text-[#6f6a63]">
+                    ...
+                  </span>
+                ) : (
+                  <button
+                    key={item}
+                    className={cn(
+                      PAGE_BUTTON_BASE_CLASSNAME,
+                      item === page
+                        ? 'border-[#c79a31]/70 bg-[#c79a31]/15 text-[#f3cf7a] shadow-[0_0_24px_rgba(199,154,49,0.16)]'
+                        : 'border-white/10 bg-[#121515] hover:border-[#5f8599] hover:bg-[#1a232b]'
+                    )}
+                    disabled={mediaQuery.isFetching}
+                    type="button"
+                    onClick={() => setPage(item)}
+                  >
+                    {item}
+                  </button>
+                )
+              )}
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="border-white/10 bg-[#121515] text-[#beb7af] hover:border-[#5f8599] hover:bg-[#1a232b] hover:text-[#f2ede4]"
+              disabled={page >= mediaQuery.data.totalPages || mediaQuery.isFetching}
+              onClick={() => setPage(page + 1)}
+            >
+              Next
+              <ChevronRight />
+            </Button>
+          </div>
+        </section>
+      ) : null}
 
       {selectedMedia ? (
         <div
@@ -301,7 +372,14 @@ const MediaPage = () => {
                 <div className="relative [backface-visibility:hidden]">
                   <div className="relative flex min-h-[70vh] items-center justify-center bg-[#0b0d0d] pt-20">
                     {selectedMedia.type === 'image' ? (
-                      <img alt={selectedMedia.sanitizedName} className="max-h-[70vh] w-full object-contain" src={selectedMedia.url} />
+                      <RetryingMediaImage
+                        alt={selectedMedia.sanitizedName}
+                        imgClassName="object-contain"
+                        key={`${selectedMedia.id}-${selectedMedia.url ?? ''}`}
+                        overlayClassName="bg-[#0b0d0d]/86"
+                        src={selectedMedia.url}
+                        wrapperClassName="max-h-[70vh] h-full w-full"
+                      />
                     ) : (
                       <AdminVideoPlayer
                         activeVariantLabel={activeVariantLabel}
@@ -367,9 +445,21 @@ const MediaPage = () => {
           <div className="grid flex-1 gap-6 overflow-y-auto px-6 py-6">
             <div className="overflow-hidden border border-white/10 bg-[#121515]">
               {selectedMedia?.type === 'image' && getPreviewUrl(selectedMedia) ? (
-                <img alt={selectedMedia.sanitizedName} className="aspect-video w-full object-cover" src={getPreviewUrl(selectedMedia)} />
+                <RetryingMediaImage
+                  alt={selectedMedia.sanitizedName}
+                  imgClassName="aspect-video object-cover"
+                  key={`${selectedMedia.id}-${getPreviewUrl(selectedMedia)}`}
+                  src={getPreviewUrl(selectedMedia)}
+                  wrapperClassName="aspect-video w-full"
+                />
               ) : selectedMedia?.type === 'video' && selectedMedia.thumbnail ? (
-                <img alt={selectedMedia.sanitizedName} className="aspect-video w-full object-cover" src={selectedMedia.thumbnail} />
+                <RetryingMediaImage
+                  alt={selectedMedia.sanitizedName}
+                  imgClassName="aspect-video object-cover"
+                  key={`${selectedMedia.id}-${selectedMedia.thumbnail}`}
+                  src={selectedMedia.thumbnail}
+                  wrapperClassName="aspect-video w-full"
+                />
               ) : (
                 <div className="aspect-video bg-[#121515]" />
               )}

@@ -27,7 +27,23 @@ export const uploadMedia = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-export const getAllMedia = asyncHandler(async (_req: Request, res: Response) => {
+export const getAllMedia = asyncHandler(async (req: Request, res: Response) => {
+  const shouldPaginate =
+    typeof req.query.page !== 'undefined' ||
+    typeof req.query.pageSize !== 'undefined' ||
+    typeof req.query.type !== 'undefined';
+
+  if (shouldPaginate) {
+    const media = await mediaService.getPaginatedMedia(req.query);
+
+    res.status(200).json({
+      success: true,
+      ...media,
+    });
+
+    return;
+  }
+
   const files = await mediaService.getMedia();
 
   res.status(200).json({

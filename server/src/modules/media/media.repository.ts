@@ -1,6 +1,6 @@
-import { MediaType } from '../../generated/prisma/index.js';
+import { MediaType, Prisma } from '../../generated/prisma/index.js';
 import { prisma } from '../../config/db.js';
-import type { CreateImageMediaInput, CreateVideoMediaInput, MediaWithRelations } from './media.types.js';
+import type { CreateImageMediaInput, CreateVideoMediaInput, MediaListFilter, MediaWithRelations } from './media.types.js';
 
 const mediaInclude = {
   image: true,
@@ -85,6 +85,43 @@ export const findAllMedia = async (): Promise<MediaWithRelations[]> =>
     orderBy: { createdAt: 'desc' },
     include: mediaInclude,
   });
+
+const getMediaWhereClause = (type: MediaListFilter): Prisma.MediaWhereInput => {
+  if (type === 'image') {
+    return { type: MediaType.IMAGE };
+  }
+
+  if (type === 'video') {
+    return { type: MediaType.VIDEO };
+  }
+
+  return {};
+};
+
+export const findPaginatedMedia = async (
+  type: MediaListFilter,
+  page: number,
+  pageSize: number
+): Promise<{ items: MediaWithRelations[]; totalItems: number }> => {
+  const where = getMediaWhereClause(type);
+  const skip = (page - 1) * pageSize;
+
+  const [items, totalItems] = await Promise.all([
+    prisma.media.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: pageSize,
+      include: mediaInclude,
+    }),
+    prisma.media.count({ where }),
+  ]);
+
+  return {
+    items,
+    totalItems,
+  };
+};
 
 export const deleteMediaById = async (id: string) =>
   prisma.media.delete({

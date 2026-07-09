@@ -2,6 +2,7 @@ import type { Media, VideoVariantQuality } from '../../generated/prisma/index.js
 
 export type MediaKind = 'image' | 'video';
 export type VideoVariantLabel = '480p' | '720p' | '1080p';
+export type MediaListFilter = 'all' | 'image' | 'video';
 
 export type UploadedMediaFile = {
   mediaType: MediaKind;
@@ -69,6 +70,20 @@ export type MediaUploadResponseItem = {
   thumbnail?: string;
   url?: string;
   variants?: Record<VideoVariantLabel, string>;
+};
+
+export type MediaListQuery = {
+  page: number;
+  pageSize: number;
+  type: MediaListFilter;
+};
+
+export type PaginatedMediaList = {
+  items: MediaUploadResponseItem[];
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
 };
 
 export type MediaWithRelations = Media & {

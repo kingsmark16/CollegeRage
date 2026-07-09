@@ -11,15 +11,18 @@ import {
   deleteMediaById,
   findAllMedia,
   findMediaById,
+  findPaginatedMedia,
   updateMediaMetadataById,
 } from './media.repository.js';
-import { updateMediaMetadataSchema, uploadRequestValidationSchema } from './media.schema.js';
+import { mediaListQuerySchema, updateMediaMetadataSchema, uploadRequestValidationSchema } from './media.schema.js';
 import { getFileExtension, readImageMetadata, resolveMediaKind, sanitizeFilename, assertFileSize } from './media.validation.js';
 import { assertAdminUser } from '../auth/auth.service.js';
 import type { NeonAuthUser } from '../auth/auth.types.js';
 import type {
   MediaUploadResponseItem,
+  PaginatedMediaList,
   MediaWithRelations,
+  MediaListQuery,
   ProcessedVideo,
   UploadedMediaFile,
   VideoVariantLabel,
@@ -211,6 +214,20 @@ export const uploadMedia = async (files: Express.Multer.File[], uploadedByUserId
 export const getMedia = async () => {
   const media = await findAllMedia();
   return media.map(mapMediaToUploadResponse);
+};
+
+export const getPaginatedMedia = async (query: unknown): Promise<PaginatedMediaList> => {
+  const parsedQuery: MediaListQuery = mediaListQuerySchema.parse(query);
+  const { items, totalItems } = await findPaginatedMedia(parsedQuery.type, parsedQuery.page, parsedQuery.pageSize);
+  const totalPages = Math.max(1, Math.ceil(totalItems / parsedQuery.pageSize));
+
+  return {
+    items: items.map(mapMediaToUploadResponse),
+    page: parsedQuery.page,
+    pageSize: parsedQuery.pageSize,
+    totalItems,
+    totalPages,
+  };
 };
 
 export const getMediaById = async (id: string) => {

@@ -1,27 +1,33 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { deleteMedia, getAdminMedia, updateMedia, uploadMediaFiles } from '@/services/media.service';
-import type { MediaItem, UpdateMediaInput } from '../media.types';
+import { deleteMedia, getAdminMediaPage, updateMedia, uploadMediaFiles } from '@/services/media.service';
+import type { MediaFilter, MediaItem, UpdateMediaInput } from '../media.types';
 
 export const adminMediaQueryKey = ['media', 'admin'] as const;
 const variantPreferenceOrder = ['720p', '1080p', '480p'] as const;
+const ADMIN_MEDIA_PAGE_SIZE = 15;
 
 export const useAdminMedia = () => {
   const queryClient = useQueryClient();
-  const [filter, setFilter] = useState<'all' | 'image' | 'video'>('all');
+  const [filter, setFilterState] = useState<MediaFilter>('all');
+  const [page, setPage] = useState(1);
   const [selectedMediaId, setSelectedMediaId] = useState<string | null>(null);
   const [selectedVariantLabel, setSelectedVariantLabel] = useState<'480p' | '720p' | '1080p' | null>(null);
 
   const mediaQuery = useQuery({
-    queryKey: adminMediaQueryKey,
-    queryFn: getAdminMedia,
+    queryKey: [...adminMediaQueryKey, filter, page, ADMIN_MEDIA_PAGE_SIZE],
+    queryFn: () => getAdminMediaPage(page, ADMIN_MEDIA_PAGE_SIZE, filter),
+    placeholderData: (previousData) => previousData,
   });
 
   const invalidateMedia = () => queryClient.invalidateQueries({ queryKey: adminMediaQueryKey });
 
   const uploadMutation = useMutation({
     mutationFn: uploadMediaFiles,
-    onSuccess: invalidateMedia,
+    onSuccess: async () => {
+      setPage(1);
+      await invalidateMedia();
+    },
   });
 
   const updateMutation = useMutation({
@@ -36,23 +42,21 @@ export const useAdminMedia = () => {
         setSelectedMediaId(null);
       }
 
+      const currentItems = mediaQuery.data?.items ?? [];
+
+      if (currentItems.length === 1 && page > 1) {
+        setPage((currentPage) => currentPage - 1);
+      }
+
       await invalidateMedia();
     },
   });
 
-  const items = useMemo(() => mediaQuery.data ?? [], [mediaQuery.data]);
-
-  const filteredItems = useMemo(() => {
-    if (filter === 'all') {
-      return items;
-    }
-
-    return items.filter((item) => item.type === filter);
-  }, [filter, items]);
+  const items = useMemo(() => mediaQuery.data?.items ?? [], [mediaQuery.data]);
 
   const selectedMedia: MediaItem | null = useMemo(
-    () => items.find((item) => item.id === selectedMediaId) ?? filteredItems[0] ?? items[0] ?? null,
-    [filteredItems, items, selectedMediaId]
+    () => items.find((item) => item.id === selectedMediaId) ?? items[0] ?? null,
+    [items, selectedMediaId]
   );
 
   const selectedMediaVariantEntries = useMemo(() => {
@@ -92,17 +96,27 @@ export const useAdminMedia = () => {
     return selectedMediaVariantEntries.find((variant) => variant.label === activeVariantLabel)?.url ?? null;
   }, [activeVariantLabel, selectedMediaVariantEntries]);
 
+  const setFilter = (nextFilter: MediaFilter) => {
+    setFilterState(nextFilter);
+    setPage(1);
+    setSelectedMediaId(null);
+    setSelectedVariantLabel(null);
+  };
+
   return {
+    ADMIN_MEDIA_PAGE_SIZE,
     activeVariantLabel,
     activeVariantUrl,
     deleteMutation,
     filter,
-    filteredItems,
+    items,
     mediaQuery,
+    page,
     selectedMedia,
     selectedMediaVariantEntries,
     selectedMediaId,
     setFilter,
+    setPage,
     setSelectedMediaId,
     setSelectedVariantLabel,
     updateMutation,

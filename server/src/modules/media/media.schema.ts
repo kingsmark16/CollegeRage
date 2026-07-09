@@ -59,5 +59,14 @@ export const updateMediaMetadataSchema = z.object({
     .optional(),
 });
 
+export const mediaListFilterSchema = z.enum(['all', 'image', 'video']);
+
+export const mediaListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(15),
+  type: mediaListFilterSchema.default('all'),
+});
+
 export type ValidatedUploadFile = z.infer<typeof uploadFileValidationSchema>;
 export type UpdateMediaMetadataInput = z.infer<typeof updateMediaMetadataSchema>;
+export type MediaListQueryInput = z.infer<typeof mediaListQuerySchema>;

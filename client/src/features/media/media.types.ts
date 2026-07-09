@@ -1,4 +1,5 @@
 export type MediaVariantMap = Partial<Record<'480p' | '720p' | '1080p', string>>;
+export type MediaFilter = 'all' | 'image' | 'video';
 
 export type MediaItem = {
   id: string;
@@ -14,3 +15,11 @@ export type UpdateMediaInput = Partial<{
   sanitizedName: string;
   description: string | null;
 }>;
+
+export type PaginatedMediaList = {
+  items: MediaItem[];
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+};

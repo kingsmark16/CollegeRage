@@ -1,10 +1,19 @@
 import { apiClient, getApiErrorMessage } from './api.service';
 import { getAuthToken } from './auth.service';
-import type { MediaItem, UpdateMediaInput } from '@/features/media/media.types';
+import type { MediaFilter, MediaItem, PaginatedMediaList, UpdateMediaInput } from '@/features/media/media.types';
 
 type MediaListResponse = {
   success: true;
   files: MediaItem[];
+};
+
+type PaginatedMediaListResponse = {
+  success: true;
+  items: MediaItem[];
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
 };
 
 type MediaDetailResponse = {
@@ -24,6 +33,28 @@ export const getAdminMedia = async () => {
   try {
     const response = await apiClient.get<MediaListResponse>('/media');
     return response.data.files;
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, 'Unable to load media library.'), { cause: error });
+  }
+};
+
+export const getAdminMediaPage = async (page: number, pageSize: number, type: MediaFilter): Promise<PaginatedMediaList> => {
+  try {
+    const response = await apiClient.get<PaginatedMediaListResponse>('/media', {
+      params: {
+        page,
+        pageSize,
+        type,
+      },
+    });
+
+    return {
+      items: response.data.items,
+      page: response.data.page,
+      pageSize: response.data.pageSize,
+      totalItems: response.data.totalItems,
+      totalPages: response.data.totalPages,
+    };
   } catch (error) {
     throw new Error(getApiErrorMessage(error, 'Unable to load media library.'), { cause: error });
   }
