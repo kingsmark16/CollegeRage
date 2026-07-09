@@ -58,6 +58,7 @@ const MediaPage = () => {
   const [draftDescription, setDraftDescription] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const paginationItems = mediaQuery.data ? getPaginationItems(page, mediaQuery.data.totalPages) : [];
+  const isDeletingMedia = deleteMutation.isPending;
 
   const handleUploadSelection = (event: ChangeEvent<HTMLInputElement>) => {
     setSelectedFiles(Array.from(event.target.files ?? []).slice(0, 10));
@@ -333,25 +334,24 @@ const MediaPage = () => {
             className="relative w-full max-w-5xl overflow-hidden border border-white/10 bg-[#1a1d1d] shadow-2xl"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between gap-3 p-4">
-              <div className="min-w-0 rounded-full border border-white/10 bg-black/45 px-3 py-1 text-xs uppercase tracking-[0.18em] text-[#f2ede4] backdrop-blur-sm">
-                {selectedMedia.sanitizedName}
-              </div>
-
-              <div className="flex items-center gap-2">
+            <div className="absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-3 p-4">
+              <div className="flex shrink-0 items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-[#3c5362] bg-[#132028]/92 text-[#d7e7ee] hover:border-[#5f8599] hover:bg-[#1b2d38] hover:text-[#ffffff]"
+                  className="h-8 px-2.5 text-[11px] border-[#3c5362] bg-[#132028]/92 text-[#d7e7ee] hover:border-[#4f7083] hover:bg-[#162730] hover:text-[#ffffff] sm:h-10 sm:px-4 sm:text-sm"
                   onClick={() => setIsInfoVisible((current) => !current)}
                 >
                   <FlipHorizontal2 aria-hidden="true" data-icon="inline-start" />
                   {isInfoVisible ? 'Show media' : 'Show info'}
                 </Button>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-[#4a4540] bg-[#171311]/92 text-[#efe6da] hover:border-[#7b746b] hover:bg-[#211b18] hover:text-[#ffffff]"
+                  className="h-8 px-2.5 text-[11px] border-[#4a4540] bg-[#171311]/92 text-[#efe6da] hover:border-[#6c645c] hover:bg-[#1d1715] hover:text-[#ffffff] sm:h-10 sm:px-4 sm:text-sm"
                   onClick={() => {
                     setIsInfoVisible(false);
                     setIsPreviewOpen(false);
@@ -365,40 +365,46 @@ const MediaPage = () => {
             <div className="[perspective:1600px]">
               <div
                 className={cn(
-                  'relative min-h-[70vh] transition-transform duration-500 [transform-style:preserve-3d]',
+                  'relative h-[min(52vh,22rem)] min-h-[18rem] transition-transform duration-500 [transform-style:preserve-3d] sm:h-[min(58vh,26rem)] sm:min-h-[22rem] lg:h-[70vh] lg:min-h-[70vh]',
                   isInfoVisible ? '[transform:rotateY(180deg)]' : ''
                 )}
               >
                 <div className="relative [backface-visibility:hidden]">
-                  <div className="relative flex min-h-[70vh] items-center justify-center bg-[#0b0d0d] pt-20">
+                  <div className="relative flex h-full min-h-[18rem] items-center justify-center bg-[#0b0d0d] px-4 pb-4 pt-14 sm:min-h-[22rem] sm:pb-4 sm:pt-16 lg:min-h-[70vh] lg:pb-6 lg:pt-20">
                     {selectedMedia.type === 'image' ? (
-                      <RetryingMediaImage
-                        alt={selectedMedia.sanitizedName}
-                        imgClassName="object-contain"
-                        key={`${selectedMedia.id}-${selectedMedia.url ?? ''}`}
-                        overlayClassName="bg-[#0b0d0d]/86"
-                        src={selectedMedia.url}
-                        wrapperClassName="max-h-[70vh] h-full w-full"
-                      />
+                      <div className="flex w-full items-center justify-center">
+                        <RetryingMediaImage
+                          alt={selectedMedia.sanitizedName}
+                          imgClassName="max-h-[calc(min(52vh,22rem)-4.5rem)] w-auto max-w-full object-contain sm:max-h-[calc(min(58vh,26rem)-5rem)] lg:max-h-[calc(70vh-6.5rem)]"
+                          key={`${selectedMedia.id}-${selectedMedia.url ?? ''}`}
+                          overlayClassName="bg-[#0b0d0d]/86"
+                          src={selectedMedia.url}
+                          wrapperClassName="inline-flex max-h-[calc(min(52vh,22rem)-4.5rem)] w-auto max-w-full items-center justify-center sm:max-h-[calc(min(58vh,26rem)-5rem)] lg:max-h-[calc(70vh-6.5rem)]"
+                        />
+                      </div>
                     ) : (
-                      <AdminVideoPlayer
-                        activeVariantLabel={activeVariantLabel}
-                        activeVariantUrl={activeVariantUrl}
-                        poster={selectedMedia.thumbnail}
-                        title={selectedMedia.sanitizedName}
-                        variants={selectedMediaVariantEntries}
-                        onVariantSelect={setSelectedVariantLabel}
-                      />
+                      <div className="flex h-full w-full items-center justify-center">
+                        <AdminVideoPlayer
+                          key={selectedMedia.id}
+                          activeVariantLabel={activeVariantLabel}
+                          activeVariantUrl={activeVariantUrl}
+                          className="max-h-full w-full max-w-[min(100%,calc((min(52vh,22rem)-4.5rem)*1.7778))] sm:max-w-[min(100%,calc((min(58vh,26rem)-5rem)*1.7778))] lg:max-w-[min(100%,calc((70vh-6.5rem)*1.7778))]"
+                          isOpen={isPreviewOpen}
+                          poster={selectedMedia.thumbnail}
+                          variants={selectedMediaVariantEntries}
+                          onVariantSelect={setSelectedVariantLabel}
+                        />
+                      </div>
                     )}
                   </div>
                 </div>
 
                 <div className="absolute inset-0 h-full [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                  <div className="flex h-full min-h-[70vh] flex-col bg-[#151818] px-6 pt-20">
+                  <div className="flex h-full min-h-[18rem] flex-col bg-[#151818] px-6 pb-4 pt-14 sm:min-h-[22rem] sm:pb-4 sm:pt-16 lg:min-h-[70vh] lg:pb-6 lg:pt-20">
                     <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center gap-6 pb-6 text-center">
                       <div className="grid gap-2 text-sm text-[#beb7af]">
-                        <p className="text-xs uppercase tracking-[0.18em] text-[#c79a31]/70">Description</p>
-                        <p className="leading-7">{selectedMedia.description || 'No description added yet.'}</p>
+                        <p className="text-[10px] uppercase tracking-[0.18em] text-[#c79a31]/70 sm:text-xs">Description</p>
+                        <p className="text-xs leading-6 sm:text-sm sm:leading-7">{selectedMedia.description || 'No description added yet.'}</p>
                       </div>
                     </div>
 
@@ -406,7 +412,8 @@ const MediaPage = () => {
                       <div className="mx-auto flex w-full max-w-2xl flex-wrap justify-center gap-3">
                         <Button
                           variant="outline"
-                          className="border-[#705929] bg-[#221b0f] text-[#f0d38a] hover:border-[#c79a31] hover:bg-[#312713] hover:text-[#ffe3a0]"
+                          className="h-8 px-2.5 text-[11px] border-[#705929] bg-[#221b0f] text-[#f0d38a] hover:border-[#b88f3c] hover:bg-[#2a2111] hover:text-[#ffe3a0] sm:h-10 sm:px-4 sm:text-sm"
+                          disabled={isDeletingMedia}
                           onClick={() => {
                             primeDrafts();
                             setIsEditOpen(true);
@@ -417,11 +424,12 @@ const MediaPage = () => {
                         </Button>
                         <Button
                           variant="destructive"
-                          className="border border-[#7a2b2b] bg-[#2a1414] text-[#ff9e9e] hover:border-[#b74242] hover:bg-[#381919] hover:text-[#ffd2d2]"
+                          className="h-8 px-2.5 text-[11px] border border-[#7a2b2b] bg-[#2a1414] text-[#ff9e9e] hover:border-[#a33d3d] hover:bg-[#321717] hover:text-[#ffd2d2] sm:h-10 sm:px-4 sm:text-sm"
+                          disabled={isDeletingMedia}
                           onClick={() => void handleDelete()}
                         >
                           <Trash2 aria-hidden="true" data-icon="inline-start" />
-                          Delete
+                          {isDeletingMedia ? 'Deleting' : 'Delete'}
                         </Button>
                       </div>
                     </div>
