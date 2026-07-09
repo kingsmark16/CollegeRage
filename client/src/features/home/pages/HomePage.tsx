@@ -48,22 +48,22 @@ const HomePage = () => {
   return (
     <main className="min-h-screen bg-[#101212] text-[#f2ede4]">
       <section className="flex h-dvh min-h-screen flex-col overflow-hidden">
-        <header className="relative z-20 border-b border-white/10 bg-[#101212]/95 px-5 py-5 shadow-[0_18px_40px_rgba(0,0,0,0.32)] backdrop-blur-md sm:px-8 lg:px-10">
-          <div className="mx-auto grid w-full max-w-7xl gap-4 lg:grid-cols-[minmax(0,220px)_auto_auto] lg:items-center lg:justify-between">
-            <Link to="/" className="min-w-0">
-              <p className="truncate text-base font-semibold uppercase tracking-[0.28em] text-[#f2ede4] sm:text-lg">
+        <header className="relative z-20 border-b border-white/10 bg-[#101212]/95 px-3 py-3 shadow-[0_18px_40px_rgba(0,0,0,0.32)] backdrop-blur-md sm:px-5 sm:py-4 lg:px-10 lg:py-4.5">
+          <div className="mx-auto grid w-full max-w-7xl grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 sm:gap-4">
+            <Link to="/" className="min-w-0 text-left">
+              <p className="truncate text-xs font-semibold uppercase tracking-[0.22em] text-[#f2ede4] sm:text-sm sm:tracking-[0.26em] lg:text-lg lg:tracking-[0.28em]">
                 College Rage
               </p>
-              <p className="mt-1 hidden text-xs uppercase tracking-[0.24em] text-[#beb7af] sm:block">
+              <p className="mt-1 truncate text-[8px] uppercase tracking-[0.14em] text-[#beb7af] sm:text-[10px] sm:tracking-[0.18em] lg:text-xs lg:tracking-[0.24em]">
                 Relive the glory
               </p>
             </Link>
 
-            <div className="flex items-center justify-start lg:justify-center">
+            <div className="flex items-center justify-center">
               {publicMusicTracksQuery.data && publicMusicTracksQuery.data.length > 0 ? (
                 <Button
                   type="button"
-                  className={`relative size-11 rounded-full border bg-[#171b1b] shadow-[0_10px_22px_rgba(0,0,0,0.22)] transition hover:bg-[#1b1f1f] ${
+                  className={`relative size-8 rounded-full border bg-[#171b1b] shadow-[0_8px_18px_rgba(0,0,0,0.22)] transition hover:bg-[#1b1f1f] sm:size-9 lg:size-11 ${
                     isSoundtrackPlaying
                       ? 'border-[#c79a31]/70 text-[#f3cf7a] shadow-[0_0_0_1px_rgba(199,154,49,0.2),0_0_24px_rgba(199,154,49,0.3),0_10px_22px_rgba(0,0,0,0.24)]'
                       : 'border-white/10 text-[#c79a31] hover:border-[#c79a31]/45 hover:text-[#f3cf7a]'
@@ -85,13 +85,13 @@ const HomePage = () => {
                   />
                   <Music4
                     aria-hidden="true"
-                    className={`relative z-10 size-4 ${isSoundtrackPlaying ? 'animate-[pulse_1.6s_ease-in-out_infinite]' : ''}`}
+                    className={`relative z-10 size-3 sm:size-3.5 lg:size-4 ${isSoundtrackPlaying ? 'animate-[pulse_1.6s_ease-in-out_infinite]' : ''}`}
                   />
                   <span className="sr-only">{isMusicPlayerOpen ? 'Close music player' : 'Open music player'}</span>
                 </Button>
               ) : (
-                <div className="flex size-11 items-center justify-center rounded-full border border-white/10 bg-[#151818] text-[#8f887e]">
-                  <Music4 aria-hidden="true" className="size-4" />
+                <div className="flex size-8 items-center justify-center rounded-full border border-white/10 bg-[#151818] text-[#8f887e] sm:size-9 lg:size-11">
+                  <Music4 aria-hidden="true" className="size-3 sm:size-3.5 lg:size-4" />
                   <span className="sr-only">
                     {publicMusicTracksQuery.isLoading ? 'Loading soundtrack...' : 'No soundtrack available'}
                   </span>
@@ -99,8 +99,11 @@ const HomePage = () => {
               )}
             </div>
 
-            <div className="flex shrink-0 items-center justify-start lg:justify-end">
-              <Button asChild className="border-[#c79a31] bg-[#c79a31] text-[#131110] hover:bg-[#f3cf7a]">
+            <div className="flex shrink-0 items-center justify-end">
+              <Button
+                asChild
+                className="h-8 rounded-xl border-[#c79a31] bg-[#c79a31] px-2.5 text-[10px] text-[#131110] hover:bg-[#f3cf7a] sm:h-9 sm:px-3 sm:text-xs lg:h-11 lg:rounded-2xl lg:px-5 lg:text-sm"
+              >
                 <Link to={dashboardHref}>
                   <ShieldCheck aria-hidden="true" data-icon="inline-start" />
                   <span>{isLoading ? 'Checking' : user && isAdmin ? 'Dashboard' : 'Admin'}</span>
@@ -126,18 +129,18 @@ const HomePage = () => {
               onClick={() => setIsMusicPlayerOpen(false)}
             />
 
-            <div className="pointer-events-none absolute inset-x-0 top-24 z-10 flex justify-center px-3 sm:top-28">
+            <div className="pointer-events-none absolute inset-x-0 top-20 z-10 flex justify-center px-3 sm:top-24">
             <div
-              className={`relative w-full max-w-[820px] rounded-[28px] border border-white/10 bg-[#101212]/98 shadow-[0_30px_60px_rgba(0,0,0,0.38)] transition duration-200 ${
+              className={`relative w-full max-w-[820px] rounded-[24px] border border-white/10 bg-[#101212]/98 shadow-[0_30px_60px_rgba(0,0,0,0.38)] transition duration-200 sm:rounded-[28px] ${
                 isMusicPlayerOpen
                   ? 'pointer-events-auto translate-y-0 scale-100'
                   : 'pointer-events-none -translate-y-4 scale-[0.98]'
               }`}
             >
-              <div className="flex items-start justify-between gap-4 border-b border-white/10 px-5 py-5 sm:px-6">
+              <div className="flex items-start justify-between gap-3 border-b border-white/10 px-4 py-4 sm:gap-4 sm:px-6 sm:py-5">
                 <div>
-                  <p className="text-lg font-semibold uppercase tracking-[0.18em] text-[#f2ede4]">Soundtrack</p>
-                  <p className="mt-1 text-sm text-[#8f887e]">
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#f2ede4] sm:text-lg sm:tracking-[0.18em]">Soundtrack</p>
+                  <p className="mt-1 text-xs text-[#8f887e] sm:text-sm">
                     Play, switch tracks, and control the landing page soundtrack.
                   </p>
                 </div>
@@ -145,16 +148,16 @@ const HomePage = () => {
                 <Button
                   type="button"
                   variant="ghost"
-                  className="grid place-items-center border border-white/10 bg-[#171311] text-[#efe6da] hover:border-[#7b746b] hover:bg-[#211b18] hover:text-[#ffffff]"
+                  className="grid h-8 w-8 place-items-center border border-white/10 bg-[#171311] text-[#efe6da] hover:border-[#7b746b] hover:bg-[#211b18] hover:text-[#ffffff] sm:h-9 sm:w-9"
                   size="icon-sm"
                   onClick={() => setIsMusicPlayerOpen(false)}
                 >
-                  <X aria-hidden="true" className="size-4" />
+                  <X aria-hidden="true" className="size-3.5 sm:size-4" />
                   <span className="sr-only">Close music player</span>
                 </Button>
               </div>
 
-              <div className="px-4 py-4 sm:px-6 sm:py-5">
+              <div className="px-3 py-3 sm:px-6 sm:py-5">
                 <LandingHeaderMusicPlayer
                   tracks={publicMusicTracksQuery.data}
                   onPlaybackStateChange={setIsSoundtrackPlaying}
