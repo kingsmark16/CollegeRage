@@ -41,6 +41,7 @@ RUN npm ci --omit=dev \
   && npm cache clean --force
 
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/src/generated ./dist/generated
 COPY --from=builder /app/prisma ./prisma
 
 RUN mkdir -p /tmp/college-rage-media \
