@@ -1,1 +1,10 @@
 .codex/
+
+# Local environment and Docker overrides
+.env
+.env.*
+!.env.example
+docker-compose.override.yml
+
+# Local Docker/runtime data
+.docker-data/

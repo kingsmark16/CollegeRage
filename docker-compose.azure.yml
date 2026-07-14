@@ -1,0 +1,12 @@
+services:
+  server:
+    image: collegerageacr2026.azurecr.io/college-rage-server:latest
+    expose:
+      - "3000"
+
+  client:
+    image: collegerageacr2026.azurecr.io/college-rage-client:latest
+    depends_on:
+      - server
+    ports:
+      - "80:80"

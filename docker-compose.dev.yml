@@ -1,0 +1,41 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+      target: development
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+      CLIENT_ORIGIN: http://localhost:5173
+      MEDIA_TEMP_DIR: /tmp/college-rage-media
+    command: sh -c "npx prisma generate && npm run dev"
+    volumes:
+      - ./server:/app
+      - server_node_modules:/app/node_modules
+    restart: unless-stopped
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+      target: builder
+    env_file:
+      - client/.env.local
+    environment:
+      VITE_API_BASE_URL: /api/v1
+      VITE_DEV_API_TARGET: http://server:3000
+    command: npm run dev -- --host 0.0.0.0
+    volumes:
+      - ./client:/app
+      - client_node_modules:/app/node_modules
+    depends_on:
+      - server
+    ports:
+      - "5173:5173"
+    restart: unless-stopped
+
+volumes:
+  server_node_modules:
+  client_node_modules:
