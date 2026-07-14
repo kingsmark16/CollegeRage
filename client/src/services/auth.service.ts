@@ -15,6 +15,25 @@ const getAuthClient = () => {
   return getNeonAuth().adapter;
 };
 
+const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number) => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error('Neon Auth session request timed out. Check the production auth URL and allowed domain.'));
+        }, timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  }
+};
+
 export type AuthMode = 'sign-in' | 'sign-up';
 
 export type AuthCredentials = {
@@ -59,7 +78,7 @@ export const isAdminUser = (user: AuthUser | null) => {
 
 export const getCurrentSession = async () => {
   const authClient = getAuthClient();
-  const result = await authClient.getSession();
+  const result = await withTimeout(authClient.getSession(), 10_000);
 
   if (result.error) {
     throw new Error(result.error.message);
