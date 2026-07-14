@@ -47,6 +47,8 @@ jobs:
           file: client/Dockerfile
           build-args: |
             VITE_API_BASE_URL=/api/v1
+            VITE_NEON_AUTH_URL=${{ secrets.VITE_NEON_AUTH_URL }}
+            VITE_ADMIN_EMAILS=${{ secrets.VITE_ADMIN_EMAILS }}
             NGINX_CONFIG=nginx.azure.conf
           push: true
           tags: |
