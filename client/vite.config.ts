@@ -8,6 +8,10 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     host: true,
+    watch: {
+      usePolling: true,
+      interval: 300,
+    },
     proxy: {
       '/api': {
         target: process.env.VITE_DEV_API_TARGET ?? 'http://localhost:3000',

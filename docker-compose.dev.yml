@@ -21,6 +21,8 @@ services:
       context: .
       dockerfile: client/Dockerfile
       target: builder
+    env_file:
+      - client/.env.local
     environment:
       VITE_API_BASE_URL: /api/v1
       VITE_DEV_API_TARGET: http://server:3000

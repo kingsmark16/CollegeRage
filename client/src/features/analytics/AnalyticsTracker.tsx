@@ -18,7 +18,7 @@ const AnalyticsTracker = () => {
 
     const now = Date.now();
 
-    if (lastTrackedPath === path && now - lastTrackedAt < 1000) {
+    if (lastTrackedPath === path && now - lastTrackedAt < 30_000) {
       return;
     }
 

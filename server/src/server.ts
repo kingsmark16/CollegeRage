@@ -23,7 +23,7 @@ export const createServer = () => {
 
   app.get('/', (req: Request, res: Response) => {
     logger.info('Received request for /');
-    res.send('Hello, World Dockers');
+    res.send('Hello, World! The server is running.');
   });
 
   app.get('/health', (req: Request, res: Response) => {
