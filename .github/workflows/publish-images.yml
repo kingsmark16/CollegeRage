@@ -47,6 +47,7 @@ jobs:
           file: client/Dockerfile
           build-args: |
             VITE_API_BASE_URL=/api/v1
+            NGINX_CONFIG=nginx.azure.conf
           push: true
           tags: |
             ${{ env.REGISTRY }}/college-rage-client:latest
