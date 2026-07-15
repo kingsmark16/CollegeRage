@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import LoadingExperience from '@/components/LoadingExperience';
+import AdminFooter from '@/features/admin/components/AdminFooter';
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
 import type { MediaItem } from '@/features/media/media.types';
 import LandingHeaderMusicPlayer from '../components/LandingHeaderMusicPlayer';
@@ -255,6 +256,8 @@ const HomePage = () => {
         media={mediaGalleryQuery.data ?? []}
         onPlayerOpenChange={setIsVideoPlayerOpen}
       />
+
+      <AdminFooter />
 
       {!isVideoPlayerOpen ? (
         <div className="pointer-events-none fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-3 z-[1000] grid gap-1.5 md:hidden">
