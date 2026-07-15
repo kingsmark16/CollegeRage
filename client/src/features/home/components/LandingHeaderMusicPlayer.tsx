@@ -186,7 +186,7 @@ const LandingHeaderMusicPlayer = ({ onPlaybackStateChange, tracks }: LandingHead
   if (!currentTrack) {
     return (
       <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
-        <div className="flex min-w-0 items-center rounded-[22px] border border-white/10 bg-[#141818] px-3 py-2 text-[10px] uppercase tracking-[0.16em] text-[#8f887e]">
+        <div className="flex min-w-0 items-center rounded-[20px] border border-white/10 bg-[#141818] px-3 py-2 text-[9px] uppercase tracking-[0.14em] text-[#8f887e] sm:rounded-[22px] sm:text-[10px] sm:tracking-[0.16em]">
           No soundtrack
         </div>
       </div>
@@ -220,43 +220,43 @@ const LandingHeaderMusicPlayer = ({ onPlaybackStateChange, tracks }: LandingHead
   );
 
   return (
-    <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-2.5">
+    <div className="flex min-w-0 flex-col items-center gap-2 text-center sm:flex-row sm:items-center sm:gap-2.5 sm:text-left">
       {audioPortalTarget ? createPortal(audioElement, audioPortalTarget) : audioElement}
 
-      <div className="min-w-0 sm:max-w-[560px] sm:flex-1">
-        <div className="flex min-w-0 items-center gap-2 rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(20,24,24,0.98)_0%,rgba(15,18,18,0.98)_100%)] px-3 py-2 text-[#f2ede4] shadow-[0_12px_26px_rgba(0,0,0,0.28)]">
-          <div className="grid size-9 shrink-0 place-items-center rounded-full border border-[#c79a31]/18 bg-[radial-gradient(circle_at_30%_30%,#4d4330_0%,#292318_58%,#161311_100%)] text-[9px] font-semibold uppercase tracking-[0.14em] text-[#f3cf7a] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+      <div className="min-w-0 w-full sm:max-w-[560px] sm:flex-1">
+        <div className="flex min-w-0 items-center gap-1.5 rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(20,24,24,0.98)_0%,rgba(15,18,18,0.98)_100%)] px-2.5 py-2 text-[#f2ede4] shadow-[0_12px_26px_rgba(0,0,0,0.28)] sm:gap-2 sm:rounded-[22px] sm:px-3">
+          <div className="grid size-8 shrink-0 place-items-center rounded-full border border-[#c79a31]/18 bg-[radial-gradient(circle_at_30%_30%,#4d4330_0%,#292318_58%,#161311_100%)] text-[8px] font-semibold uppercase tracking-[0.12em] text-[#f3cf7a] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] sm:size-9 sm:text-[9px] sm:tracking-[0.14em]">
             {getTrackBadge(currentTrack)}
           </div>
 
           <div className="min-w-0 flex-[0.9]">
-            <p className="truncate text-[12px] font-semibold text-[#f2ede4]">{currentTrack.title}</p>
-            <p className="truncate text-[10px] font-medium text-[#8f887e]">
+            <p className="truncate text-[11px] font-semibold text-[#f2ede4] sm:text-[12px]">{currentTrack.title}</p>
+            <p className="truncate text-[9px] font-medium text-[#8f887e] sm:text-[10px]">
               {currentTrack.artist?.trim() || 'Background soundtrack'}
             </p>
           </div>
 
           <div className="flex shrink-0 items-center gap-0.5">
             <button
-              className="grid size-7 shrink-0 place-items-center rounded-full text-[#c8b78f] transition hover:bg-white/6 hover:text-[#f3cf7a]"
+              className="grid size-6 shrink-0 place-items-center rounded-full text-[#c8b78f] transition hover:bg-white/6 hover:text-[#f3cf7a] sm:size-7"
               type="button"
               onClick={() => void selectTrack(resolvedTrackIndex - 1, isPlaying)}
             >
-              <SkipBack className="size-3.5" />
+              <SkipBack className="size-3 sm:size-3.5" />
               <span className="sr-only">Previous track</span>
             </button>
 
             <button
-              className="grid size-8 shrink-0 place-items-center rounded-full bg-[linear-gradient(180deg,#f0c869_0%,#c79a31_100%)] text-[#17120d] shadow-[0_8px_18px_rgba(199,154,49,0.28)] transition hover:scale-[1.02] hover:shadow-[0_10px_22px_rgba(199,154,49,0.34)]"
+              className="grid size-7 shrink-0 place-items-center rounded-full bg-[linear-gradient(180deg,#f0c869_0%,#c79a31_100%)] text-[#17120d] shadow-[0_8px_18px_rgba(199,154,49,0.28)] transition hover:scale-[1.02] hover:shadow-[0_10px_22px_rgba(199,154,49,0.34)] sm:size-8"
               type="button"
               onClick={() => void togglePlayback()}
             >
               {isAudioLoading ? (
-                <LoaderCircle className="size-3.5 animate-spin" />
+                <LoaderCircle className="size-3 animate-spin sm:size-3.5" />
               ) : isPlaying ? (
-                <Pause className="size-3.5" />
+                <Pause className="size-3 sm:size-3.5" />
               ) : (
-                <Play className="ml-0.5 size-3.5 fill-current" />
+                <Play className="ml-0.5 size-3 fill-current sm:size-3.5" />
               )}
               <span className="sr-only">
                 {isAudioLoading ? 'Loading track' : isPlaying ? 'Pause track' : 'Play track'}
@@ -264,11 +264,11 @@ const LandingHeaderMusicPlayer = ({ onPlaybackStateChange, tracks }: LandingHead
             </button>
 
             <button
-              className="grid size-7 shrink-0 place-items-center rounded-full text-[#c8b78f] transition hover:bg-white/6 hover:text-[#f3cf7a]"
+              className="grid size-6 shrink-0 place-items-center rounded-full text-[#c8b78f] transition hover:bg-white/6 hover:text-[#f3cf7a] sm:size-7"
               type="button"
               onClick={() => void selectTrack(resolvedTrackIndex + 1, isPlaying)}
             >
-              <SkipForward className="size-3.5" />
+              <SkipForward className="size-3 sm:size-3.5" />
               <span className="sr-only">Next track</span>
             </button>
           </div>
@@ -300,8 +300,8 @@ const LandingHeaderMusicPlayer = ({ onPlaybackStateChange, tracks }: LandingHead
           </div>
         </div>
 
-        <div className="mt-1.5 flex items-center gap-2 px-2 sm:hidden">
-          <span className="w-8 shrink-0 text-right text-[10px] font-medium tabular-nums text-[#8f887e]">
+        <div className="mt-1.5 flex items-center gap-2 px-1 sm:hidden">
+          <span className="w-8 shrink-0 text-right text-[9px] font-medium tabular-nums text-[#8f887e]">
             {formatTime(currentTime)}
           </span>
 
@@ -321,18 +321,18 @@ const LandingHeaderMusicPlayer = ({ onPlaybackStateChange, tracks }: LandingHead
             />
           </div>
 
-          <span className="w-8 shrink-0 text-[10px] font-medium tabular-nums text-[#8f887e]">
+          <span className="w-8 shrink-0 text-[9px] font-medium tabular-nums text-[#8f887e]">
             {formatTime(duration)}
           </span>
         </div>
       </div>
 
-      <div className="min-w-0 sm:w-[220px] sm:flex-none">
-        <div className="flex min-w-0 items-center gap-2 rounded-[18px] border border-white/10 bg-[#171b1b] px-3 py-2">
-          <span className="shrink-0 text-[9px] uppercase tracking-[0.16em] text-[#8f887e]">Track</span>
+      <div className="min-w-0 w-full sm:w-[220px] sm:flex-none">
+        <div className="flex min-w-0 items-center gap-2 rounded-[16px] border border-white/10 bg-[#171b1b] px-2.5 py-2 sm:rounded-[18px] sm:px-3">
+          <span className="shrink-0 text-[8px] uppercase tracking-[0.14em] text-[#8f887e] sm:text-[9px] sm:tracking-[0.16em]">Track</span>
           <div className="min-w-0 flex-1 overflow-hidden">
             <select
-              className="block w-full min-w-0 truncate rounded-full border border-white/10 bg-[#171b1b] px-3 py-1.5 pr-8 text-[11px] font-medium text-[#f2ede4] outline-none transition hover:border-white/20 focus:border-[#c79a31]/65"
+              className="block w-full min-w-0 truncate rounded-full border border-white/10 bg-[#171b1b] px-2.5 py-1.5 pr-8 text-[10px] font-medium text-[#f2ede4] outline-none transition hover:border-white/20 focus:border-[#c79a31]/65 sm:px-3 sm:text-[11px]"
               value={String(resolvedTrackIndex)}
               onChange={(event) => void selectTrack(Number(event.target.value), isPlaying)}
             >

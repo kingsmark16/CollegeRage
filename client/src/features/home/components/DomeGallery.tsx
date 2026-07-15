@@ -5,6 +5,7 @@ type ImageItem = string | { src: string; alt?: string };
 
 type DomeGalleryProps = {
   images?: ImageItem[];
+  pauseImageLoading?: boolean;
   fit?: number;
   fitBasis?: 'auto' | 'min' | 'max' | 'width' | 'height';
   minRadius?: number;
@@ -123,10 +124,9 @@ const getImageRetryDelay = (attempt: number) => {
   return Math.min(750 * 2 ** Math.min(attempt, 5), 20000);
 };
 
-const INITIAL_ACTIVE_IMAGE_COUNT = 56;
-const ACTIVE_IMAGE_BATCH_SIZE = 16;
-const ACTIVE_IMAGE_BATCH_INTERVAL_MS = 120;
-const RETRY_BLINK_DURATION_MS = 220;
+const INITIAL_ACTIVE_IMAGE_COUNT = 24;
+const ACTIVE_IMAGE_BATCH_SIZE = 8;
+const ACTIVE_IMAGE_BATCH_INTERVAL_MS = 240;
 
 const getRowsPerColumn = (imageCount: number) => {
   if (imageCount <= 40) return 6;
@@ -263,6 +263,7 @@ const getInitialVisibilityScore = (item: ItemDef, segments: number) => {
 
 export default function DomeGallery({
   images = DEFAULT_IMAGES,
+  pauseImageLoading = false,
   fit = 0.5,
   fitBasis = 'auto',
   minRadius = 600,
@@ -309,12 +310,10 @@ export default function DomeGallery({
   const openStartedAtRef = useRef(0);
   const lastDragEndAt = useRef(0);
   const retryTimersRef = useRef<Map<string, number>>(new Map());
-  const retryBlinkTimersRef = useRef<Map<string, number>>(new Map());
   const retryAttemptsRef = useRef<Map<string, number>>(new Map());
   const sessionLayoutSeedRef = useRef<number>(Math.floor(Math.random() * 0x100000000));
   const [imageRetryKeys, setImageRetryKeys] = useState<Record<string, number>>({});
   const [loadedImageSources, setLoadedImageSources] = useState<Record<string, boolean>>({});
-  const [retryBlinkSources, setRetryBlinkSources] = useState<Record<string, boolean>>({});
 
   const scrollLockedRef = useRef(false);
   const lockScroll = useCallback(() => {
@@ -374,26 +373,10 @@ export default function DomeGallery({
     retryTimersRef.current.delete(src);
   }, []);
 
-  const clearImageRetryBlinkTimer = useCallback((src: string) => {
-    const timer = retryBlinkTimersRef.current.get(src);
-    if (timer === undefined) return;
-
-    window.clearTimeout(timer);
-    retryBlinkTimersRef.current.delete(src);
-  }, []);
-
   const markImageLoaded = useCallback(
     (src: string) => {
       clearImageRetryTimer(src);
-      clearImageRetryBlinkTimer(src);
       retryAttemptsRef.current.delete(src);
-      setRetryBlinkSources(currentSources => {
-        if (!currentSources[src]) return currentSources;
-
-        const nextSources = { ...currentSources };
-        delete nextSources[src];
-        return nextSources;
-      });
       setLoadedImageSources(currentSources => {
         if (currentSources[src]) return currentSources;
 
@@ -403,18 +386,15 @@ export default function DomeGallery({
         };
       });
     },
-    [clearImageRetryBlinkTimer, clearImageRetryTimer]
+    [clearImageRetryTimer]
   );
 
   const scheduleImageRetry = useCallback(
     (src: string) => {
-      if (src.length === 0 || retryTimersRef.current.has(src)) return;
+      if (pauseImageLoading || src.length === 0 || retryTimersRef.current.has(src)) return;
 
       const attempt = retryAttemptsRef.current.get(src) ?? 0;
       const retryDelay = getImageRetryDelay(attempt);
-      const blinkDelay = Math.max(retryDelay - RETRY_BLINK_DURATION_MS, 0);
-
-      clearImageRetryBlinkTimer(src);
       setLoadedImageSources(currentSources => {
         if (!(src in currentSources)) return currentSources;
 
@@ -423,39 +403,22 @@ export default function DomeGallery({
         return nextSources;
       });
 
-      const blinkTimer = window.setTimeout(() => {
-        retryBlinkTimersRef.current.delete(src);
-        setRetryBlinkSources(currentSources => ({
-          ...currentSources,
-          [src]: true
-        }));
-      }, blinkDelay);
-
       const timer = window.setTimeout(() => {
         retryTimersRef.current.delete(src);
-        clearImageRetryBlinkTimer(src);
         retryAttemptsRef.current.set(src, attempt + 1);
-        setRetryBlinkSources(currentSources => {
-          if (!currentSources[src]) return currentSources;
-
-          const nextSources = { ...currentSources };
-          delete nextSources[src];
-          return nextSources;
-        });
         setImageRetryKeys(currentKeys => ({
           ...currentKeys,
           [src]: (currentKeys[src] ?? 0) + 1
         }));
       }, retryDelay);
 
-      retryBlinkTimersRef.current.set(src, blinkTimer);
       retryTimersRef.current.set(src, timer);
     },
-    [clearImageRetryBlinkTimer]
+    [pauseImageLoading]
   );
 
   useEffect(() => {
-    if (activeImageCount >= imageSources.length) return;
+    if (pauseImageLoading || activeImageCount >= imageSources.length) return;
 
     const timer = window.setTimeout(() => {
       setActiveImageState(currentState => {
@@ -469,17 +432,21 @@ export default function DomeGallery({
     }, ACTIVE_IMAGE_BATCH_INTERVAL_MS);
 
     return () => window.clearTimeout(timer);
-  }, [activeImageCount, imageSources.length, imageSourcesKey]);
+  }, [activeImageCount, imageSources.length, imageSourcesKey, pauseImageLoading]);
+
+  useEffect(() => {
+    if (!pauseImageLoading) return;
+
+    retryTimersRef.current.forEach(timer => window.clearTimeout(timer));
+    retryTimersRef.current.clear();
+  }, [pauseImageLoading]);
 
   useEffect(() => {
     const retryAttempts = retryAttemptsRef.current;
-    const retryBlinkTimers = retryBlinkTimersRef.current;
     const retryTimers = retryTimersRef.current;
 
     return () => {
       retryAttempts.clear();
-      retryBlinkTimers.forEach(timer => window.clearTimeout(timer));
-      retryBlinkTimers.clear();
       retryTimers.forEach(timer => window.clearTimeout(timer));
       retryTimers.clear();
     };
@@ -489,9 +456,6 @@ export default function DomeGallery({
     const nextImageSources = new Set(imageSources);
 
     setLoadedImageSources(currentSources =>
-      Object.fromEntries(Object.entries(currentSources).filter(([src]) => nextImageSources.has(src)))
-    );
-    setRetryBlinkSources(currentSources =>
       Object.fromEntries(Object.entries(currentSources).filter(([src]) => nextImageSources.has(src)))
     );
   }, [imageSources]);
@@ -1009,13 +973,10 @@ export default function DomeGallery({
   };
 
   useEffect(() => {
-    const retryBlinkTimers = retryBlinkTimersRef.current;
     const retryTimers = retryTimersRef.current;
 
     return () => {
       document.body.classList.remove('dg-scroll-lock');
-      retryBlinkTimers.forEach(timer => window.clearTimeout(timer));
-      retryBlinkTimers.clear();
       retryTimers.forEach(timer => window.clearTimeout(timer));
       retryTimers.clear();
     };
@@ -1113,66 +1074,6 @@ export default function DomeGallery({
         linear-gradient(135deg, rgba(242, 237, 228, 0.04), rgba(199, 154, 49, 0.05));
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
     }
-    .item__image::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      padding: 1px;
-      background: linear-gradient(
-        135deg,
-        rgba(255, 105, 180, 0.8),
-        rgba(255, 194, 92, 0.88),
-        rgba(118, 255, 214, 0.82),
-        rgba(108, 162, 255, 0.82),
-        rgba(255, 105, 180, 0.8)
-      );
-      background-size: 220% 220%;
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      opacity: 0;
-      transition: opacity 180ms ease;
-      pointer-events: none;
-    }
-    .item__image::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background:
-        linear-gradient(135deg, rgba(255, 99, 171, 0.08), transparent 34%),
-        linear-gradient(315deg, rgba(103, 224, 255, 0.08), transparent 40%);
-      opacity: 0;
-      transition: opacity 180ms ease;
-      pointer-events: none;
-    }
-    .item__image[data-loading='true']::before,
-    .item__image[data-loading='true']::after {
-      opacity: 1;
-    }
-    .item__image[data-loading-animated='true']::before {
-      animation: dg-border-spectrum 3200ms linear infinite;
-      will-change: background-position;
-    }
-    .item__image[data-loading='true'] {
-      box-shadow:
-        inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-        0 0 12px rgba(255, 110, 199, 0.08),
-        0 0 18px rgba(93, 176, 255, 0.06);
-    }
-    .item__image[data-loading-animated='true'] {
-      box-shadow:
-        inset 0 0 0 1px rgba(255, 255, 255, 0.09),
-        0 0 16px rgba(255, 110, 199, 0.1),
-        0 0 22px rgba(255, 194, 92, 0.08),
-        0 0 28px rgba(93, 176, 255, 0.08);
-    }
-    .item__image[data-retrying='true']::before,
-    .item__image[data-retrying='true']::after {
-      animation-duration: 900ms;
-      opacity: 1;
-    }
     .item__image--reference {
       position: absolute;
       inset: 10px;
@@ -1188,72 +1089,11 @@ export default function DomeGallery({
       position: absolute;
       inset: 0;
       pointer-events: none;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at 22% 18%, rgba(255, 121, 198, 0.16), transparent 30%),
-        radial-gradient(circle at 80% 24%, rgba(255, 201, 102, 0.14), transparent 32%),
-        radial-gradient(circle at 54% 82%, rgba(90, 218, 255, 0.12), transparent 34%),
-        linear-gradient(140deg, rgba(36, 18, 48, 0.28), rgba(31, 49, 72, 0.22) 44%, rgba(16, 18, 18, 0.16));
+      background: #252b2a;
       opacity: 0;
-      transition: opacity 180ms ease, filter 180ms ease;
-    }
-    .item__loading-overlay::before {
-      content: '';
-      position: absolute;
-      inset: -35%;
-      background:
-        linear-gradient(
-          112deg,
-          transparent 16%,
-          rgba(255, 107, 183, 0.04) 30%,
-          rgba(255, 211, 97, 0.34) 45%,
-          rgba(97, 236, 255, 0.26) 56%,
-          rgba(120, 165, 255, 0.08) 65%,
-          transparent 80%
-        );
-      transform: translateX(-62%) rotate(8deg);
-    }
-    .item__loading-overlay::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 30%, rgba(0, 0, 0, 0.12));
-      opacity: 0.9;
     }
     .item__loading-overlay[data-visible='true'] {
       opacity: 1;
-    }
-    .item__loading-overlay[data-animated='true']::before {
-      animation: dg-tile-sheen 1700ms ease-in-out infinite;
-      will-change: transform;
-    }
-    .item__loading-overlay[data-retrying='true'] {
-      animation: dg-retry-blink 220ms steps(2, end) 1;
-      filter: saturate(1.15);
-    }
-    @keyframes dg-tile-sheen {
-      0% {
-        transform: translateX(-62%) rotate(8deg);
-      }
-      100% {
-        transform: translateX(62%) rotate(8deg);
-      }
-    }
-    @keyframes dg-retry-blink {
-      0%, 100% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0.22;
-      }
-    }
-    @keyframes dg-border-spectrum {
-      0% {
-        background-position: 0% 50%;
-      }
-      100% {
-        background-position: 200% 50%;
-      }
     }
   `;
 
@@ -1282,23 +1122,12 @@ export default function DomeGallery({
             WebkitUserSelect: 'none'
           }}
         >
-          <div
-            className="absolute inset-[12%] m-auto z-[1] pointer-events-none"
-            style={{
-              background:
-                'radial-gradient(circle at 50% 48%, rgba(199,154,49,0.16), transparent 36%), radial-gradient(circle at 50% 52%, rgba(242,237,228,0.08), transparent 52%)',
-              filter: 'blur(38px)',
-              transform: 'scale(1.04)'
-            }}
-          />
           <div className="stage">
             <div ref={sphereRef} className="sphere">
               {items.map((it, i) => {
-                const isImageActive = activeImageSources.has(it.src);
                 const isImageLoaded = Boolean(loadedImageSources[it.src]);
-                const isRetryBlinking = Boolean(retryBlinkSources[it.src]);
+                const isImageActive = activeImageSources.has(it.src) && (!pauseImageLoading || isImageLoaded);
                 const showLoadingOverlay = !isImageLoaded;
-                const animateLoadingTile = (isImageActive && !isImageLoaded) || isRetryBlinking;
                 const priorityIndex = imageSourcePriority[it.src] ?? Number.MAX_SAFE_INTEGER;
                 const fetchPriority = priorityIndex < Math.min(INITIAL_ACTIVE_IMAGE_COUNT, 24) ? 'high' : 'auto';
 
@@ -1326,10 +1155,7 @@ export default function DomeGallery({
                     )}
                   >
                     <div
-                      className="item__image absolute block overflow-hidden cursor-pointer bg-[#171a1a] transition-transform duration-300"
-                      data-loading={showLoadingOverlay}
-                      data-loading-animated={animateLoadingTile}
-                      data-retrying={isRetryBlinking}
+                        className="item__image absolute block overflow-hidden cursor-pointer bg-[#252b2a] transition-transform duration-300"
                       role="button"
                       tabIndex={0}
                       aria-label={it.alt || 'Open image'}
@@ -1357,8 +1183,6 @@ export default function DomeGallery({
                       <div
                         className="item__loading-overlay"
                         data-visible={showLoadingOverlay}
-                        data-animated={animateLoadingTile}
-                        data-retrying={isRetryBlinking}
                         aria-hidden="true"
                       />
                       {isImageActive ? (
@@ -1367,7 +1191,7 @@ export default function DomeGallery({
                           src={it.src}
                           draggable={false}
                           alt={it.alt}
-                          loading="eager"
+                          loading={fetchPriority === 'high' ? 'eager' : 'lazy'}
                           decoding="async"
                           fetchPriority={fetchPriority}
                           onLoad={() => markImageLoaded(it.src)}
@@ -1407,7 +1231,6 @@ export default function DomeGallery({
             style={{
               WebkitMaskImage: `radial-gradient(rgba(235, 235, 235, 0) 70%, var(--overlay-blur-color, ${overlayBlurColor}) 90%)`,
               maskImage: `radial-gradient(rgba(235, 235, 235, 0) 70%, var(--overlay-blur-color, ${overlayBlurColor}) 90%)`,
-              backdropFilter: 'blur(3px)'
             }}
           />
 
