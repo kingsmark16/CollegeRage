@@ -62,16 +62,16 @@ const AuthPage = ({ mode }: AuthPageProps) => {
   }
 
   return (
-    <main className="min-h-screen bg-[#121414] text-[#e2e2e2]">
-      <section className="relative grid min-h-screen overflow-hidden px-4 py-8 md:px-12">
+    <main className="min-h-[100dvh] overflow-x-hidden bg-[#121414] text-[#e2e2e2]">
+      <section className="relative flex min-h-[100dvh] items-center justify-center overflow-y-auto px-3 py-4 sm:px-6 sm:py-8 md:px-12">
         <img src={backgroundImage} alt="" className="absolute inset-0 h-full w-full object-cover opacity-75" />
         <div className="pointer-events-none absolute inset-0 bg-[#121414]/78" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(212,165,66,0.2),transparent_30%),radial-gradient(circle_at_80%_72%,rgba(52,213,154,0.12),transparent_28%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(212,165,66,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(212,165,66,0.05)_1px,transparent_1px)] bg-[size:40px_40px]" />
 
-        <div className="relative mx-auto flex w-full max-w-[1200px] items-center justify-center">
-          <div className="grid w-full gap-12 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="flex max-w-xl flex-col justify-between px-2 py-8 md:px-8">
+        <div className="relative mx-auto flex w-full max-w-[1200px] items-center justify-center py-2 sm:py-4 lg:py-8">
+          <div className="grid w-full min-w-0 gap-6 sm:gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:gap-12">
+            <div className="flex min-w-0 max-w-xl flex-col items-center justify-between px-0 py-2 text-center sm:px-4 sm:py-6 md:px-8 lg:items-start lg:py-8 lg:text-left">
               <div>
                 <Button
                   asChild
@@ -84,39 +84,15 @@ const AuthPage = ({ mode }: AuthPageProps) => {
                   </Link>
                 </Button>
 
-                <div className="mt-12">
-                  <p className="text-2xl font-bold tracking-widest">College Rage</p>
-                  <p className="mt-3 text-sm font-medium uppercase tracking-widest text-[#d4a542]">Relive the glory</p>
-                </div>
-
-                <div className="mt-12">
-                  <h1 className="font-heading text-5xl leading-tight text-[#f5f1ea]">
-                    {isSignIn ? 'Admin sign in' : 'Create the admin account'}
-                  </h1>
-                  <p className="mt-5 max-w-lg text-sm leading-8 text-[#afaaa3] sm:text-base">
-                    {isSignIn
-                      ? 'Enter the private workspace and continue with media management, Dropbox setup, and internal operations.'
-                      : 'Create the authenticated account that owns the private dashboard. Public visitors will still stay on the open site.'}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-10 grid gap-4 sm:grid-cols-2">
-                <div className="border border-white/10 bg-[#181b1b]/70 p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-[#d4a542]">Public route</p>
-                  <p className="mt-3 text-sm leading-7 text-[#d7d2ca]">The home page stays visible to every visitor.</p>
-                </div>
-                <div className="border border-white/10 bg-[#181b1b]/70 p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-[#d4a542]">Admin route</p>
-                  <p className="mt-3 text-sm leading-7 text-[#d7d2ca]">
-                    Signed-in admin visits are redirected into the protected dashboard.
-                  </p>
+                <div className="mt-6 sm:mt-10 lg:mt-12">
+                  <p className="text-xl font-bold tracking-[0.18em] sm:text-2xl sm:tracking-widest">College Rage</p>
+                  <p className="mt-2 text-[11px] font-medium uppercase tracking-[0.18em] text-[#d4a542] sm:mt-3 sm:text-sm sm:tracking-widest">Relive the glory</p>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-center">
-              <div className="w-full max-w-md border border-[#2e2e2e] bg-[#171919]/88 p-8 backdrop-blur-sm">
+            <div className="flex min-w-0 items-center justify-center">
+              <div className="w-full max-w-[28rem] min-w-0 border border-[#2e2e2e] bg-[#171919]/90 p-5 backdrop-blur-sm sm:p-8">
                 <p className="text-xs uppercase tracking-[0.25em] text-[#d4a542]">{isSignIn ? 'Sign in' : 'Sign up'}</p>
                 <h2 className="mt-4 font-heading text-3xl text-[#f5f1ea]">
                   {isSignIn ? 'Welcome back' : 'Secure the dashboard'}
@@ -128,17 +104,17 @@ const AuthPage = ({ mode }: AuthPageProps) => {
                 </p>
 
                 {error ? (
-                  <div className="mt-6 border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                  <div className="mt-6 break-words border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                     {error}
                   </div>
                 ) : null}
 
-                <form className="mt-8 flex flex-col gap-6" onSubmit={handleSubmit}>
+                <form className="mt-6 flex min-w-0 flex-col gap-5 sm:mt-8 sm:gap-6" onSubmit={handleSubmit}>
                   {!isSignIn ? (
                     <label className="flex flex-col gap-2 text-sm font-medium text-[#e2e2e2]">
                       Name
                       <input
-                        className="border border-[#3f3a34] bg-transparent px-4 py-3 text-sm text-[#e2e2e2] outline-none transition-colors placeholder:text-[#999999] focus:border-[#d4a542] focus:ring-1 focus:ring-[#d4a542]"
+                        className="w-full min-w-0 border border-[#3f3a34] bg-transparent px-3 py-3 text-sm text-[#e2e2e2] outline-none transition-colors placeholder:text-[#999999] focus:border-[#d4a542] focus:ring-1 focus:ring-[#d4a542] sm:px-4"
                         value={name}
                         onChange={(event) => {
                           setName(event.target.value);
@@ -157,7 +133,7 @@ const AuthPage = ({ mode }: AuthPageProps) => {
                   <label className="flex flex-col gap-2 text-sm font-medium text-[#e2e2e2]">
                     Email
                     <input
-                      className="border border-[#3f3a34] bg-transparent px-4 py-3 text-sm text-[#e2e2e2] outline-none transition-colors placeholder:text-[#999999] focus:border-[#d4a542] focus:ring-1 focus:ring-[#d4a542]"
+                      className="w-full min-w-0 border border-[#3f3a34] bg-transparent px-3 py-3 text-sm text-[#e2e2e2] outline-none transition-colors placeholder:text-[#999999] focus:border-[#d4a542] focus:ring-1 focus:ring-[#d4a542] sm:px-4"
                       value={email}
                       onChange={(event) => {
                         setEmail(event.target.value);
@@ -176,7 +152,7 @@ const AuthPage = ({ mode }: AuthPageProps) => {
                   <label className="flex flex-col gap-2 text-sm font-medium text-[#e2e2e2]">
                     Password
                     <input
-                      className="border border-[#3f3a34] bg-transparent px-4 py-3 text-sm text-[#e2e2e2] outline-none transition-colors placeholder:text-[#999999] focus:border-[#d4a542] focus:ring-1 focus:ring-[#d4a542]"
+                      className="w-full min-w-0 border border-[#3f3a34] bg-transparent px-3 py-3 text-sm text-[#e2e2e2] outline-none transition-colors placeholder:text-[#999999] focus:border-[#d4a542] focus:ring-1 focus:ring-[#d4a542] sm:px-4"
                       value={password}
                       onChange={(event) => {
                         setPassword(event.target.value);
@@ -206,7 +182,7 @@ const AuthPage = ({ mode }: AuthPageProps) => {
                   </Button>
                 </form>
 
-                <div className="mt-8 text-center text-sm text-[#999999]">
+                <div className="mt-6 text-center text-sm text-[#999999] sm:mt-8">
                   {isSignIn ? "Don't have an account?" : 'Already have an account?'}
                   <Link
                     className="ml-2 text-[#d4a542] transition-colors hover:text-[#ebc97d]"
