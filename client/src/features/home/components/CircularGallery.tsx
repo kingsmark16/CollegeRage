@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 export type CircularGalleryItem = {
   id: string;
@@ -166,6 +167,15 @@ const CircularGallery = ({ items, pauseImageLoading = false, className = '', onI
       }}
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(199,154,49,0.09),transparent_48%)]" />
+
+      <div className="pointer-events-none absolute inset-x-0 bottom-3 z-[120] flex justify-center sm:bottom-5">
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#101212]/75 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-[#beb7af] shadow-lg backdrop-blur-md sm:gap-3 sm:px-4 sm:py-2 sm:text-[10px]">
+          <ArrowLeft aria-hidden="true" className="size-3 text-[#c79a31] sm:size-3.5" />
+          <span className="sm:hidden">Swipe to explore</span>
+          <span className="hidden sm:inline">Drag to explore</span>
+          <ArrowRight aria-hidden="true" className="size-3 text-[#c79a31] sm:size-3.5" />
+        </div>
+      </div>
 
       {items.map((item, index) => {
         const position = wrapPosition(index * cardSlotWidth + scrollOffset, totalWidth);

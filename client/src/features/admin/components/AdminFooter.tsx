@@ -9,7 +9,7 @@ const AdminFooter = () => {
     <footer className="border-t border-white/10 bg-[#0b0f14] px-4 py-8 sm:px-6 sm:py-10">
       <div className="mx-auto grid max-w-7xl gap-8">
         <div className="grid gap-8 lg:grid-cols-[1.1fr_1fr_0.8fr] lg:items-start">
-          <div>
+          <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
             <div className="flex items-center gap-2 text-[#f3cf7a]">
               <span className="grid size-10 place-items-center overflow-hidden rounded-xl border border-[#c79a31]/25 bg-[#c79a31]/10 shadow-[0_0_20px_rgba(199,154,49,0.12)]">
                 <img alt="College Rage" className="size-full object-cover transition-transform duration-300 hover:scale-110" src={screenLogo} />
@@ -21,7 +21,7 @@ const AdminFooter = () => {
             </p>
           </div>
 
-          <div>
+          <div className="text-center">
             <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#7f89a3]">The Memory Makers</p>
             <div className="mt-4 grid grid-cols-2 gap-2">
               {featuredNames.map((name, index) => (
@@ -36,7 +36,7 @@ const AdminFooter = () => {
             </div>
           </div>
 
-          <div className="flex flex-col items-start gap-3 lg:items-end">
+          <div className="flex flex-col items-center gap-3 text-center lg:items-end lg:text-right">
             <a
               className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2.5 text-xs font-semibold text-[#f2ede4] transition hover:-translate-y-0.5 hover:border-[#c79a31]/60 hover:bg-[#c79a31]/10 hover:text-[#f3cf7a]"
               href={githubUrl}
@@ -51,7 +51,7 @@ const AdminFooter = () => {
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-white/8 pt-5 text-xs text-[#6f788b] sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col items-center gap-3 border-t border-white/8 pt-5 text-center text-xs text-[#6f788b] sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} College Rage. All rights reserved.</p>
           <p className="inline-flex items-center gap-1.5">
             Made with <Heart aria-hidden="true" className="size-3.5 fill-[#c79a31] text-[#c79a31]" /> and care.
