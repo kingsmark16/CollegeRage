@@ -132,18 +132,18 @@ const VideoMemoriesSection = ({ isError, isLoading, media, onPlayerOpenChange }:
   };
 
   return (
-    <section className="border-t border-white/10 bg-[#101212] px-4 py-16 sm:px-8 sm:py-20 lg:px-10 lg:py-24">
+    <section className="border-t border-white/10 bg-[#101212] px-4 py-10 sm:px-8 sm:py-16 lg:px-10 lg:py-24">
       <div className="mx-auto grid w-full max-w-7xl gap-8 lg:gap-10">
         <div className="grid gap-3 sm:max-w-2xl">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#c79a31]">Video memories</p>
-          <h2 className="font-heading text-4xl text-[#f2ede4] sm:text-5xl">Every moment, still moving.</h2>
-          <p className="max-w-xl text-sm leading-7 text-[#beb7af] sm:text-base">
+          <h2 className="font-heading text-2xl text-[#f2ede4] sm:text-3xl lg:text-4xl">Every moment, still moving.</h2>
+          <p className="max-w-xl text-xs leading-6 text-[#beb7af] sm:text-sm sm:leading-7">
             Scroll through the archive, choose a memory, and let it play in full.
           </p>
         </div>
 
         {videoItems.length > 0 ? (
-          <div className="h-[420px] border border-white/10 bg-[#151818] shadow-[0_24px_60px_rgba(0,0,0,0.24)] sm:h-[520px]">
+          <div className="h-[210px] border border-white/10 bg-[#151818] shadow-[0_24px_60px_rgba(0,0,0,0.24)] min-[400px]:h-[240px] sm:h-[520px]">
             <CircularGallery
               items={videoItems}
               pauseImageLoading={Boolean(selectedVideo)}
@@ -163,14 +163,14 @@ const VideoMemoriesSection = ({ isError, isLoading, media, onPlayerOpenChange }:
       </div>
 
       {selectedVideo && activeVariantUrl ? (
-        <div className="fixed inset-0 z-[1000] isolate grid place-items-center p-4 sm:p-8" role="dialog" aria-label={getVideoLabel(selectedVideo)} aria-modal="true">
+        <div className="fixed inset-0 z-[1000] isolate grid place-items-center p-1 sm:p-3" role="dialog" aria-label={getVideoLabel(selectedVideo)} aria-modal="true">
           <button
             aria-label="Close video player"
             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             type="button"
             onClick={closeVideoPlayer}
           />
-          <div className="relative z-10 grid max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-5xl overflow-y-auto border border-white/10 bg-[#101212] p-1.5 shadow-[0_30px_80px_rgba(0,0,0,0.58)] sm:max-h-[calc(100dvh-2rem)] sm:w-full sm:p-3">
+          <div className="relative z-10 grid max-h-[calc(100dvh-0.5rem)] w-[calc(100vw-0.5rem)] max-w-5xl place-items-center overflow-y-auto border border-white/10 bg-[#101212] p-0.5 shadow-[0_30px_80px_rgba(0,0,0,0.58)] sm:max-h-[calc(100dvh-1.5rem)] sm:w-[calc(100vw-1.5rem)] sm:p-2">
             <Button
               className="absolute right-2 top-2 z-20 size-8 border border-white/10 bg-[#171b1b]/90 text-[#f2ede4] hover:border-[#c79a31]/60 hover:bg-[#211b18] hover:text-[#f3cf7a] sm:right-3 sm:top-3"
               size="icon"

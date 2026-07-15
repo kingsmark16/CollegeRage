@@ -67,6 +67,8 @@ const RetryingThumbnail = ({ source, pauseLoading = false }: { source: string; p
 
 const CircularGallery = ({ items, pauseImageLoading = false, className = '', onItemSelect }: CircularGalleryProps) => {
   const [scrollOffset, setScrollOffset] = useState(0);
+  const scrollOffsetRef = useRef(0);
+  const scrollFrameRef = useRef<number | null>(null);
   const pointerStartRef = useRef(0);
   const pointerLastRef = useRef(0);
   const isDraggingRef = useRef(false);
@@ -75,20 +77,41 @@ const CircularGallery = ({ items, pauseImageLoading = false, className = '', onI
   const cardSlotWidth = CARD_WIDTH + CARD_GAP;
   const totalWidth = useMemo(() => Math.max(items.length * cardSlotWidth, 1), [items.length, cardSlotWidth]);
 
+  const scheduleScrollOffset = (nextOffset: number) => {
+    scrollOffsetRef.current = nextOffset;
+
+    if (scrollFrameRef.current !== null) {
+      return;
+    }
+
+    scrollFrameRef.current = window.requestAnimationFrame(() => {
+      scrollFrameRef.current = null;
+      setScrollOffset(scrollOffsetRef.current);
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      if (scrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(scrollFrameRef.current);
+      }
+    };
+  }, []);
+
   const handleItemClick = (item: CircularGalleryItem, index: number) => {
     if (wasDraggedRef.current) {
       wasDraggedRef.current = false;
       return;
     }
 
-    const currentPosition = wrapPosition(index * cardSlotWidth + scrollOffset, totalWidth);
+    const currentPosition = wrapPosition(index * cardSlotWidth + scrollOffsetRef.current, totalWidth);
 
     if (Math.abs(currentPosition) > CENTER_CLICK_THRESHOLD) {
-      setScrollOffset(-index * cardSlotWidth);
+      scheduleScrollOffset(-index * cardSlotWidth);
       return;
     }
 
-    setScrollOffset(-index * cardSlotWidth);
+    scheduleScrollOffset(-index * cardSlotWidth);
     onItemSelect?.(item);
   };
 
@@ -111,7 +134,7 @@ const CircularGallery = ({ items, pauseImageLoading = false, className = '', onI
     if (Math.abs(event.clientX - pointerStartRef.current) >= DRAG_THRESHOLD) {
       wasDraggedRef.current = true;
     }
-    setScrollOffset((currentOffset) => currentOffset + distance);
+    scheduleScrollOffset(scrollOffsetRef.current + distance);
     pointerLastRef.current = event.clientX;
   };
 
@@ -128,20 +151,21 @@ const CircularGallery = ({ items, pauseImageLoading = false, className = '', onI
 
   return (
     <div
-      className={`relative h-full w-full cursor-grab touch-none overflow-hidden active:cursor-grabbing ${className}`}
+      className={`relative h-full w-full cursor-grab touch-pan-y overscroll-contain overflow-hidden active:cursor-grabbing ${className}`}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
       onWheel={(event) => {
         event.preventDefault();
-        setScrollOffset((currentOffset) => currentOffset - event.deltaY * 0.8);
+        scheduleScrollOffset(scrollOffsetRef.current - event.deltaY * 0.8);
       }}
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(199,154,49,0.09),transparent_48%)]" />
 
       {items.map((item, index) => {
         const position = wrapPosition(index * cardSlotWidth + scrollOffset, totalWidth);
+        const isCentered = Math.abs(position) <= CENTER_CLICK_THRESHOLD;
         const normalizedPosition = position / (totalWidth / 2 || 1);
         const arcAngle = normalizedPosition * MAX_ARC_ANGLE;
         const depth = Math.abs(normalizedPosition);
@@ -167,7 +191,7 @@ const CircularGallery = ({ items, pauseImageLoading = false, className = '', onI
             <RetryingThumbnail source={item.image} pauseLoading={pauseImageLoading} />
             <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
             <span className="pointer-events-none absolute inset-0 grid place-items-center">
-              <span className="grid size-12 place-items-center rounded-full border border-white/35 bg-black/45 pl-0.5 text-sm text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+              <span className={`grid size-12 place-items-center rounded-full border border-white/35 bg-black/45 pl-0.5 text-sm text-white transition-opacity duration-200 ${isCentered ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                 ▶
               </span>
             </span>

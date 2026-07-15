@@ -316,15 +316,23 @@ export default function DomeGallery({
   const [loadedImageSources, setLoadedImageSources] = useState<Record<string, boolean>>({});
 
   const scrollLockedRef = useRef(false);
+  const previousBodyOverflowRef = useRef('');
+  const previousBodyOverscrollBehaviorRef = useRef('');
   const lockScroll = useCallback(() => {
     if (scrollLockedRef.current) return;
     scrollLockedRef.current = true;
+    previousBodyOverflowRef.current = document.body.style.overflow;
+    previousBodyOverscrollBehaviorRef.current = document.body.style.overscrollBehavior;
+    document.body.style.overflow = 'hidden';
+    document.body.style.overscrollBehavior = 'none';
     document.body.classList.add('dg-scroll-lock');
   }, []);
   const unlockScroll = useCallback(() => {
     if (!scrollLockedRef.current) return;
     if (rootRef.current?.getAttribute('data-enlarging') === 'true') return;
     scrollLockedRef.current = false;
+    document.body.style.overflow = previousBodyOverflowRef.current;
+    document.body.style.overscrollBehavior = previousBodyOverscrollBehaviorRef.current;
     document.body.classList.remove('dg-scroll-lock');
   }, []);
 
@@ -515,9 +523,9 @@ export default function DomeGallery({
       applyTransform(rotationRef.current.x, rotationRef.current.y);
 
       const enlargedOverlay = viewerRef.current?.querySelector('.enlarge') as HTMLElement;
-      if (enlargedOverlay && frameRef.current && mainRef.current) {
+      if (enlargedOverlay && frameRef.current && viewerRef.current) {
         const frameR = frameRef.current.getBoundingClientRect();
-        const mainR = mainRef.current.getBoundingClientRect();
+        const viewerR = viewerRef.current.getBoundingClientRect();
         const imageAspect = Number.parseFloat(enlargedOverlay.dataset.aspect ?? '');
 
         const hasCustomSize = openedImageWidth && openedImageHeight;
@@ -528,23 +536,23 @@ export default function DomeGallery({
           const tempRect = tempDiv.getBoundingClientRect();
           document.body.removeChild(tempDiv);
 
-          const centeredLeft = frameR.left - mainR.left + (frameR.width - tempRect.width) / 2;
-          const centeredTop = frameR.top - mainR.top + (frameR.height - tempRect.height) / 2;
+          const centeredLeft = frameR.left - viewerR.left + (frameR.width - tempRect.width) / 2;
+          const centeredTop = frameR.top - viewerR.top + (frameR.height - tempRect.height) / 2;
 
           enlargedOverlay.style.left = `${centeredLeft}px`;
           enlargedOverlay.style.top = `${centeredTop}px`;
         } else if (Number.isFinite(imageAspect) && imageAspect > 0) {
           const fitted = getAspectFitRect(frameR.width, frameR.height, imageAspect);
-          const centeredLeft = frameR.left - mainR.left + (frameR.width - fitted.width) / 2;
-          const centeredTop = frameR.top - mainR.top + (frameR.height - fitted.height) / 2;
+          const centeredLeft = frameR.left - viewerR.left + (frameR.width - fitted.width) / 2;
+          const centeredTop = frameR.top - viewerR.top + (frameR.height - fitted.height) / 2;
 
           enlargedOverlay.style.left = `${centeredLeft}px`;
           enlargedOverlay.style.top = `${centeredTop}px`;
           enlargedOverlay.style.width = `${fitted.width}px`;
           enlargedOverlay.style.height = `${fitted.height}px`;
         } else {
-          enlargedOverlay.style.left = `${frameR.left - mainR.left}px`;
-          enlargedOverlay.style.top = `${frameR.top - mainR.top}px`;
+          enlargedOverlay.style.left = `${frameR.left - viewerR.left}px`;
+          enlargedOverlay.style.top = `${frameR.top - viewerR.top}px`;
           enlargedOverlay.style.width = `${frameR.width}px`;
           enlargedOverlay.style.height = `${frameR.height}px`;
         }
@@ -728,22 +736,23 @@ export default function DomeGallery({
         focusedElRef.current = null;
         rootRef.current?.removeAttribute('data-enlarging');
         openingRef.current = false;
+        unlockScroll();
         return;
       }
 
       const currentRect = overlay.getBoundingClientRect();
-      const rootRect = rootRef.current!.getBoundingClientRect();
+      const viewerRect = viewerRef.current!.getBoundingClientRect();
 
       const originalPosRelativeToRoot = {
-        left: originalPos.left - rootRect.left,
-        top: originalPos.top - rootRect.top,
+        left: originalPos.left - viewerRect.left,
+        top: originalPos.top - viewerRect.top,
         width: originalPos.width,
         height: originalPos.height
       };
 
       const overlayRelativeToRoot = {
-        left: currentRect.left - rootRect.left,
-        top: currentRect.top - rootRect.top,
+        left: currentRect.left - viewerRect.left,
+        top: currentRect.top - viewerRect.top,
         width: currentRect.width,
         height: currentRect.height
       };
@@ -775,7 +784,7 @@ export default function DomeGallery({
       }
 
       overlay.remove();
-      rootRef.current!.appendChild(animatingOverlay);
+      viewerRef.current!.appendChild(animatingOverlay);
 
       void animatingOverlay.getBoundingClientRect();
 
@@ -816,7 +825,7 @@ export default function DomeGallery({
                 el.style.opacity = '';
                 openingRef.current = false;
                 if (!draggingRef.current && rootRef.current?.getAttribute('data-enlarging') !== 'true') {
-                  document.body.classList.remove('dg-scroll-lock');
+                  unlockScroll();
                 }
               }, 300);
             });
@@ -839,7 +848,7 @@ export default function DomeGallery({
       scrim.removeEventListener('click', close);
       window.removeEventListener('keydown', onKey);
     };
-  }, [enlargeTransitionMs, openedImageBorderRadius, grayscale]);
+  }, [enlargeTransitionMs, openedImageBorderRadius, grayscale, unlockScroll]);
 
   const openItemFromElement = (el: HTMLElement) => {
     if (openingRef.current) return;
@@ -869,10 +878,10 @@ export default function DomeGallery({
     void refDiv.offsetHeight;
 
     const tileR = refDiv.getBoundingClientRect();
-    const mainR = mainRef.current?.getBoundingClientRect();
+    const viewerR = viewerRef.current?.getBoundingClientRect();
     const frameR = frameRef.current?.getBoundingClientRect();
 
-    if (!mainR || !frameR || tileR.width <= 0 || tileR.height <= 0) {
+    if (!viewerR || !frameR || tileR.width <= 0 || tileR.height <= 0) {
       openingRef.current = false;
       focusedElRef.current = null;
       parent.removeChild(refDiv);
@@ -899,8 +908,8 @@ export default function DomeGallery({
         ? sourceImage.naturalWidth / sourceImage.naturalHeight
         : tileR.width / tileR.height;
     const targetSize = getAspectFitRect(frameR.width, frameR.height, imageAspect);
-    const targetLeft = frameR.left - mainR.left + (frameR.width - targetSize.width) / 2;
-    const targetTop = frameR.top - mainR.top + (frameR.height - targetSize.height) / 2;
+    const targetLeft = frameR.left - viewerR.left + (frameR.width - targetSize.width) / 2;
+    const targetTop = frameR.top - viewerR.top + (frameR.height - targetSize.height) / 2;
     const overlay = document.createElement('div');
     overlay.className = 'enlarge';
     overlay.dataset.aspect = String(imageAspect);
@@ -913,16 +922,16 @@ export default function DomeGallery({
 
       const fitted = getAspectFitRect(frameR.width, frameR.height, loadedAspect);
       overlay.dataset.aspect = String(loadedAspect);
-      overlay.style.left = `${frameR.left - mainR.left + (frameR.width - fitted.width) / 2}px`;
-      overlay.style.top = `${frameR.top - mainR.top + (frameR.height - fitted.height) / 2}px`;
+      overlay.style.left = `${frameR.left - viewerR.left + (frameR.width - fitted.width) / 2}px`;
+      overlay.style.top = `${frameR.top - viewerR.top + (frameR.height - fitted.height) / 2}px`;
       overlay.style.width = `${fitted.width}px`;
       overlay.style.height = `${fitted.height}px`;
     });
     img.src = rawSrc;
     overlay.appendChild(img);
     viewerRef.current!.appendChild(overlay);
-    const tx0 = tileR.left - mainR.left - targetLeft;
-    const ty0 = tileR.top - mainR.top - targetTop;
+    const tx0 = tileR.left - viewerR.left - targetLeft;
+    const ty0 = tileR.top - viewerR.top - targetTop;
     const sx0 = tileR.width / targetSize.width;
     const sy0 = tileR.height / targetSize.height;
 
@@ -952,8 +961,8 @@ export default function DomeGallery({
         overlay.style.height = frameR.height + 'px';
         void overlay.offsetWidth;
         overlay.style.transition = `left ${enlargeTransitionMs}ms ease, top ${enlargeTransitionMs}ms ease, width ${enlargeTransitionMs}ms ease, height ${enlargeTransitionMs}ms ease`;
-        const centeredLeft = frameR.left - mainR.left + (frameR.width - newRect.width) / 2;
-        const centeredTop = frameR.top - mainR.top + (frameR.height - newRect.height) / 2;
+        const centeredLeft = frameR.left - viewerR.left + (frameR.width - newRect.width) / 2;
+        const centeredTop = frameR.top - viewerR.top + (frameR.height - newRect.height) / 2;
         requestAnimationFrame(() => {
           overlay.style.left = `${centeredLeft}px`;
           overlay.style.top = `${centeredTop}px`;
@@ -976,6 +985,10 @@ export default function DomeGallery({
     const retryTimers = retryTimersRef.current;
 
     return () => {
+      if (scrollLockedRef.current) {
+        document.body.style.overflow = previousBodyOverflowRef.current;
+        document.body.style.overscrollBehavior = previousBodyOverscrollBehaviorRef.current;
+      }
       document.body.classList.remove('dg-scroll-lock');
       retryTimers.forEach(timer => window.clearTimeout(timer));
       retryTimers.clear();
@@ -1249,8 +1262,8 @@ export default function DomeGallery({
 
           <div
             ref={viewerRef}
-            className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center"
-            style={{ padding: 'var(--viewer-pad)' }}
+            className="fixed inset-0 z-[9999] pointer-events-none flex items-center justify-center"
+            style={{ padding: 0 }}
           >
             <div
               ref={scrimRef}
