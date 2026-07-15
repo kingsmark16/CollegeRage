@@ -1,15 +1,6 @@
 import { useState, type ChangeEvent } from 'react';
-import { ChevronLeft, ChevronRight, Film, FlipHorizontal2, Image as ImageIcon, Pencil, Play, Trash2, Upload } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, FilePlus2, Film, Image as ImageIcon, MoreVertical, Play, SlidersHorizontal, Trash2, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { getErrorMessage, notifyAsync } from '@/lib/toast';
@@ -48,25 +39,16 @@ const MediaPage = () => {
     setPage,
     setSelectedMediaId,
     setSelectedVariantLabel,
-    updateMutation,
     uploadMutation,
   } = useAdminMedia();
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isInfoVisible, setIsInfoVisible] = useState(false);
-  const [draftName, setDraftName] = useState('');
-  const [draftDescription, setDraftDescription] = useState('');
+  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const paginationItems = mediaQuery.data ? getPaginationItems(page, mediaQuery.data.totalPages) : [];
   const isDeletingMedia = deleteMutation.isPending;
 
   const handleUploadSelection = (event: ChangeEvent<HTMLInputElement>) => {
     setSelectedFiles(Array.from(event.target.files ?? []).slice(0, 10));
-  };
-
-  const primeDrafts = () => {
-    setDraftName(selectedMedia?.sanitizedName ?? '');
-    setDraftDescription(selectedMedia?.description ?? '');
   };
 
   const handleUpload = async () => {
@@ -86,32 +68,6 @@ const MediaPage = () => {
     }
   };
 
-  const handleSave = async () => {
-    if (!selectedMedia) {
-      return;
-    }
-
-    try {
-      await notifyAsync(
-        updateMutation.mutateAsync({
-          id: selectedMedia.id,
-          input: {
-            sanitizedName: draftName.trim(),
-            description: draftDescription.trim() || null,
-          },
-        }),
-        {
-          loading: 'Updating media...',
-          success: 'Media updated successfully.',
-          error: (updateError) => getErrorMessage(updateError, 'Media update failed.'),
-        }
-      );
-      setIsEditOpen(false);
-    } catch {
-      // The toast reports the failure; keep the editor open for correction or retry.
-    }
-  };
-
   const handleDelete = async () => {
     if (!selectedMedia) {
       return;
@@ -124,7 +80,6 @@ const MediaPage = () => {
         error: (deleteError) => getErrorMessage(deleteError, 'Media delete failed.'),
       });
       setIsPreviewOpen(false);
-      setIsEditOpen(false);
     } catch {
       // The toast reports the failure; keep the media preview visible.
     }
@@ -132,15 +87,25 @@ const MediaPage = () => {
 
   return (
     <div className="grid gap-6">
-      <section className="flex flex-col gap-5 items-center justify-between md:flex-row">
-        <div>
-          <p className="text-xs uppercase tracking-[0.24em] text-[#c79a31]">Media gallery</p>
-        </div>
+      <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#151818]/90 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.18)] sm:p-5">
+        <div className="pointer-events-none absolute -right-16 -top-20 size-48 rounded-full bg-[#c79a31]/10 blur-3xl" />
+        <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.24em] text-[#c79a31]">Media gallery</p>
+            <p className="mt-1 text-sm text-[#8f887e]">Add images and videos to your archive.</p>
+          </div>
 
-        <div className="flex flex-row gap-3 sm:items-end">
-          <label className="flex cursor-pointer items-center justify-center gap-3 border border-white/10 bg-[#151818] px-4 py-3 text-sm text-[#f2ede4] transition hover:border-[#c79a31]/60 hover:bg-[#181b1b] sm:w-auto">
-            <Upload className="size-4 text-[#c79a31]" />
-            <span>{selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : 'Select up to 10 files'}</span>
+          <div className="flex w-full flex-col gap-2.5 sm:flex-row md:w-auto">
+            <label className="group flex min-h-12 flex-1 cursor-pointer items-center gap-3 rounded-xl border border-dashed border-white/15 bg-[#101313]/80 px-4 py-2.5 text-sm text-[#d7d0c7] transition hover:border-[#c79a31]/70 hover:bg-[#1b1a16] focus-within:border-[#c79a31] focus-within:ring-2 focus-within:ring-[#c79a31]/20 md:min-w-64 md:flex-none">
+              <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[#c79a31]/15 text-[#f3cf7a] transition group-hover:bg-[#c79a31]/25">
+                <FilePlus2 aria-hidden="true" className="size-4" />
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate font-semibold text-[#f2ede4]">
+                  {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : 'Choose media files'}
+                </span>
+                <span className="block text-[11px] text-[#8f887e]">Up to 10 files</span>
+              </span>
             <input
               accept=".jpg,.jpeg,.png,.webp,.gif,.mp4,.mov,.mkv,.avi,.webm"
               className="hidden"
@@ -148,15 +113,16 @@ const MediaPage = () => {
               type="file"
               onChange={handleUploadSelection}
             />
-          </label>
-          <Button
-            className="border-[#c79a31] bg-[#f2ede4] text-[#131110] hover:bg-[#ffffff]"
-            disabled={selectedFiles.length === 0 || uploadMutation.isPending}
-            onClick={() => void handleUpload()}
-          >
-            <Upload aria-hidden="true" data-icon="inline-start" />
-            {uploadMutation.isPending ? 'Uploading' : 'Upload new'}
-          </Button>
+            </label>
+            <Button
+              className="min-h-12 rounded-xl border-[#c79a31] bg-[#c79a31] px-5 text-[#131110] shadow-[0_8px_24px_rgba(199,154,49,0.18)] transition hover:-translate-y-0.5 hover:border-[#e5bc63] hover:bg-[#e5bc63] disabled:border-white/10 disabled:bg-[#292b2b] disabled:text-[#77736d]"
+              disabled={selectedFiles.length === 0 || uploadMutation.isPending}
+              onClick={() => void handleUpload()}
+            >
+              <Upload aria-hidden="true" data-icon="inline-start" />
+              {uploadMutation.isPending ? 'Uploading...' : 'Upload media'}
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -166,30 +132,28 @@ const MediaPage = () => {
         </div>
       ) : null}
 
-      <section className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-wrap items-center gap-2">
-          {[
-            { key: 'all', label: 'Show All' },
-            { key: 'image', label: 'Images Only' },
-            { key: 'video', label: 'Videos Only' },
-          ].map((option) => (
-            <button
-              key={option.key}
-              className={cn(
-                'rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition',
-                filter === option.key
-                  ? 'border-[#c79a31]/70 bg-[#c79a31]/15 text-[#f3cf7a] shadow-[0_0_24px_rgba(199,154,49,0.16)]'
-                  : 'border-white/10 bg-[#1c1f1f] text-[#a9a39b] hover:border-white/20 hover:text-[#f2ede4]'
-              )}
-              type="button"
-              onClick={() => setFilter(option.key as 'all' | 'image' | 'video')}
+      <section className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#121515] p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+        <label className="flex min-w-0 items-center gap-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl border border-[#c79a31]/25 bg-[#c79a31]/10 text-[#f3cf7a]">
+            <SlidersHorizontal aria-hidden="true" className="size-4" />
+          </span>
+          <span className="shrink-0 text-xs font-semibold uppercase tracking-[0.18em] text-[#a9a39b]">View</span>
+          <span className="relative min-w-0 flex-1 sm:flex-none">
+            <select
+              aria-label="Filter media"
+              className="w-full cursor-pointer appearance-none rounded-xl border border-white/10 bg-[#1c1f1f] py-2.5 pl-3 pr-9 text-xs font-semibold uppercase tracking-[0.12em] text-[#f2ede4] outline-none transition hover:border-[#c79a31]/50 hover:bg-[#202323] focus:border-[#c79a31] focus:ring-2 focus:ring-[#c79a31]/20 sm:w-52"
+              value={filter}
+              onChange={(event) => setFilter(event.target.value as 'all' | 'image' | 'video')}
             >
-              {option.label}
-            </button>
-          ))}
-        </div>
+              <option value="all">Show All</option>
+              <option value="image">Images Only</option>
+              <option value="video">Videos Only</option>
+            </select>
+            <ChevronDown aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-[#c79a31]" />
+          </span>
+        </label>
 
-        <p className="text-sm text-[#8f887e]">
+        <p className="pl-12 text-xs text-[#8f887e] sm:pl-0 sm:text-right">
           {mediaQuery.data ? `${mediaQuery.data.totalItems.toLocaleString()} media items` : 'Loading media'}
         </p>
       </section>
@@ -224,7 +188,7 @@ const MediaPage = () => {
               onClick={() => {
                 setSelectedMediaId(item.id);
                 setSelectedVariantLabel(null);
-                setIsInfoVisible(false);
+                setIsActionsMenuOpen(false);
                 setIsPreviewOpen(true);
               }}
             >
@@ -254,11 +218,6 @@ const MediaPage = () => {
                 ) : null}
               </div>
 
-              <div className="flex items-start justify-between gap-3 p-4">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-[#f2ede4]">{item.sanitizedName}</p>
-                </div>
-              </div>
             </button>
           );
         })}
@@ -322,64 +281,74 @@ const MediaPage = () => {
       {selectedMedia ? (
         <div
           className={cn(
-            'fixed inset-0 z-40 flex items-center justify-center bg-black/70 px-4 py-6 backdrop-blur-sm transition',
+            'fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 p-0 backdrop-blur-sm transition sm:p-3',
             isPreviewOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
           )}
           onClick={() => {
-            setIsInfoVisible(false);
+            setIsActionsMenuOpen(false);
             setIsPreviewOpen(false);
           }}
         >
           <div
-            className="relative w-full max-w-5xl overflow-hidden border border-white/10 bg-[#1a1d1d] shadow-2xl"
+            className="relative flex h-dvh max-h-dvh w-screen max-w-6xl flex-col overflow-hidden border border-white/10 bg-[#1a1d1d] shadow-2xl sm:h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-1.5rem)] sm:w-[calc(100vw-1.5rem)]"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-3 p-4">
-              <div className="flex shrink-0 items-center gap-2">
+            <div className="absolute inset-x-0 top-0 z-20 flex items-start justify-end gap-2 p-3 sm:p-4">
+              <div className="relative">
                 <Button
+                  aria-label="Media actions"
                   variant="outline"
-                  size="sm"
-                  className="h-8 px-2.5 text-[11px] border-[#3c5362] bg-[#132028]/92 text-[#d7e7ee] hover:border-[#4f7083] hover:bg-[#162730] hover:text-[#ffffff] sm:h-10 sm:px-4 sm:text-sm"
-                  onClick={() => setIsInfoVisible((current) => !current)}
+                  size="icon"
+                  className="size-8 border-white/10 bg-[#171311]/90 text-[#efe6da] backdrop-blur-sm hover:border-[#c79a31]/60 hover:bg-[#211b18] hover:text-[#f3cf7a] sm:size-10"
+                  onClick={() => setIsActionsMenuOpen((current) => !current)}
                 >
-                  <FlipHorizontal2 aria-hidden="true" data-icon="inline-start" />
-                  {isInfoVisible ? 'Show media' : 'Show info'}
+                  <MoreVertical aria-hidden="true" className="size-4 sm:size-5" />
                 </Button>
+
+                {isActionsMenuOpen ? (
+                  <div className="absolute right-0 top-full z-30 mt-2 grid min-w-32 gap-1 border border-white/10 bg-[#101212]/95 p-1.5 shadow-2xl backdrop-blur-md">
+                    <button
+                      className="flex items-center gap-2 px-3 py-2 text-left text-xs font-semibold text-[#ff9e9e] transition hover:bg-red-500/10 hover:text-[#ffd2d2]"
+                      disabled={isDeletingMedia}
+                      type="button"
+                      onClick={() => {
+                        setIsActionsMenuOpen(false);
+                        void handleDelete();
+                      }}
+                    >
+                      <Trash2 aria-hidden="true" className="size-3.5" />
+                      {isDeletingMedia ? 'Deleting' : 'Delete'}
+                    </button>
+                  </div>
+                ) : null}
               </div>
 
-              <div className="flex shrink-0 items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 px-2.5 text-[11px] border-[#4a4540] bg-[#171311]/92 text-[#efe6da] hover:border-[#6c645c] hover:bg-[#1d1715] hover:text-[#ffffff] sm:h-10 sm:px-4 sm:text-sm"
-                  onClick={() => {
-                    setIsInfoVisible(false);
-                    setIsPreviewOpen(false);
-                  }}
-                >
-                  Close
-                </Button>
-              </div>
+              <Button
+                aria-label="Close media preview"
+                variant="outline"
+                size="icon"
+                className="size-8 border-white/10 bg-[#171311]/90 text-[#efe6da] backdrop-blur-sm hover:border-[#c79a31]/60 hover:bg-[#211b18] hover:text-[#f3cf7a] sm:size-10"
+                onClick={() => {
+                  setIsActionsMenuOpen(false);
+                  setIsPreviewOpen(false);
+                }}
+              >
+                <X aria-hidden="true" className="size-4 sm:size-5" />
+                <span className="sr-only">Close media preview</span>
+              </Button>
             </div>
 
-            <div className="[perspective:1600px]">
-              <div
-                className={cn(
-                  'relative h-[min(52vh,22rem)] min-h-[18rem] transition-transform duration-500 [transform-style:preserve-3d] sm:h-[min(58vh,26rem)] sm:min-h-[22rem] lg:h-[70vh] lg:min-h-[70vh]',
-                  isInfoVisible ? '[transform:rotateY(180deg)]' : ''
-                )}
-              >
-                <div className="relative [backface-visibility:hidden]">
-                  <div className="relative flex h-full min-h-[18rem] items-center justify-center bg-[#0b0d0d] px-4 pb-4 pt-14 sm:min-h-[22rem] sm:pb-4 sm:pt-16 lg:min-h-[70vh] lg:pb-6 lg:pt-20">
+            <div className="relative min-h-0 flex-1">
+              <div className="relative flex h-full min-h-0 items-center justify-center bg-[#0b0d0d] px-2 pb-2 pt-14 sm:px-4 sm:pb-4 sm:pt-16 lg:pb-6 lg:pt-20">
                     {selectedMedia.type === 'image' ? (
                       <div className="flex w-full items-center justify-center">
                         <RetryingMediaImage
                           alt={selectedMedia.sanitizedName}
-                          imgClassName="max-h-[calc(min(52vh,22rem)-4.5rem)] w-auto max-w-full object-contain sm:max-h-[calc(min(58vh,26rem)-5rem)] lg:max-h-[calc(70vh-6.5rem)]"
+                          imgClassName="max-h-[calc(100dvh-5rem)] w-auto max-w-full object-contain sm:max-h-[calc(100dvh-6rem)]"
                           key={`${selectedMedia.id}-${selectedMedia.url ?? ''}`}
                           overlayClassName="bg-[#0b0d0d]/86"
                           src={selectedMedia.url}
-                          wrapperClassName="inline-flex max-h-[calc(min(52vh,22rem)-4.5rem)] w-auto max-w-full items-center justify-center sm:max-h-[calc(min(58vh,26rem)-5rem)] lg:max-h-[calc(70vh-6.5rem)]"
+                          wrapperClassName="inline-flex max-h-[calc(100dvh-5rem)] w-auto max-w-full items-center justify-center sm:max-h-[calc(100dvh-6rem)]"
                         />
                       </div>
                     ) : (
@@ -388,7 +357,7 @@ const MediaPage = () => {
                           key={selectedMedia.id}
                           activeVariantLabel={activeVariantLabel}
                           activeVariantUrl={activeVariantUrl}
-                          className="max-h-full w-full max-w-[min(100%,calc((min(52vh,22rem)-4.5rem)*1.7778))] sm:max-w-[min(100%,calc((min(58vh,26rem)-5rem)*1.7778))] lg:max-w-[min(100%,calc((70vh-6.5rem)*1.7778))]"
+                          className="max-h-full w-full max-w-[min(100%,calc((100dvh-5rem)*1.7778))] sm:max-w-[min(100%,calc((100dvh-6rem)*1.7778))]"
                           isOpen={isPreviewOpen}
                           poster={selectedMedia.thumbnail}
                           variants={selectedMediaVariantEntries}
@@ -396,122 +365,11 @@ const MediaPage = () => {
                         />
                       </div>
                     )}
-                  </div>
-                </div>
-
-                <div className="absolute inset-0 h-full [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                  <div className="flex h-full min-h-[18rem] flex-col bg-[#151818] px-6 pb-4 pt-14 sm:min-h-[22rem] sm:pb-4 sm:pt-16 lg:min-h-[70vh] lg:pb-6 lg:pt-20">
-                    <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center gap-6 pb-6 text-center">
-                      <div className="grid gap-2 text-sm text-[#beb7af]">
-                        <p className="text-[10px] uppercase tracking-[0.18em] text-[#c79a31]/70 sm:text-xs">Description</p>
-                        <p className="text-xs leading-6 sm:text-sm sm:leading-7">{selectedMedia.description || 'No description added yet.'}</p>
-                      </div>
-                    </div>
-
-                    <div className="border-t border-white/10 py-5">
-                      <div className="mx-auto flex w-full max-w-2xl flex-wrap justify-center gap-3">
-                        <Button
-                          variant="outline"
-                          className="h-8 px-2.5 text-[11px] border-[#705929] bg-[#221b0f] text-[#f0d38a] hover:border-[#b88f3c] hover:bg-[#2a2111] hover:text-[#ffe3a0] sm:h-10 sm:px-4 sm:text-sm"
-                          disabled={isDeletingMedia}
-                          onClick={() => {
-                            primeDrafts();
-                            setIsEditOpen(true);
-                          }}
-                        >
-                          <Pencil aria-hidden="true" data-icon="inline-start" />
-                          Edit
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          className="h-8 px-2.5 text-[11px] border border-[#7a2b2b] bg-[#2a1414] text-[#ff9e9e] hover:border-[#a33d3d] hover:bg-[#321717] hover:text-[#ffd2d2] sm:h-10 sm:px-4 sm:text-sm"
-                          disabled={isDeletingMedia}
-                          onClick={() => void handleDelete()}
-                        >
-                          <Trash2 aria-hidden="true" data-icon="inline-start" />
-                          {isDeletingMedia ? 'Deleting' : 'Delete'}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
         </div>
       ) : null}
-
-      <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <SheetContent className="w-full border-white/10 bg-[#171919] text-[#f2ede4] sm:max-w-[440px]">
-          <SheetHeader className="border-b border-white/10 px-6 py-6">
-            <SheetTitle className="text-[#f2ede4]">Edit media</SheetTitle>
-            <SheetDescription className="text-[#8f887e]">
-              Update the display name and description stored against this asset.
-            </SheetDescription>
-          </SheetHeader>
-
-          <div className="grid flex-1 gap-6 overflow-y-auto px-6 py-6">
-            <div className="overflow-hidden border border-white/10 bg-[#121515]">
-              {selectedMedia?.type === 'image' && getPreviewUrl(selectedMedia) ? (
-                <RetryingMediaImage
-                  alt={selectedMedia.sanitizedName}
-                  imgClassName="aspect-video object-cover"
-                  key={`${selectedMedia.id}-${getPreviewUrl(selectedMedia)}`}
-                  src={getPreviewUrl(selectedMedia)}
-                  wrapperClassName="aspect-video w-full"
-                />
-              ) : selectedMedia?.type === 'video' && selectedMedia.thumbnail ? (
-                <RetryingMediaImage
-                  alt={selectedMedia.sanitizedName}
-                  imgClassName="aspect-video object-cover"
-                  key={`${selectedMedia.id}-${selectedMedia.thumbnail}`}
-                  src={selectedMedia.thumbnail}
-                  wrapperClassName="aspect-video w-full"
-                />
-              ) : (
-                <div className="aspect-video bg-[#121515]" />
-              )}
-            </div>
-
-            <div className="grid gap-5">
-              <div className="grid gap-2">
-                <label className="text-xs uppercase tracking-[0.18em] text-[#c79a31]/70">Title</label>
-                <Input
-                  className="border-white/10 bg-[#111414] text-[#f2ede4] placeholder:text-[#6d675f]"
-                  value={draftName}
-                  onChange={(event) => setDraftName(event.target.value)}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <label className="text-xs uppercase tracking-[0.18em] text-[#c79a31]/70">Description</label>
-                <textarea
-                  className="min-h-32 resize-y border border-white/10 bg-[#111414] px-3 py-2 text-sm text-[#f2ede4] outline-none transition focus:border-[#c79a31]/60"
-                  value={draftDescription}
-                  onChange={(event) => setDraftDescription(event.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-
-          <SheetFooter className="border-t border-white/10 px-6 py-5 sm:flex-row">
-            <Button
-              variant="outline"
-              className="border-[#4a4540] bg-[#171311] text-[#efe6da] hover:border-[#7b746b] hover:bg-[#211b18] hover:text-[#ffffff]"
-              onClick={() => setIsEditOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              className="border-[#c79a31] bg-[#c79a31] text-[#131110] hover:border-[#e5bc63] hover:bg-[#dfb24c]"
-              disabled={!selectedMedia || !draftName.trim() || updateMutation.isPending}
-              onClick={() => void handleSave()}
-            >
-              {updateMutation.isPending ? 'Saving' : 'Save changes'}
-            </Button>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
     </div>
   );
 };

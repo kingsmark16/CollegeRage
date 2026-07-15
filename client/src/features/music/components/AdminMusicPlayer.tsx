@@ -87,7 +87,7 @@ const AdminMusicPlayer = ({ autoPlay = false, artist, title, url }: AdminMusicPl
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="overflow-hidden border border-white/10 bg-[linear-gradient(180deg,#111515_0%,#0b0e0e_100%)]">
+    <div className="overflow-hidden rounded-xl border border-[#c79a31]/20 bg-[linear-gradient(145deg,#171b1b_0%,#0b0e0e_100%)] shadow-[0_14px_35px_rgba(0,0,0,0.18)]">
       <audio
         ref={audioRef}
         preload="metadata"
@@ -99,14 +99,14 @@ const AdminMusicPlayer = ({ autoPlay = false, artist, title, url }: AdminMusicPl
         onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
       />
 
-      <div className="grid gap-5 p-5 sm:p-6">
-        <div className="flex items-center gap-4">
+      <div className="grid gap-5 p-4 sm:p-5">
+        <div className="flex min-w-0 items-center gap-3 sm:gap-4">
           <button
-            className="group relative grid size-14 shrink-0 place-items-center rounded-full border border-[#c79a31]/30 bg-[#171b1b] text-[#f2ede4] shadow-[0_0_0_1px_rgba(255,255,255,0.03)] transition hover:border-[#c79a31]/65 hover:bg-[#1b2020] hover:text-[#f3cf7a] sm:size-16"
+            className="group relative grid size-12 shrink-0 place-items-center rounded-full border border-[#c79a31]/45 bg-[#c79a31]/10 text-[#f2ede4] shadow-[0_0_0_1px_rgba(255,255,255,0.03)] transition hover:scale-105 hover:border-[#c79a31]/75 hover:bg-[#c79a31]/20 hover:text-[#f3cf7a] sm:size-14"
             type="button"
             onClick={() => void togglePlayback()}
           >
-            <span className="absolute inset-1 rounded-full border border-white/8" />
+            <span className="absolute inset-1 rounded-full border border-white/10" />
             {isPlaying ? (
               <Pause className="relative z-10 size-5 fill-current sm:size-6" />
             ) : (
@@ -117,15 +117,15 @@ const AdminMusicPlayer = ({ autoPlay = false, artist, title, url }: AdminMusicPl
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold uppercase tracking-[0.18em] text-[#f2ede4]">
+                <p className="truncate text-xs font-semibold uppercase tracking-[0.14em] text-[#f2ede4] sm:text-sm sm:tracking-[0.18em]">
                   {title}
                 </p>
-                <p className="truncate text-xs uppercase tracking-[0.18em] text-[#8f887e]">
+                <p className="truncate text-[11px] uppercase tracking-[0.14em] text-[#8f887e] sm:text-xs sm:tracking-[0.18em]">
                   {artist?.trim() || 'Background soundtrack'}
                 </p>
               </div>
 
-              <div className="hidden items-end gap-1 sm:flex">
+                <div className="hidden items-end gap-1 md:flex">
                 {Array.from({ length: 10 }).map((_, index) => (
                   <span
                     key={index}
@@ -152,7 +152,7 @@ const AdminMusicPlayer = ({ autoPlay = false, artist, title, url }: AdminMusicPl
               <input
                 id={progressId}
                 aria-label="Seek track"
-                className="h-1.5 w-full cursor-pointer appearance-none bg-white/12 accent-[#c79a31]"
+                className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/12 accent-[#c79a31]"
                 max={100}
                 min={0}
                 type="range"
