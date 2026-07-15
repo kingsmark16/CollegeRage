@@ -1,6 +1,7 @@
 import { Film, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import LoadingExperience from '@/components/LoadingExperience';
 import AdminVideoPlayer from '@/features/media/components/AdminVideoPlayer';
 import type { MediaItem } from '@/features/media/media.types';
 import CircularGallery, { type CircularGalleryItem } from './CircularGallery';
@@ -151,12 +152,10 @@ const VideoMemoriesSection = ({ isError, isLoading, media, onPlayerOpenChange }:
             />
           </div>
         ) : (
-          <div className="grid min-h-72 place-items-center border border-dashed border-white/15 bg-[#151818] px-6 text-center">
+          isLoading ? <LoadingExperience compact variant="gallery" /> : <div className="grid min-h-72 place-items-center border border-dashed border-white/15 bg-[#151818] px-6 text-center">
             <div className="grid max-w-sm justify-items-center gap-3 text-[#8f887e]">
               <Film className="size-9" aria-hidden="true" />
-              <p className="text-sm leading-6">
-                {isLoading ? 'Loading video memories...' : isError ? 'Video memories could not be loaded right now.' : 'No public videos are available yet.'}
-              </p>
+              <p className="text-sm leading-6">{isError ? 'Video memories could not be loaded right now.' : 'No public videos are available yet.'}</p>
             </div>
           </div>
         )}

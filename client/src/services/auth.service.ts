@@ -15,6 +15,18 @@ const getAuthClient = () => {
   return getNeonAuth().adapter;
 };
 
+const getAuthErrorMessage = (message: string | undefined, fallback: string) => {
+  if (!message) {
+    return fallback;
+  }
+
+  if (message.toLowerCase().includes('email and password sign up is not enabled')) {
+    return 'Email registration is currently unavailable. Please contact an administrator to enable new accounts.';
+  }
+
+  return message;
+};
+
 const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number) => {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
@@ -81,7 +93,7 @@ export const getCurrentSession = async () => {
   const result = await withTimeout(authClient.getSession(), 10_000);
 
   if (result.error) {
-    throw new Error(result.error.message);
+    throw new Error(getAuthErrorMessage(result.error.message, 'Unable to check your session.'));
   }
 
   return result.data;
@@ -110,7 +122,7 @@ export const signInWithEmail = async ({ email, password }: AuthCredentials) => {
   const result = await authClient.signIn.email({ email, password });
 
   if (result.error) {
-    throw new Error(result.error.message);
+    throw new Error(getAuthErrorMessage(result.error.message, 'Unable to sign in with those credentials.'));
   }
 
   return getCurrentSession();
@@ -125,7 +137,7 @@ export const signUpWithEmail = async ({ email, password, name }: AuthCredentials
   });
 
   if (result.error) {
-    throw new Error(result.error.message);
+    throw new Error(getAuthErrorMessage(result.error.message, 'Unable to create your account.'));
   }
 
   return getCurrentSession();

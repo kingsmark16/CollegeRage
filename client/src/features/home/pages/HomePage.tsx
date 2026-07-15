@@ -2,6 +2,7 @@ import { ArrowDown, ArrowUp, ImageOff, Music4, ShieldCheck, X } from 'lucide-rea
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import LoadingExperience from '@/components/LoadingExperience';
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
 import type { MediaItem } from '@/features/media/media.types';
 import LandingHeaderMusicPlayer from '../components/LandingHeaderMusicPlayer';
@@ -228,12 +229,10 @@ const HomePage = () => {
               openedImageBorderRadius="8px"
             />
           ) : (
-            <div className="grid h-full place-items-center bg-[#101212]">
+            mediaGalleryQuery.isLoading ? <LoadingExperience compact variant="gallery" /> : <div className="grid h-full place-items-center bg-[#101212]">
               <div className="flex flex-col items-center gap-4 text-center text-[#8f887e]">
                 <ImageOff className="size-10" aria-hidden="true" />
-                <p className="max-w-sm text-sm leading-6">
-                  {mediaGalleryQuery.isLoading ? 'Loading media gallery...' : 'No public media is available yet.'}
-                </p>
+                <p className="max-w-sm text-sm leading-6">No public media is available yet.</p>
               </div>
             </div>
           )}
