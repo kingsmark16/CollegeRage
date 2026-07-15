@@ -1,5 +1,5 @@
-import { ImageOff, Music4, ShieldCheck, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { ArrowDown, ArrowUp, ImageOff, Music4, ShieldCheck, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
@@ -34,7 +34,27 @@ const HomePage = () => {
   const [isMusicPlayerOpen, setIsMusicPlayerOpen] = useState(false);
   const [isSoundtrackPlaying, setIsSoundtrackPlaying] = useState(false);
   const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const previousScrollYRef = useRef(0);
   const dashboardHref = isAdmin ? '/admin' : '/auth/sign-in';
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const previousScrollY = previousScrollYRef.current;
+
+      if (currentScrollY <= 8 || currentScrollY < previousScrollY - 4) {
+        setIsHeaderVisible(true);
+      } else if (currentScrollY > previousScrollY + 4) {
+        setIsHeaderVisible(false);
+      }
+
+      previousScrollYRef.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const galleryImages = useMemo<GalleryImage[]>(() => {
     return (mediaGalleryQuery.data ?? [])
@@ -49,8 +69,12 @@ const HomePage = () => {
 
   return (
     <main className="min-h-screen bg-[#101212] text-[#f2ede4]">
-      <section className="flex h-dvh min-h-screen flex-col overflow-hidden">
-        <header className="relative z-20 overflow-x-clip border-b border-white/10 bg-[#101212]/95 px-2.5 py-2.5 shadow-[0_18px_40px_rgba(0,0,0,0.32)] backdrop-blur-md sm:px-5 sm:py-4 lg:px-10 lg:py-4.5">
+      <section className="flex h-dvh min-h-screen flex-col overflow-hidden pt-[61px] sm:pt-[86px] lg:pt-[92px]">
+        <header
+          className={`fixed inset-x-0 top-0 z-[1100] overflow-x-clip border-b border-white/10 bg-[#101212]/95 px-2.5 py-2.5 shadow-[0_18px_40px_rgba(0,0,0,0.32)] backdrop-blur-md transition-transform duration-300 ease-out sm:px-5 sm:py-4 lg:px-10 lg:py-4.5 ${
+            isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+          }`}
+        >
           <div className="mx-auto grid w-full max-w-7xl grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-1.5 sm:gap-4">
             <Link to="/" className="min-w-0 text-left">
               <p className="truncate text-xs font-semibold uppercase tracking-[0.22em] text-[#f2ede4] sm:text-sm sm:tracking-[0.26em] lg:text-lg lg:tracking-[0.28em]">
@@ -114,6 +138,20 @@ const HomePage = () => {
             </div>
           </div>
         </header>
+
+        <div className="relative z-10 shrink-0 px-4 pb-3 pt-5 sm:px-8 sm:pb-4 sm:pt-7 lg:px-10 lg:pt-8">
+          <div className="mx-auto grid w-full max-w-7xl gap-2">
+            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[#c79a31] sm:text-[10px] lg:text-xs">
+              Photo memories
+            </p>
+            <h1 className="font-heading text-xl leading-tight text-[#f2ede4] sm:text-2xl lg:text-3xl">
+              Every frame, still here.
+            </h1>
+            <p className="max-w-xl text-[11px] leading-5 text-[#beb7af] sm:text-xs sm:leading-6 lg:text-sm">
+              Scroll through the archive, choose a memory, and let it stay with you.
+            </p>
+          </div>
+        </div>
 
         {publicMusicTracksQuery.data && publicMusicTracksQuery.data.length > 0 ? (
           <div
@@ -218,6 +256,33 @@ const HomePage = () => {
         media={mediaGalleryQuery.data ?? []}
         onPlayerOpenChange={setIsVideoPlayerOpen}
       />
+
+      {!isVideoPlayerOpen ? (
+        <div className="pointer-events-none fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-3 z-[1000] grid gap-1.5 md:hidden">
+          <button
+            aria-label="Scroll to top"
+            className="pointer-events-auto group relative grid size-8 place-items-center rounded-full border border-[#f3cf7a]/80 bg-[linear-gradient(145deg,#f3cf7a,#c79a31)] text-[#17120d] shadow-[0_8px_18px_rgba(0,0,0,0.35),0_0_14px_rgba(199,154,49,0.3),inset_0_1px_0_rgba(255,255,255,0.45)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ffe7a8] hover:bg-[#f3cf7a] hover:shadow-[0_12px_22px_rgba(0,0,0,0.42),0_0_0_3px_rgba(199,154,49,0.16),0_0_20px_rgba(199,154,49,0.42)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffe7a8] active:translate-y-0 active:scale-90 sm:size-9"
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
+            <ArrowUp aria-hidden="true" className="size-3.5 transition-transform duration-200 group-hover:-translate-y-0.5 sm:size-4" />
+            <span className="pointer-events-none absolute right-[calc(100%+0.5rem)] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded-md border border-white/10 bg-[#101212]/95 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#f2ede4] opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 sm:block">
+              Top
+            </span>
+          </button>
+          <button
+            aria-label="Scroll to bottom"
+            className="pointer-events-auto group relative grid size-8 place-items-center rounded-full border border-[#f3cf7a]/80 bg-[linear-gradient(145deg,#f3cf7a,#c79a31)] text-[#17120d] shadow-[0_8px_18px_rgba(0,0,0,0.35),0_0_14px_rgba(199,154,49,0.3),inset_0_1px_0_rgba(255,255,255,0.45)] transition-all duration-200 hover:translate-y-0.5 hover:border-[#ffe7a8] hover:bg-[#f3cf7a] hover:shadow-[0_12px_22px_rgba(0,0,0,0.42),0_0_0_3px_rgba(199,154,49,0.16),0_0_20px_rgba(199,154,49,0.42)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffe7a8] active:translate-y-0 active:scale-90 sm:size-9"
+            type="button"
+            onClick={() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' })}
+          >
+            <ArrowDown aria-hidden="true" className="size-3.5 transition-transform duration-200 group-hover:translate-y-0.5 sm:size-4" />
+            <span className="pointer-events-none absolute right-[calc(100%+0.5rem)] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded-md border border-white/10 bg-[#101212]/95 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#f2ede4] opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 sm:block">
+              Bottom
+            </span>
+          </button>
+        </div>
+      ) : null}
     </main>
   );
 };
