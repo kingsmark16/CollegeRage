@@ -52,6 +52,7 @@ const AdminVideoPlayer = ({
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isQualityMenuOpen, setIsQualityMenuOpen] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
 
   const progress = useMemo(() => {
     if (!duration) {
@@ -89,9 +90,11 @@ const AdminVideoPlayer = ({
     if (!isOpen) {
       video.pause();
       setIsPlaying(false);
+      setIsBuffering(false);
       return;
     }
 
+    setIsBuffering(true);
     pendingResumePlaybackRef.current = true;
     void handleSourceReady();
   }, [isOpen, activeVariantUrl]);
@@ -104,12 +107,20 @@ const AdminVideoPlayer = ({
     }
 
     if (video.paused) {
-      await video.play();
-      setIsPlaying(true);
+      setIsBuffering(true);
+
+      try {
+        await video.play();
+        setIsPlaying(true);
+      } catch {
+        setIsBuffering(false);
+        setIsPlaying(false);
+      }
       return;
     }
 
     video.pause();
+    setIsBuffering(false);
     setIsPlaying(false);
   };
 
@@ -166,6 +177,7 @@ const AdminVideoPlayer = ({
       pendingResumePlaybackRef.current = !video.paused && !video.ended;
     }
 
+    setIsBuffering(true);
     setIsQualityMenuOpen(false);
     onVariantSelect(label);
   };
@@ -196,6 +208,7 @@ const AdminVideoPlayer = ({
       try {
         await video.play();
       } catch {
+        setIsBuffering(false);
         setIsPlaying(false);
       }
     }
@@ -208,19 +221,31 @@ const AdminVideoPlayer = ({
           ref={videoRef}
           className="h-full w-full bg-black object-contain"
           poster={poster}
-          preload="metadata"
+          preload={isOpen ? 'auto' : 'metadata'}
           src={activeVariantUrl ?? undefined}
+          onLoadStart={() => setIsBuffering(true)}
+          onWaiting={() => setIsBuffering(true)}
+          onStalled={() => setIsBuffering(true)}
+          onLoadedData={() => setIsBuffering(false)}
           onCanPlay={() => {
+            setIsBuffering(false);
             void handleSourceReady();
           }}
           onClick={() => void togglePlayback()}
           onDurationChange={(event) => setDuration(event.currentTarget.duration || 0)}
-          onEnded={() => setIsPlaying(false)}
+          onEnded={() => {
+            setIsBuffering(false);
+            setIsPlaying(false);
+          }}
           onLoadedMetadata={() => {
             void handleSourceReady();
           }}
-          onPause={() => setIsPlaying(false)}
+          onPause={() => {
+            setIsBuffering(false);
+            setIsPlaying(false);
+          }}
           onPlay={() => setIsPlaying(true)}
+          onPlaying={() => setIsBuffering(false)}
           onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
           onVolumeChange={(event) => {
             setIsMuted(event.currentTarget.muted);
@@ -233,13 +258,25 @@ const AdminVideoPlayer = ({
         <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/50 to-transparent" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
 
+        {isBuffering ? (
+          <div aria-live="polite" className="pointer-events-none absolute inset-0 grid place-items-center">
+            <span className="grid size-12 place-items-center rounded-full border border-white/20 bg-black/30 backdrop-blur-sm sm:size-16">
+              <span
+                aria-hidden="true"
+                className="size-6 animate-spin rounded-full border-2 border-white/20 border-t-[#c79a31] sm:size-8"
+              />
+              <span className="sr-only">Loading video</span>
+            </span>
+          </div>
+        ) : null}
+
         <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
           <div className="min-w-0 rounded-full border border-white/10 bg-black/45 px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-[#f2ede4] backdrop-blur-sm sm:px-3 sm:text-xs">
             {activeVariantLabel ?? 'Video'}
           </div>
         </div>
 
-        {!isPlaying ? (
+        {!isPlaying && !isBuffering ? (
           <div className="absolute inset-0 grid place-items-center">
             <button
               className="grid size-12 place-items-center rounded-full border border-white/16 bg-[#1b2128]/88 text-[#f2ede4] backdrop-blur-md transition hover:scale-[1.03] hover:border-[#d3aa51]/60 hover:bg-[#26313b]/94 hover:text-[#f8d98f] active:scale-100 active:border-[#e0b862]/70 active:bg-[#2f3b47]/96 active:text-[#ffe3a8] sm:size-20"

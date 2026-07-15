@@ -6,6 +6,7 @@ import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
 import type { MediaItem } from '@/features/media/media.types';
 import LandingHeaderMusicPlayer from '../components/LandingHeaderMusicPlayer';
 import DomeGallery from '../components/DomeGallery';
+import VideoMemoriesSection from '../components/VideoMemoriesSection';
 import { usePublicMediaGallery } from '../hooks/usePublicMediaGallery';
 import { usePublicMusicTracks } from '../hooks/usePublicMusicTracks';
 
@@ -32,6 +33,7 @@ const HomePage = () => {
   const publicMusicTracksQuery = usePublicMusicTracks();
   const [isMusicPlayerOpen, setIsMusicPlayerOpen] = useState(false);
   const [isSoundtrackPlaying, setIsSoundtrackPlaying] = useState(false);
+  const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false);
   const dashboardHref = isAdmin ? '/admin' : '/auth/sign-in';
 
   const galleryImages = useMemo<GalleryImage[]>(() => {
@@ -48,8 +50,8 @@ const HomePage = () => {
   return (
     <main className="min-h-screen bg-[#101212] text-[#f2ede4]">
       <section className="flex h-dvh min-h-screen flex-col overflow-hidden">
-        <header className="relative z-20 border-b border-white/10 bg-[#101212]/95 px-3 py-3 shadow-[0_18px_40px_rgba(0,0,0,0.32)] backdrop-blur-md sm:px-5 sm:py-4 lg:px-10 lg:py-4.5">
-          <div className="mx-auto grid w-full max-w-7xl grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 sm:gap-4">
+        <header className="relative z-20 overflow-x-clip border-b border-white/10 bg-[#101212]/95 px-2.5 py-2.5 shadow-[0_18px_40px_rgba(0,0,0,0.32)] backdrop-blur-md sm:px-5 sm:py-4 lg:px-10 lg:py-4.5">
+          <div className="mx-auto grid w-full max-w-7xl grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-1.5 sm:gap-4">
             <Link to="/" className="min-w-0 text-left">
               <p className="truncate text-xs font-semibold uppercase tracking-[0.22em] text-[#f2ede4] sm:text-sm sm:tracking-[0.26em] lg:text-lg lg:tracking-[0.28em]">
                 College Rage
@@ -59,7 +61,7 @@ const HomePage = () => {
               </p>
             </Link>
 
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-end gap-1.5 sm:justify-center sm:gap-0">
               {publicMusicTracksQuery.data && publicMusicTracksQuery.data.length > 0 ? (
                 <Button
                   type="button"
@@ -102,7 +104,7 @@ const HomePage = () => {
             <div className="flex shrink-0 items-center justify-end">
               <Button
                 asChild
-                className="h-8 rounded-xl border-[#c79a31] bg-[#c79a31] px-2.5 text-[10px] text-[#131110] hover:bg-[#f3cf7a] sm:h-9 sm:px-3 sm:text-xs lg:h-11 lg:rounded-2xl lg:px-5 lg:text-sm"
+                className="h-8 whitespace-nowrap rounded-xl border-[#c79a31] bg-[#c79a31] px-2 text-[9px] text-[#131110] hover:bg-[#f3cf7a] sm:h-9 sm:px-3 sm:text-xs lg:h-11 lg:rounded-2xl lg:px-5 lg:text-sm"
               >
                 <Link to={dashboardHref}>
                   <ShieldCheck aria-hidden="true" data-icon="inline-start" />
@@ -129,18 +131,18 @@ const HomePage = () => {
               onClick={() => setIsMusicPlayerOpen(false)}
             />
 
-            <div className="pointer-events-none absolute inset-x-0 top-20 z-10 flex justify-center px-3 sm:top-24">
+            <div className="pointer-events-none absolute inset-x-0 top-16 z-10 flex max-h-[calc(100dvh-4.5rem)] justify-center overflow-y-auto px-2 pb-2 sm:top-24 sm:max-h-[calc(100dvh-6rem)] sm:px-3 sm:pb-4">
             <div
-              className={`relative w-full max-w-[820px] rounded-[24px] border border-white/10 bg-[#101212]/98 shadow-[0_30px_60px_rgba(0,0,0,0.38)] transition duration-200 sm:rounded-[28px] ${
+              className={`relative w-full max-w-[calc(100vw-1rem)] rounded-[18px] border border-white/10 bg-[#101212]/98 shadow-[0_30px_60px_rgba(0,0,0,0.38)] transition duration-200 sm:max-w-[820px] sm:rounded-[28px] ${
                 isMusicPlayerOpen
                   ? 'pointer-events-auto translate-y-0 scale-100'
                   : 'pointer-events-none -translate-y-4 scale-[0.98]'
               }`}
             >
-              <div className="flex items-start justify-between gap-3 border-b border-white/10 px-4 py-4 sm:gap-4 sm:px-6 sm:py-5">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#f2ede4] sm:text-lg sm:tracking-[0.18em]">Soundtrack</p>
-                  <p className="mt-1 text-xs text-[#8f887e] sm:text-sm">
+              <div className="flex items-start justify-between gap-2 border-b border-white/10 px-3 py-3 sm:gap-4 sm:px-6 sm:py-5">
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-semibold uppercase tracking-[0.14em] text-[#f2ede4] sm:text-lg sm:tracking-[0.18em]">Soundtrack</p>
+                  <p className="mt-1 max-w-[17rem] text-[11px] leading-5 text-[#8f887e] sm:max-w-none sm:text-sm">
                     Play, switch tracks, and control the landing page soundtrack.
                   </p>
                 </div>
@@ -157,7 +159,7 @@ const HomePage = () => {
                 </Button>
               </div>
 
-              <div className="px-3 py-3 sm:px-6 sm:py-5">
+              <div className="px-2.5 py-3 sm:px-6 sm:py-5">
                 <LandingHeaderMusicPlayer
                   tracks={publicMusicTracksQuery.data}
                   onPlaybackStateChange={setIsSoundtrackPlaying}
@@ -172,6 +174,7 @@ const HomePage = () => {
           {hasGalleryImages ? (
             <DomeGallery
               images={galleryImages}
+              pauseImageLoading={isVideoPlayerOpen}
               fit={0.78}
               fitBasis="max"
               minRadius={300}
@@ -208,6 +211,13 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      <VideoMemoriesSection
+        isError={mediaGalleryQuery.isError}
+        isLoading={mediaGalleryQuery.isLoading}
+        media={mediaGalleryQuery.data ?? []}
+        onPlayerOpenChange={setIsVideoPlayerOpen}
+      />
     </main>
   );
 };
