@@ -47,7 +47,7 @@ const ToggleCard = ({ checked, description, label, onToggle }: ToggleCardProps) 
   return (
     <button
       className={cn(
-        'flex items-start justify-between gap-4 border px-4 py-4 text-left transition',
+        'flex items-start justify-between gap-4 rounded-xl border px-4 py-4 text-left transition',
         checked
           ? 'border-[#c79a31]/65 bg-[#1d1a12] text-[#f3cf7a] shadow-[0_0_24px_rgba(199,154,49,0.12)]'
           : 'border-white/10 bg-[#121515] text-[#f2ede4] hover:border-white/20 hover:bg-[#181b1b]'
@@ -67,7 +67,7 @@ const ToggleCard = ({ checked, description, label, onToggle }: ToggleCardProps) 
       <div
         className={cn(
           'grid size-6 shrink-0 place-items-center border transition',
-          checked ? 'border-[#c79a31]/60 bg-[#c79a31] text-[#131110]' : 'border-white/10 bg-[#141717] text-transparent'
+          checked ? 'rounded-full border-[#c79a31]/60 bg-[#c79a31] text-[#131110]' : 'rounded-full border-white/10 bg-[#141717] text-transparent'
         )}
       >
         <Check className="size-3.5" />
@@ -203,34 +203,41 @@ const AdminMusicPanel = () => {
   };
 
   return (
-    <section className="grid gap-5 py-2 lg:grid-cols-[0.9fr_1.1fr]">
-      <article className="border border-white/10 bg-[#151818] p-6">
-        <div className="flex items-center gap-3 text-[#c79a31]">
-          <Music className="size-5" />
-          <p className="text-xs uppercase tracking-[0.24em]">Music</p>
+    <section className="grid gap-5 py-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      <article className="relative overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(145deg,#171b1b_0%,#101313_100%)] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.16)] sm:p-6">
+        <div className="pointer-events-none absolute -right-20 -top-20 size-56 rounded-full bg-[#c79a31]/10 blur-3xl" />
+        <div className="relative flex items-center gap-3 text-[#c79a31]">
+          <span className="grid size-10 place-items-center rounded-xl border border-[#c79a31]/25 bg-[#c79a31]/10">
+            <Music className="size-5" />
+          </span>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em]">Soundtrack</p>
         </div>
-        <h2 className="mt-4 text-2xl font-semibold">Upload soundtrack</h2>
+        <h2 className="relative mt-5 text-2xl font-semibold tracking-tight text-[#f2ede4]">Upload soundtrack</h2>
+        <p className="relative mt-2 text-sm leading-6 text-[#8f887e]">Add a track to your archive and choose how it appears in the player.</p>
         {tracksQuery.error ? (
           <div className="mt-5 border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
             {getErrorMessage(tracksQuery.error, 'Unable to load music tracks.')}
           </div>
         ) : null}
 
-        <form className="mt-6 grid gap-4" onSubmit={(event) => void handleSubmit(event)}>
+        <form className="relative mt-6 grid gap-4" onSubmit={(event) => void handleSubmit(event)}>
           <div className="grid gap-2 text-sm text-[#f2ede4]">
-            <span>Audio file</span>
-            <label className="flex cursor-pointer items-center justify-between gap-4 border border-white/10 bg-[#121515] px-4 py-4 transition hover:border-[#c79a31]/45 hover:bg-[#181b1b]">
-              <div className="min-w-0">
-                <p className="truncate text-xs font-semibold uppercase tracking-[0.18em] text-[#f2ede4]">
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[#beb7af]">Audio file</span>
+            <label className="group flex min-h-20 min-w-0 cursor-pointer items-center gap-2 overflow-hidden rounded-xl border border-dashed border-white/15 bg-[#0d1010]/75 px-3 py-3 transition hover:border-[#c79a31]/60 hover:bg-[#1a1a15] focus-within:border-[#c79a31] focus-within:ring-2 focus-within:ring-[#c79a31]/20 sm:gap-3 sm:px-5">
+              <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#c79a31]/12 text-[#f3cf7a] transition group-hover:bg-[#c79a31]/22 sm:size-10">
+                  <Upload className="size-4" />
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f2ede4] sm:text-xs sm:tracking-[0.16em]">
                   {file ? file.name : 'Select soundtrack'}
-                </p>
-                <p className="mt-1 text-sm text-[#8f887e]">
-                  MP3, M4A, AAC, WAV, OGG, or FLAC
-                </p>
+                  </p>
+                  <p className="mt-1 text-xs text-[#8f887e]">MP3, M4A, AAC, WAV, OGG, or FLAC</p>
+                </div>
               </div>
 
-              <span className="inline-flex h-9 shrink-0 items-center justify-center border border-[#c79a31]/55 bg-[#c79a31]/12 px-4 text-xs font-semibold uppercase tracking-[0.18em] text-[#f3cf7a]">
-                Browse
+              <span className="inline-flex h-9 min-w-0 max-w-20 shrink items-center justify-center overflow-hidden rounded-lg border border-[#c79a31]/45 bg-[#c79a31]/10 px-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#f3cf7a] transition group-hover:bg-[#c79a31]/20 sm:max-w-none sm:shrink-0 sm:px-3 sm:text-[11px] sm:tracking-[0.16em]">
+                <span className="truncate">Browse files</span>
               </span>
 
               <input
@@ -242,27 +249,27 @@ const AdminMusicPanel = () => {
             </label>
           </div>
 
-          <label className="grid gap-2 text-sm text-[#f2ede4]">
+          <label className="grid gap-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-[#beb7af]">
             Title
             <Input
-              className="border-white/10 bg-[#121515] text-[#f2ede4] placeholder:text-[#6f6a63]"
+              className="h-11 rounded-xl border-white/10 border-b-white/10 bg-[#0d1010] px-3 py-2 text-sm font-normal leading-5 tracking-normal text-[#f2ede4] placeholder:text-[#6f6a63] focus-visible:border-[#c79a31]/70 focus-visible:border-b-[#c79a31]/70 focus-visible:ring-0"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               placeholder="Selected filename will appear here"
             />
           </label>
 
-          <label className="grid gap-2 text-sm text-[#f2ede4]">
+          <label className="grid gap-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-[#beb7af]">
             Artist
             <Input
-              className="border-white/10 bg-[#121515] text-[#f2ede4] placeholder:text-[#6f6a63]"
+              className="h-11 rounded-xl border-white/10 border-b-white/10 bg-[#0d1010] px-3 py-2 text-sm font-normal leading-5 tracking-normal text-[#f2ede4] placeholder:text-[#6f6a63] focus-visible:border-[#c79a31]/70 focus-visible:border-b-[#c79a31]/70 focus-visible:ring-0"
               value={artist}
               onChange={(event) => setArtist(event.target.value)}
               placeholder="Optional"
             />
           </label>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             <ToggleCard
               checked={isActive}
               label="Show track"
@@ -276,7 +283,7 @@ const AdminMusicPanel = () => {
           </div>
 
           <Button
-            className="mt-2 border-[#c79a31] bg-[#c79a31] text-[#131110] hover:bg-[#dfb24c]"
+            className="mt-2 h-11 rounded-xl border-[#c79a31] bg-[#c79a31] font-semibold text-[#131110] shadow-[0_8px_24px_rgba(199,154,49,0.16)] transition hover:-translate-y-0.5 hover:border-[#e5bc63] hover:bg-[#e5bc63] disabled:border-white/10 disabled:bg-[#292b2b] disabled:text-[#77736d]"
             disabled={!file || isBusy}
             type="submit"
           >
@@ -286,11 +293,11 @@ const AdminMusicPanel = () => {
         </form>
       </article>
 
-      <article className="border border-white/10 bg-[#151818] p-6">
+      <article className="min-w-0 rounded-2xl border border-white/10 bg-[#151818] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.12)] sm:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.24em] text-[#c79a31]">Playlist catalog</p>
-            <h2 className="mt-3 text-2xl font-semibold">Uploaded tracks</h2>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[#f2ede4]">Uploaded tracks</h2>
           </div>
           <p className="text-sm text-[#beb7af]">{tracks.length} track{tracks.length === 1 ? '' : 's'}</p>
         </div>
@@ -307,18 +314,18 @@ const AdminMusicPanel = () => {
           ) : null}
 
           {tracks.map((track) => (
-            <div key={track.id} className="border border-white/10 bg-black/10 p-4 sm:p-5">
+            <div key={track.id} className="min-w-0 rounded-xl border border-white/10 bg-[#101313]/80 p-3 transition hover:border-white/20 hover:bg-[#141818] sm:p-4">
               {(() => {
                 const isPlayerOpen = expandedTrackId === track.id;
 
                 return (
                   <>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
+              <div className="flex min-w-0 flex-row items-start justify-between gap-3">
+                <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       className={cn(
-                        'grid size-9 shrink-0 place-items-center border transition',
+                        'grid size-10 shrink-0 place-items-center rounded-full border transition',
                         isPlayerOpen
                           ? 'border-[#c79a31]/60 bg-[#c79a31]/12 text-[#f3cf7a]'
                           : 'border-white/10 bg-[#141717] text-[#f2ede4] hover:border-[#c79a31]/45 hover:bg-[#181b1b] hover:text-[#f3cf7a]'
@@ -328,7 +335,7 @@ const AdminMusicPanel = () => {
                     >
                       {isPlayerOpen ? <Pause className="size-4" /> : <Play className="ml-0.5 size-4 fill-current" />}
                     </button>
-                    <h3 className="text-lg font-semibold text-[#f2ede4]">{track.title}</h3>
+                    <h3 className="min-w-0 max-w-full truncate text-base font-semibold text-[#f2ede4] sm:text-lg">{track.title}</h3>
                     {track.isDefault ? (
                       <span className="border border-[#c79a31]/50 px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#d7b15f]">
                         Default
@@ -342,11 +349,11 @@ const AdminMusicPanel = () => {
                     {track.artist || 'Unknown artist'} | {formatDuration(track.duration)}
                   </p>
                 </div>
-                <div ref={activeMenuTrackId === track.id ? actionsMenuRef : null} className="relative self-start">
+                <div ref={activeMenuTrackId === track.id ? actionsMenuRef : null} className="relative ml-auto shrink-0 self-start">
                   <Button
                     size="icon-sm"
                     variant="outline"
-                    className="border-white/10 bg-[#141717] text-[#f2ede4] hover:border-[#c79a31]/45 hover:bg-[#181b1b] hover:text-[#f3cf7a]"
+                    className="rounded-full border-white/10 bg-[#141717] text-[#f2ede4] hover:border-[#c79a31]/45 hover:bg-[#181b1b] hover:text-[#f3cf7a]"
                     onClick={() =>
                       setActiveMenuTrackId((current) => (current === track.id ? null : track.id))
                     }
@@ -358,7 +365,7 @@ const AdminMusicPanel = () => {
                   </Button>
 
                   {activeMenuTrackId === track.id ? (
-                    <div className="absolute right-0 top-11 z-20 grid min-w-40 overflow-hidden border border-white/10 bg-[#121515] shadow-2xl">
+                    <div className="absolute right-0 top-11 z-20 grid w-max min-w-40 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-white/10 bg-[#121515] shadow-2xl">
                       <button
                         className="flex items-center gap-3 px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.18em] text-[#d6e3e3] transition hover:bg-[#223034] hover:text-white"
                         type="button"

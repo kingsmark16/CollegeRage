@@ -16,6 +16,7 @@ const CARD_WIDTH = 360;
 const CARD_GAP = 24;
 const DRAG_THRESHOLD = 8;
 const SWIPE_SENSITIVITY = 1.8;
+const MOBILE_SWIPE_SENSITIVITY = 3.4;
 const CENTER_CLICK_THRESHOLD = CARD_WIDTH * 0.5;
 const ARC_RADIUS = 500;
 const MAX_ARC_ANGLE = 1.4;
@@ -71,6 +72,7 @@ const CircularGallery = ({ items, pauseImageLoading = false, className = '', onI
   const scrollFrameRef = useRef<number | null>(null);
   const pointerStartRef = useRef(0);
   const pointerLastRef = useRef(0);
+  const isTouchPointerRef = useRef(false);
   const isDraggingRef = useRef(false);
   const wasDraggedRef = useRef(false);
 
@@ -119,6 +121,7 @@ const CircularGallery = ({ items, pauseImageLoading = false, className = '', onI
     isDraggingRef.current = true;
     pointerStartRef.current = event.clientX;
     pointerLastRef.current = event.clientX;
+    isTouchPointerRef.current = event.pointerType !== 'mouse';
     wasDraggedRef.current = false;
     if (event.pointerType !== 'mouse') {
       event.currentTarget.setPointerCapture(event.pointerId);
@@ -130,7 +133,8 @@ const CircularGallery = ({ items, pauseImageLoading = false, className = '', onI
       return;
     }
 
-    const distance = (event.clientX - pointerLastRef.current) * SWIPE_SENSITIVITY;
+    const sensitivity = isTouchPointerRef.current ? MOBILE_SWIPE_SENSITIVITY : SWIPE_SENSITIVITY;
+    const distance = (event.clientX - pointerLastRef.current) * sensitivity;
     if (Math.abs(event.clientX - pointerStartRef.current) >= DRAG_THRESHOLD) {
       wasDraggedRef.current = true;
     }

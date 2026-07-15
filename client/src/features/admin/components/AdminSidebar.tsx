@@ -15,6 +15,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
   SidebarSeparator,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions';
@@ -22,7 +23,14 @@ import { adminNavigationItems } from '../admin-navigation';
 
 const AdminSidebar = () => {
   const { signOutMutation, signOutUser } = useAuthActions();
+  const { isMobile, setOpenMobile } = useSidebar();
   const isBusy = signOutMutation.isPending;
+
+  const closeMobileSidebar = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   return (
     <Sidebar
@@ -64,6 +72,7 @@ const AdminSidebar = () => {
                     <NavLink
                       to={item.href}
                       end={item.href === '/admin'}
+                      onClick={closeMobileSidebar}
                       className={({ isActive }) =>
                         cn(
                           'transition-colors group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0',

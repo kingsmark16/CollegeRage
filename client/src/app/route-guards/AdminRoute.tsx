@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import LoadingExperience from '@/components/LoadingExperience';
 import { useAuthSession } from '@/features/auth/hooks/useAuthSession';
 import { useAuthSessionStore } from '@/features/auth/stores/auth-session.store';
 
@@ -20,11 +21,7 @@ const AdminRoute = () => {
   }, [isAdmin, isLoading, location.pathname, location.search, setRedirectPath, user]);
 
   if (isLoading) {
-    return (
-      <main className="grid min-h-screen place-items-center bg-[#0f1111] px-6 text-[#f5f0e8]">
-        <p className="text-sm text-[#b2aba3]">Loading the dashboard...</p>
-      </main>
-    );
+    return <LoadingExperience variant="dashboard" />;
   }
 
   if (!user || !isAdmin) {
