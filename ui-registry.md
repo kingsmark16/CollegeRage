@@ -1,7 +1,7 @@
 ### Auth Page
 
 File: client/src/features/auth/AuthPage.tsx
-Last updated: 2026-06-27
+Last updated: 2026-07-15
 
 | Property         | Class |
 | ---------------- | ----- |
@@ -10,13 +10,13 @@ Last updated: 2026-06-27
 | Border radius    | none / square-edged shadcn button radius |
 | Text - primary   | `text-[#e2e2e2]` |
 | Text - secondary | `text-[#999999]` |
-| Spacing          | `px-4 py-8`, `md:px-12`, `gap-6`, panel `px-4 py-4` |
+| Spacing          | responsive viewport `min-h-[100dvh] overflow-y-auto`, mobile `px-3 py-4`, desktop `md:px-12`, form card `p-5 sm:p-8`, marketing detail cards hidden below `sm` |
 | Hover state      | `hover:border-[#34d59a]`, `hover:text-[#5af2b4]` |
 | Shadow           | none |
 | Accent usage     | `LOGO.png`, `text-[#c084fc]`, `text-[#5af2b4]`, `bg-[#34d59a]/10`, `border-[#34d59a]/60` |
 
 **Pattern notes:**
-Authentication surfaces use the College Rage brand assets over the Stitch Neon Tech layout: full-bleed mosaic background, dark readability overlay, logo-first header, compact typography, and green/purple accents for brand, focus, verified, and hover states. Keep auth controls dense and centered; avoid decorative cards inside cards.
+Authentication surfaces use the College Rage brand assets over the Stitch Neon Tech layout: full-bleed mosaic background, dark readability overlay, logo-first header, compact typography, and green/purple accents for brand, focus, verified, and hover states. Keep auth controls dense and centered; avoid decorative cards inside cards. On narrow screens, use a centered single-column composition with centered brand content, reduced spacing, a capped form card, full-width form controls, and vertical page scrolling only when the viewport is too short; hide secondary marketing detail cards so the form remains reachable and visually centered. At larger widths, restore the left-aligned marketing column beside the centered form.
 
 ### Admin Media Page
 
